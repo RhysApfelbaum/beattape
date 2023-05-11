@@ -1,49 +1,38 @@
-//==============================================================================
-// Prerequisite code needed to set up FMOD object.  See documentation.
-//==============================================================================
-
-var FMOD = {};                          // FMOD global object which must be declared to enable 'main' and 'preRun' and then call the constructor function.
-FMOD['preRun'] = prerun;                // Will be called before FMOD runs, but after the Emscripten runtime has initialized
-FMOD['onRuntimeInitialized'] = main;    // Called when the Emscripten runtime has initialized
+var FMOD = {};                              // FMOD global object which must be declared to enable 'main' and 'preRun' and then call the constructor function.
+FMOD['preRun'] = prerun;                    // Will be called before FMOD runs, but after the Emscripten runtime has initialized
+FMOD['onRuntimeInitialized'] = main;        // Called when the Emscripten runtime has initialized
 FMOD['INITIAL_MEMORY'] = 64 * 1024 * 1024;  // FMOD Heap defaults to 16mb which is enough for this demo, but set it differently here for demonstration (64mb)
-FMODModule(FMOD);                       // Calling the constructor function with our object
+FMODModule(FMOD);                           // Calling the constructor function with our object
 
-//==============================================================================
-// Example code
-//==============================================================================
-
-var gSystem;                            // Global 'System' object which has the Studio API functions.
-var gSystemCore;                        // Global 'SystemCore' object which has the Core API functions.
-var eventDescription = {};          // Global Event Description for the explosion event.  This event is played as a one-shot and released immediately after it has been created.
-var eventInstance = {};       // Global Event Instance for the looping ambience event.  A single instance is started or stopped based on user input.
+var gSystem;                // Global 'System' object which has the Studio API functions.
+var gSystemCore;            // Global 'SystemCore' object which has the Core API functions.
+var eventDescription = {};  // Global Event Description for the explosion event.  This event is played as a one-shot and released immediately after it has been created.
+var eventInstance = {};     // Global Event Instance for the looping ambience event.  A single instance is started or stopped based on user input.
 
 
 // Simple error checking function for all FMOD return values.
-function CHECK_RESULT(result)
-{
+function CHECK_RESULT(result) {
     if (result != FMOD.OK) {
         console.error(FMOD.ErrorString(result));
-
         throw msg;
     }
 }
 
 // Will be called before FMOD runs, but after the Emscripten runtime has initialized
 // Call FMOD file preloading functions here to mount local files.  Otherwise load custom data from memory or use own file system.
-function prerun()
-{
-    var fileUrl = "/banks/";
-    var fileName;
+function prerun() {
+    var fileUrl = "/fmod/build/desktop/";
+    var fileNames;
     var folderName = "/";
     var canRead = true;
     var canWrite = false;
 
-    fileName = [
+    fileNames = [
         "Master.bank",
         "Master.strings.bank",
     ];
 
-    fileName.forEach((name) => {
+    fileNames.forEach((name) => {
         FMOD.FS_createPreloadedFile(folderName, name, fileUrl + name, canRead, canWrite);
     })
 }
