@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <title>FMOD SYSTEM</title>
+    <link href="style.css" type="text/css" rel="stylesheet" />
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</head>
+<body>
+    <h1>FMOD SYSTEM</h1>
+    <button id="toggle-pause" onclick="togglePause()">Play</button>
+    <div class="slider-container">
+        <p>Health</p>
+        <input type="range" id="health-slider" value="100" onchange="updateSliderValues()" />
+        <p id="health-val"></p>
+    </div>
+    <div class="slider-container">
+        <p>Intensity</p>
+        <input type="range" id="intensity-slider" value="0" onchange="updateSliderValues()"/>
+        <p id="intensity-val"></p>
+    </div>
+    <div class="state-container">
+        <p></p>
+        <p id="state"></p>
+    </div>
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="fmodstudio.js"></script>
+    <script type="text/javascript" src="simple_event.js"></script>
+</body>
