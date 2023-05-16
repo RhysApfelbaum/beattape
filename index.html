@@ -1,27 +1,21 @@
 <!DOCTYPE html>
 <head>
-    <title>FMOD SYSTEM</title>
+    <title>BEATTAPE</title>
     <link href="style.css" type="text/css" rel="stylesheet" />
     <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href='https://unpkg.com/css.gg@2.0.0/icons/css/play-pause.css' rel='stylesheet'>
+    <link href='https://unpkg.com/css.gg@2.0.0/icons/css/play-button.css' rel='stylesheet'>
 </head>
 <body>
-    <h1>FMOD SYSTEM</h1>
-    <button id="toggle-pause" onclick="togglePause()">Play</button>
-    <div class="slider-container">
-        <p>Health</p>
-        <input type="range" id="health-slider" value="100" onchange="updateSliderValues()" />
-        <p id="health-val"></p>
-    </div>
-    <div class="slider-container">
-        <p>Intensity</p>
-        <input type="range" id="intensity-slider" value="0" onchange="updateSliderValues()"/>
-        <p id="intensity-val"></p>
-    </div>
-    <div class="state-container">
-        <p></p>
-        <p id="state"></p>
-    </div>
-    <script type="text/javascript" src="script.js"></script>
+    <h1>BEATTAPE</h1>
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTA1YzAxMmJlY2M0NGUwMTZkNzNmNDIyNzI3MGQ0MjE3ZDcyMDM4OCZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PXM/H1wouLelz12zAjj3zL/giphy.gif" />
+    <br>
+    <button id="last-track"><-</button>
+    <button id="toggle-pause" onclick="togglePause()">
+        <img src="pause.png" id="play-pause-icon"/>
+    </button>
+    <button id="next-track">-></button>
+
     <script type="text/javascript" src="fmod/engine/fmodstudio.js"></script>
-    <script type="text/javascript" src="simple_event.js"></script>
+    <script type="text/javascript" src="script.js"></script>
 </body>

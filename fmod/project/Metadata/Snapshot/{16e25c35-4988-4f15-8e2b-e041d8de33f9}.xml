@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="Snapshot" id="{16e25c35-4988-4f15-8e2b-e041d8de33f9}">
+		<property name="name">
+			<value>Paused</value>
+		</property>
+		<relationship name="mixer">
+			<destination>{1675547a-68d7-478b-8a08-0f428fcb8319}</destination>
+		</relationship>
+		<relationship name="automatableProperties">
+			<destination>{d64888a5-231b-4fb2-94c0-c108a9bb41be}</destination>
+		</relationship>
+		<relationship name="markerTracks">
+			<destination>{0e0a5efe-6981-451e-9b84-a333befc50a3}</destination>
+		</relationship>
+		<relationship name="timeline">
+			<destination>{6a0967aa-9102-4e76-8062-73396bbd5371}</destination>
+		</relationship>
+		<relationship name="snapshotMasterTrack">
+			<destination>{33b73476-87a4-45a7-bfca-28dda88c881d}</destination>
+		</relationship>
+		<relationship name="snapshotProperties">
+			<destination>{b4a1bd42-42e6-4788-bd67-889940a4208c}</destination>
+			<destination>{4f51058c-e513-473e-bae6-84a1c58742f5}</destination>
+		</relationship>
+		<relationship name="snapshotTracks">
+			<destination>{858ba586-c717-4a34-9641-aa5dfcd5221a}</destination>
+		</relationship>
+	</object>
+	<object class="EventAutomatableProperties" id="{d64888a5-231b-4fb2-94c0-c108a9bb41be}">
+		<relationship name="automators">
+			<destination>{90a6a860-a005-4185-bf85-7f6a3668742b}</destination>
+		</relationship>
+	</object>
+	<object class="MarkerTrack" id="{0e0a5efe-6981-451e-9b84-a333befc50a3}" />
+	<object class="Timeline" id="{6a0967aa-9102-4e76-8062-73396bbd5371}" />
+	<object class="SnapshotMasterTrack" id="{33b73476-87a4-45a7-bfca-28dda88c881d}" />
+	<object class="SnapshotProperty" id="{b4a1bd42-42e6-4788-bd67-889940a4208c}">
+		<property name="propertyName">
+			<value>pitch</value>
+		</property>
+		<property name="value">
+			<value>-24</value>
+		</property>
+		<relationship name="automatableObject">
+			<destination>{54a42bb8-19b2-480d-8ded-1a439f464b88}</destination>
+		</relationship>
+	</object>
+	<object class="SnapshotProperty" id="{4f51058c-e513-473e-bae6-84a1c58742f5}">
+		<property name="propertyName">
+			<value>volume</value>
+		</property>
+		<property name="value">
+			<value>-80</value>
+		</property>
+		<relationship name="automators">
+			<destination>{744a005f-d2b5-472d-8b39-ac57fd6e90ab}</destination>
+		</relationship>
+		<relationship name="automatableObject">
+			<destination>{54a42bb8-19b2-480d-8ded-1a439f464b88}</destination>
+		</relationship>
+	</object>
+	<object class="SnapshotTrack" id="{858ba586-c717-4a34-9641-aa5dfcd5221a}">
+		<relationship name="mixerStrip">
+			<destination>{54a42bb8-19b2-480d-8ded-1a439f464b88}</destination>
+		</relationship>
+	</object>
+	<object class="Automator" id="{90a6a860-a005-4185-bf85-7f6a3668742b}">
+		<property name="nameOfPropertyBeingAutomated">
+			<value>snapshotIntensity</value>
+		</property>
+		<relationship name="automationCurves">
+			<destination>{4d9eafe5-68ed-4412-8721-897e2fbf2cb4}</destination>
+		</relationship>
+	</object>
+	<object class="Automator" id="{744a005f-d2b5-472d-8b39-ac57fd6e90ab}">
+		<property name="nameOfPropertyBeingAutomated">
+			<value>value</value>
+		</property>
+	</object>
+	<object class="AutomationCurve" id="{4d9eafe5-68ed-4412-8721-897e2fbf2cb4}">
+		<relationship name="parameter">
+			<destination>{36042a57-16f4-4251-8576-6f8377a9faef}</destination>
+		</relationship>
+		<relationship name="automationPoints">
+			<destination>{b2b07f27-a3f3-405e-9f80-621811e948d0}</destination>
+			<destination>{b571e75f-a1be-41da-b208-19af56811bf1}</destination>
+		</relationship>
+	</object>
+	<object class="AutomationPoint" id="{b2b07f27-a3f3-405e-9f80-621811e948d0}">
+		<property name="position">
+			<value>0</value>
+		</property>
+		<property name="value">
+			<value>0</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{b571e75f-a1be-41da-b208-19af56811bf1}">
+		<property name="position">
+			<value>100</value>
+		</property>
+		<property name="value">
+			<value>100</value>
+		</property>
+	</object>
+</objects>

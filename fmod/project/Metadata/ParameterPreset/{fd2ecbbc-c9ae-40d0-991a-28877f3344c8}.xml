@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{fd2ecbbc-c9ae-40d0-991a-28877f3344c8}">
+		<property name="name">
+			<value>Intensity</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{36042a57-16f4-4251-8576-6f8377a9faef}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{36042a57-16f4-4251-8576-6f8377a9faef}">
+		<property name="maximum">
+			<value>100</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<relationship name="automators">
+			<destination>{00412043-af78-40bd-9f63-015b37b3b640}</destination>
+		</relationship>
+		<relationship name="modulators">
+			<destination>{33ff644e-5a84-41c7-a642-44afe1eabbfb}</destination>
+		</relationship>
+	</object>
+	<object class="Automator" id="{00412043-af78-40bd-9f63-015b37b3b640}">
+		<property name="nameOfPropertyBeingAutomated">
+			<value>cursorPosition</value>
+		</property>
+	</object>
+	<object class="ADSRModulator" id="{33ff644e-5a84-41c7-a642-44afe1eabbfb}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>cursorPosition</value>
+		</property>
+		<property name="attackTime">
+			<value>520</value>
+		</property>
+		<property name="peakValue">
+			<value>100</value>
+		</property>
+		<property name="holdTime">
+			<value>0</value>
+		</property>
+		<property name="decayTime">
+			<value>0</value>
+		</property>
+		<property name="sustainValue">
+			<value>100</value>
+		</property>
+		<property name="releaseTime">
+			<value>580</value>
+		</property>
+	</object>
+</objects>
