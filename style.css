@@ -10,3 +10,19 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
     height: 30px;
 }
+
+#play-pause-icon {
+    width: 3em;
+    height: 3em;
+    margin: 3em 3em 3em 3em;
+}
+
+button {
+    border-radius: 0px;
+    box-shadow: 0 0 #999;
+}
+
+
+button :active {
+    box-shadow: 0 0 #666;
+}
