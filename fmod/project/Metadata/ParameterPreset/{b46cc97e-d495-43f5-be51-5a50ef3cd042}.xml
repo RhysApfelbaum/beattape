@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{b46cc97e-d495-43f5-be51-5a50ef3cd042}">
+		<property name="name">
+			<value>SampDiscrete</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{695fcebb-4e99-4a02-9a34-1293749126c4}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{695fcebb-4e99-4a02-9a34-1293749126c4}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="seekSpeed">
+			<value>0.50999999046325684</value>
+		</property>
+	</object>
+</objects>

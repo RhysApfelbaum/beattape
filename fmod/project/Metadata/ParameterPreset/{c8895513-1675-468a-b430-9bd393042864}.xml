@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{c8895513-1675-468a-b430-9bd393042864}">
+		<property name="note" />
+		<property name="name">
+			<value>Chopped</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{47666d67-77be-4d8f-a9bb-ba2b22099455}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{47666d67-77be-4d8f-a9bb-ba2b22099455}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="isExposedRecursively">
+			<value>false</value>
+		</property>
+	</object>
+</objects>
