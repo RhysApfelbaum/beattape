@@ -10,11 +10,24 @@
     <h1>BEATTAPE</h1>
     <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTA1YzAxMmJlY2M0NGUwMTZkNzNmNDIyNzI3MGQ0MjE3ZDcyMDM4OCZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PXM/H1wouLelz12zAjj3zL/giphy.gif" />
     <br>
-    <button id="last-track"><-</button>
-    <button id="toggle-pause" onclick="togglePause()">
-        <img src="pause.png" id="play-pause-icon"/>
-    </button>
-    <button id="next-track">-></button>
+    <div id="control-container">
+
+        <div class="transport-container">
+            <button id="last-track">last</button>
+            <button id="toggle-pause" onclick="togglePause()">
+                <img src="pause.png" id="play-pause-icon"/>
+            </button>
+            <button id="next-track">next</button>
+        </div>
+        <div class="sliders-container">
+            <input type="range" orient="vertical" class="slider" id="sampled"/>
+            <input type="range" orient="vertical" class="slider" id="synthesized"/>
+            <input type="range" orient="vertical" class="slider" id="chopped"/>
+            <p>Samples (3 levels)</p>
+            <p>Synths (2 levels)</p>
+            <p>Chops (not used)</p>
+        </div>
+    </div>
 
     <script type="text/javascript" src="fmod/engine/fmodstudio.js"></script>
     <script type="text/javascript" src="script.js"></script>

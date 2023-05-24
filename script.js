@@ -119,7 +119,7 @@ function initApplication() {
     loadBank('Master.bank');
     loadBank('Master.strings.bank');
     console.log('load event');
-    CHECK_RESULT( gSystem.getEvent("event:/TestTrack", trackEventInstance) );
+    CHECK_RESULT( gSystem.getEvent("event:/Rough", trackEventInstance) );
     CHECK_RESULT( trackEventInstance.val.createInstance(trackEventInstance) );
     
     CHECK_RESULT( trackEventInstance.val.start() );
@@ -144,8 +144,10 @@ function updateApplication() {
     CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
     if ((intensityFinal.val >= 100) && (! isPaused())) {
         trackEventInstance.val.setPaused(true);
-
     }
+    CHECK_RESULT( trackEventInstance.val.setParameterByName('Sampled', document.querySelector('#sampled').value / 100, false) );
+    
+    trackEventInstance.val.setParameterByName('Synthesized', document.querySelector('#synthesized').value / 100, false);
 }
 
 function isPaused() {
@@ -164,6 +166,7 @@ function setPauseState(state) {
         // Pause the track
 
         CHECK_RESULT( pauseSnapshot.val.start() );
+        trackEventInstance.val.setPaused(true);
     } else {
         // Play the track
         trackEventInstance.val.setPaused(false);
@@ -174,5 +177,4 @@ function setPauseState(state) {
 function togglePause() {
     tapeSounds.val.start();
     setPauseState(!isPaused());
-    
 }

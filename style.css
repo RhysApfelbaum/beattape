@@ -1,3 +1,8 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 body {
     font-family: 'Courier New', Courier, monospace;
     text-align: center;
@@ -5,11 +10,6 @@ body {
     background-color: rgb(17, 55, 70);
 }
 
-.slider-container, .state-container{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    height: 30px;
-}
 
 #play-pause-icon {
     width: 3em;
@@ -22,7 +22,20 @@ button {
     box-shadow: 0 0 #999;
 }
 
-
 button :active {
     box-shadow: 0 0 #666;
+}
+
+.slider {
+    width: 50px;
+    height: 150px;
+}
+
+.sliders-container {
+    display: grid;
+    grid-template-columns: repeat(3, 150px);
+    justify-content: center;
+    justify-items: center;
+    height: 150px; 
+    margin-top: 10px;
 }
