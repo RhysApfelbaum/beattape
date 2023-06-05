@@ -28,14 +28,58 @@ button :active {
 
 .slider {
     width: 50px;
+    font-size: small;
+}
+.slider-input {
+    width: 50px;
     height: 150px;
 }
 
-.sliders-container {
+.slider-container {
     display: grid;
-    grid-template-columns: repeat(3, 150px);
+    grid-template-columns: repeat(auto-fill, 100px);
     justify-content: center;
     justify-items: center;
+    width: 450px;
     height: 150px; 
     margin-top: 10px;
+}
+
+#ambience-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 100px);
+    justify-content: center;
+    justify-items: center;
+    width: 450px;
+    height: 150px; 
+    margin-top: 10px;
+}
+
+.slider-container > label {
+    grid-row-start: 2;
+}
+
+.ambience-toggle {
+    width: 30px;
+    height: 30px;
+    margin: 10px;
+    background-color: default;
+}
+
+.ambience-toggle-light {
+    width: 10px;
+    height: 5px;
+    margin: 2px 3px 3px 3px;
+    background-color: rgb(48, 48, 48);
+}
+
+#transport-container {
+    vertical-align: middle;
+}
+
+#control-container {
+    display: grid;
+    grid-template-columns: 450px 300px 450px;
+    justify-items: center;
+    justify-content: center;
 }
