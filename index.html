@@ -7,26 +7,63 @@
     <link href='https://unpkg.com/css.gg@2.0.0/icons/css/play-button.css' rel='stylesheet'>
 </head>
 <body>
-    <h1>BEATTAPE</h1>
     <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTA1YzAxMmJlY2M0NGUwMTZkNzNmNDIyNzI3MGQ0MjE3ZDcyMDM4OCZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PXM/H1wouLelz12zAjj3zL/giphy.gif" />
     <br>
     <div id="control-container">
 
-        <div class="transport-container">
+        <div class="slider-container">
+            <div class="slider">
+                <input type="range" orient="vertical" id="grit" onchange="updateTrackSliders()"/>
+                <label for="grit">grit</label>
+            </div>
+
+            <div class="slider">
+                <input type="range" orient="vertical" id="synths" onchange="updateTrackSliders()"/>
+                <label for="synths">synths</label>
+            </div>
+            <div class="slider">
+                <input type="range" orient="vertical" id="chops" onchange="updateTrackSliders()"/>
+                <label for="chops">chops</label>
+            </div>
+            <div class="slider">
+                <input type="range" orient="vertical" id="vocals" onchange="updateTrackSliders()"/>
+                <label for="vocals">vocals</label>
+            </div>
+        </div>
+        <div id="transport-container">
+            <p>now playing: </p>
+            <p id="current-track-name">aquarium</p>
             <button id="last-track">last</button>
             <button id="toggle-pause" onclick="togglePause()">
                 <img src="pause.png" id="play-pause-icon"/>
             </button>
-            <button id="next-track">next</button>
+            <button id="next-track" onclick="nextTrack()">next</button>
         </div>
-        <div class="sliders-container">
-            <input type="range" orient="vertical" class="slider" id="sampled"/>
-            <input type="range" orient="vertical" class="slider" id="synthesized"/>
-            <input type="range" orient="vertical" class="slider" id="chopped"/>
-            <p>Samples (3 levels)</p>
-            <p>Synths (2 levels)</p>
-            <p>Chops (not used)</p>
+        <div id="ambience-container">
+            <div class="slider">
+                <input type="range" orient="vertical" id="rain-amount" onchange="updateRainAmount()"/>
+                <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('rain')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
+                <label for="rain-amount">rain</label>
+            </div>
+            <div class="slider">
+                <input type="range" orient="vertical" id="rain-amount" onchange="updateRainAmount()"/>
+                <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('vinyl')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
+                <label for="rain-amount">vinyl crackle</label>
+            </div>
+            <div class="slider">
+                <input type="range" orient="vertical" id="rain-amount" onchange="updateRainAmount()"/>
+                <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('birds')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
+                <label for="rain-amount">birds chirping</label>
+            </div>
         </div>
+
+        
     </div>
 
     <script type="text/javascript" src="fmod/engine/fmodstudio.js"></script>

@@ -2,13 +2,13 @@
 <objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{4ba8fcce-8eff-44b8-93cf-faaad0c75f00}">
 		<property name="name">
-			<value>Rough</value>
+			<value>rough</value>
 		</property>
 		<property name="outputFormat">
 			<value>1</value>
 		</property>
 		<relationship name="folder">
-			<destination>{019ba83e-f927-4fc4-94fd-81647ef901d8}</destination>
+			<destination>{eba81596-1ae0-4da5-be83-c8e4cd2284ad}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{5f31293f-8905-4e71-9ef3-09acea4939c8}</destination>
