@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="MixerGroup" id="{57884ed5-49b4-4e20-b164-cc89a8047b26}">
+		<property name="volume">
+			<value>-78</value>
+		</property>
+		<property name="name">
+			<value>Radio</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{2d0c78d1-4cb6-4b36-bab0-5726c83d7cc1}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{c678ecf5-c0e9-452f-bc12-c35d1d1f6001}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{404f6594-61de-4a18-a793-435b87b91e18}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{2d0c78d1-4cb6-4b36-bab0-5726c83d7cc1}">
+		<relationship name="effects">
+			<destination>{f083690d-c1a0-4d67-ab67-8ebde6751c10}</destination>
+			<destination>{b5a3bfe5-b838-4518-bbd8-c69bfe3e980a}</destination>
+			<destination>{b4eb4185-a35e-41b5-a94e-5e49e687392c}</destination>
+			<destination>{2eecdf40-0846-47e0-8b61-8d6741c3606d}</destination>
+			<destination>{58950fbb-ad89-46ca-87f6-4b76bc0b1160}</destination>
+			<destination>{a0638eb0-3867-462a-93bc-d78593dae69b}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{c678ecf5-c0e9-452f-bc12-c35d1d1f6001}" />
+	<object class="MixerSend" id="{f083690d-c1a0-4d67-ab67-8ebde6751c10}">
+		<property name="level">
+			<value>0</value>
+		</property>
+		<property name="inputFormat">
+			<value>1</value>
+		</property>
+		<relationship name="mixerReturn">
+			<destination>{a3938987-e337-40ba-92ed-30f3b522307a}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusFader" id="{b5a3bfe5-b838-4518-bbd8-c69bfe3e980a}" />
+	<object class="PannerEffect" id="{b4eb4185-a35e-41b5-a94e-5e49e687392c}">
+		<property name="overridingOutputFormat">
+			<value>0</value>
+		</property>
+	</object>
+	<object class="MultibandEqEffect" id="{2eecdf40-0846-47e0-8b61-8d6741c3606d}">
+		<property name="filterTypeA">
+			<value>5</value>
+		</property>
+		<property name="filterTypeB">
+			<value>1</value>
+		</property>
+		<property name="filterTypeC">
+			<value>9</value>
+		</property>
+		<property name="frequencyA">
+			<value>387.055267</value>
+		</property>
+		<property name="frequencyB">
+			<value>2550.40649</value>
+		</property>
+		<property name="frequencyC">
+			<value>924.054321</value>
+		</property>
+		<property name="qualityA">
+			<value>0.929931104</value>
+		</property>
+		<property name="qualityB">
+			<value>0.974517226</value>
+		</property>
+		<property name="qualityC">
+			<value>1.95000005</value>
+		</property>
+		<property name="gainC">
+			<value>1.03448153</value>
+		</property>
+	</object>
+	<object class="SFXReverbEffect" id="{58950fbb-ad89-46ca-87f6-4b76bc0b1160}">
+		<property name="earlyDelay">
+			<value>179</value>
+		</property>
+		<property name="lateDelay">
+			<value>100</value>
+		</property>
+		<property name="diffusion">
+			<value>21</value>
+		</property>
+		<property name="highCut">
+			<value>1670</value>
+		</property>
+		<property name="earlyLateMix">
+			<value>65</value>
+		</property>
+		<property name="wetLevel">
+			<value>-28</value>
+		</property>
+	</object>
+	<object class="LimiterEffect" id="{a0638eb0-3867-462a-93bc-d78593dae69b}" />
+</objects>

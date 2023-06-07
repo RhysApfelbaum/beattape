@@ -12,12 +12,20 @@ var currentTrack;
 var currentTrackIndex;
 var rainEvent;
 
+let trackInfo;
+fetch('./tracklist.json')
+    .then((response) => response.json())
+    .then((json) => {
+        trackInfo = json;
+ });
 var tracknames = [
     'aquarium',
-    'rough',
     'echo',
+    'rough',
     'snooze',
-    'lazy'
+    'lazy',
+    'limp',
+    'schmaltzfordebby'
 ];
 
 var tracklist = [];
@@ -29,24 +37,34 @@ class SingleInstanceEvent {
         let outval = {};
         CHECK_RESULT( system.getEvent(path, outval) );
         this.description = outval.val;
+
+        return FMOD.OK;
     }
 
     get isLoaded() {
         return this.instance != null;
     }
 
-    async load() {
+    load() {
         let outval = {};
+
+        // Create an event instance from our event description
         CHECK_RESULT( this.description.createInstance(outval) );
+
+        // Point the instance property to our newly created event instance
         this.instance = outval.val;
+
+        return FMOD.OK
     }
 
     unload() {
         // Mark the event instance for destruction
-        this.instance.release();
+        CHECK_RESULT( this.instance.release() );
 
         // Point instance to null
         this.instance = null;
+
+        return FMOD.OK;
     }
 
     // Loads the event, plays it once, and immediately unloads it
@@ -59,13 +77,69 @@ class SingleInstanceEvent {
 }
 
 class Track {
-    name;
-    displayName;
-    event = null;
 
-    constructor(system, name) {
+    constructor(name) {
         this.name = name;
-        this.event = new SingleInstanceEvent(system, 'event:/Tracks/' + name);
+        this.eventPath = `event:/Tracks/${name}`;
+        this.bankURL = `/fmod/build/desktop/${name}.bank`;
+        this.bankName = `${name}.bank`
+        this.bankPath = `/${this.bankName}`;
+        this.event = null;
+        this.bankHandle = null;
+    }
+
+    // A simple check to see whether the bank and the event have been loaded
+    get isLoaded() {
+        return (this.event != null) && (this.bankHandle != null);
+    }
+
+    async load() {
+        let canRead = true;
+        let canWrite = false;
+        let canOwn = false;
+        let handleOutval = {};
+
+        return new Promise((resolve, reject) => {
+            fetch(this.bankURL)
+            .then(response => response.arrayBuffer())
+            .then(buffer => new Uint8Array(buffer))
+            .then(array => FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn))
+            .then(() => {
+                let result = gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, handleOutval);
+                if (result != FMOD.OK) {
+                    throw new Error(`Error loading bank from downloaded file: ${FMOD.ErrorString(result)}`);
+                };
+            })
+            .then(() => {
+                this.bankHandle = handleOutval.val;
+                this.event = new SingleInstanceEvent(gSystem, this.eventPath);
+                
+                this.event.load();
+                resolve(FMOD.OK);
+            })
+            .catch(e => {
+                console.error(`Error loading ${this.name} from ${this.bankURL}\n${e.message}\n`)
+                reject();
+            });
+        });
+        
+    }
+
+    unload() {
+        // Unload the track event if it's loaded
+        if (this.event.isLoaded) {
+            this.event.unload();
+            this.event = null;
+        }
+
+        // Unload the bank
+        this.bankHandle.unload();
+        this.bankHandle = null;
+
+        // Unlink the bank file, which should destroy it, because it should be the only reference to it.
+        FMOD.FS_unlink(this.bankPath);
+
+        return FMOD.OK;
     }
 }
 
@@ -74,7 +148,7 @@ class Track {
 var FMOD = {
     'preRun': prerun,
     'onRuntimeInitialized': main,
-    'INITIAL_MEMORY': 64 * 1024 * 1024
+    'INITIAL_MEMORY': 16 * 1024 * 1024
 };
 
 FMODModule(FMOD);
@@ -82,8 +156,7 @@ FMODModule(FMOD);
 // Simple error checking function for all FMOD return values.
 function CHECK_RESULT(result) {
     if (result != FMOD.OK) {
-        console.error(FMOD.ErrorString(result));
-        throw msg;
+        throw new Error (FMOD.ErrorString(result));
     }
 }
 
@@ -103,7 +176,7 @@ function prerun() {
     
     fileNames.forEach((name) => {
         if (FMOD.FS_createPreloadedFile(folderName, name, fileUrl + name, canRead, canWrite) != FMOD.OK) {
-            console.error('error making preloaded file:' + name);
+            console.error('Error making preloaded file:' + name);
         }
     })
 }
@@ -111,18 +184,16 @@ function prerun() {
 // Called when the Emscripten runtime has initialized
 function main() {
     // A temporary empty object to hold our system
-    var outval = {};
-    var result;
+    let outval = {};
+    let result;
     
     
-    // Create the system and check the result
+    // Create the system
     result = FMOD.Studio_System_Create(outval);
     CHECK_RESULT(result);
     gSystem = outval.val;
-    
     result = gSystem.getCoreSystem(outval);
     CHECK_RESULT(result);
-    
     gSystemCore = outval.val;
     
     // Optional.  Setting DSP Buffer size can affect latency and stability.
@@ -138,10 +209,10 @@ function main() {
     CHECK_RESULT(result);
     
     // 1024 virtual channels
-    result = gSystem.initialize(1024, FMOD.STUDIO_INIT_NORMAL, FMOD.INIT_NORMAL, null);
+    result = gSystem.initialize(32, FMOD.STUDIO_INIT_NORMAL, FMOD.INIT_NORMAL, null);
     CHECK_RESULT(result);
     
-    initApplication();
+    init();
     
     // Set the framerate to 50 frames per second, or 20ms.
     window.setInterval(updateApplication, 20);
@@ -149,18 +220,19 @@ function main() {
     return FMOD.OK;
 }
 
-// Helper function to load a bank by name.
-function loadBank(name) {
-    var bankhandle = {};
-    CHECK_RESULT( gSystem.loadBankFile("/" + name, FMOD.STUDIO_LOAD_BANK_NORMAL, bankhandle) );
-
+function loadBank(name, url, handle_outval) {
+    
+    
 }
 
 // Called from main, does some application setup.  In our case we will load some sounds.
-function initApplication() {
+function init() {
+    let outval = {};
 
-    loadBank('Master.bank');
-    loadBank('Master.strings.bank');
+    // Load Master bank from preloaded file
+    CHECK_RESULT( gSystem.loadBankFile('/Master.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
+    CHECK_RESULT( gSystem.loadBankFile('/Master.strings.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
+
 
     CHECK_RESULT( gSystem.getEvent('snapshot:/Paused', pauseSnapshot));
     CHECK_RESULT( pauseSnapshot.val.createInstance(pauseSnapshot) );
@@ -169,19 +241,28 @@ function initApplication() {
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
 
+    radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
+    radioSnapshot.load();
     rainEvent.load();
 
     tracknames.forEach((name) => {
-        tracklist.push(new Track(gSystem, name));
+        tracklist.push(new Track(name));
     });
 
     // Load the first track in the paused state
     currentTrackIndex = 0;
     currentTrack = tracklist[currentTrackIndex];
-    currentTrack.event.load();
-    currentTrack.event.instance.start();
+    console.log(currentTrack);
+    currentTrack.load().then(() => {
+        console.log(currentTrack);
+        currentTrack.event.instance.start();
+        currentTrack.event.instance.setPaused(true);
+        setPauseState(true);
+    });
+    //setPauseState(true);
+    console.log(currentTrack);
+    
     document.querySelector('#current-track-name').innerHTML = currentTrack.name;
-    setPauseState(true);
 }
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop).
@@ -223,16 +304,33 @@ function setPauseState(state) {
 
 function nextTrack() {
     playButtonSFX.oneShot();
+
     currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    currentTrack.event.unload();
+    currentTrack.unload();
     currentTrackIndex = (currentTrackIndex + 1) % tracklist.length;
     currentTrack = tracklist[currentTrackIndex];
-    currentTrack.event.load();
+    currentTrack.load().then(() => {
+        //updateTrackSliders();
+        currentTrack.event.instance.start();
+    });
 
-    updateTrackSliders();
 
-    currentTrack.event.instance.start();
     document.querySelector('#current-track-name').innerHTML = currentTrack.name;
+
+}
+
+let trackfx = true;
+function toggleTrackFX(type) {
+    playButtonSFX.oneShot();
+    if (type != 'radio') return;
+    if (trackfx) {
+        radioSnapshot.instance.start();
+        document.querySelector('#radio-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+    } else {
+        radioSnapshot.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+        document.querySelector('#radio-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+    }
+    trackfx = !trackfx;
 
 }
 
@@ -260,14 +358,13 @@ function updateTrackSliders() {
     let grit = document.querySelector('#grit').value / 100;
     let synths = document.querySelector('#synths').value / 100;
     let chops = document.querySelector('#chops').value / 100;
+
+    // TODO: Implement this
     let vocals = document.querySelector('#vocals').value / 100;
 
     currentTrack.event.instance.setParameterByName('Sampled', grit, false);
     currentTrack.event.instance.setParameterByName('Synthesized', synths, false);
     currentTrack.event.instance.setParameterByName('Chopped', chops, false);
-
-
-
 }
 
 function updateRainAmount() {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="MixerReturn" id="{2c8a0294-c48f-41fd-8314-2f5160988279}">
+		<property name="name">
+			<value>Pitch Wobble BP</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{20ef546e-b948-49a0-9c84-c5ca75baaa4c}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{97d76225-a240-4818-834a-257581cbff4c}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{57884ed5-49b4-4e20-b164-cc89a8047b26}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{20ef546e-b948-49a0-9c84-c5ca75baaa4c}">
+		<relationship name="effects">
+			<destination>{d4f162b2-a06d-44ce-91cc-b4c0d18c850f}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{97d76225-a240-4818-834a-257581cbff4c}" />
+	<object class="MixerBusFader" id="{d4f162b2-a06d-44ce-91cc-b4c0d18c850f}" />
+</objects>

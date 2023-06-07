@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="MixerGroup" id="{69521de1-e0b2-47b3-b089-f4c5955c2cc4}">
+		<property name="volume">
+			<value>-80</value>
+		</property>
+		<property name="name">
+			<value>Pitch Wobble</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{e040742d-c1c5-4d43-b25b-4de07bf76c5a}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{5ef91a2e-0e63-4315-bb35-0fa60686b42e}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{57884ed5-49b4-4e20-b164-cc89a8047b26}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{e040742d-c1c5-4d43-b25b-4de07bf76c5a}">
+		<relationship name="effects">
+			<destination>{c6d501ad-f569-474b-b653-1c7f7596f7e2}</destination>
+			<destination>{e76ce257-de31-4b8d-b03b-1341c7c9a994}</destination>
+			<destination>{5480d3ca-d54f-4d35-bd9b-ffb32486c581}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{5ef91a2e-0e63-4315-bb35-0fa60686b42e}" />
+	<object class="MixerSend" id="{c6d501ad-f569-474b-b653-1c7f7596f7e2}">
+		<property name="level">
+			<value>0</value>
+		</property>
+		<property name="inputFormat">
+			<value>1</value>
+		</property>
+		<relationship name="mixerReturn">
+			<destination>{2c8a0294-c48f-41fd-8314-2f5160988279}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusFader" id="{e76ce257-de31-4b8d-b03b-1341c7c9a994}" />
+	<object class="PitchShifterEffect" id="{5480d3ca-d54f-4d35-bd9b-ffb32486c581}">
+		<property name="pitch">
+			<value>1</value>
+		</property>
+		<relationship name="modulators">
+			<destination>{650a0902-e858-48c3-ad0e-447cd9bb9882}</destination>
+		</relationship>
+	</object>
+	<object class="LFOModulator" id="{650a0902-e858-48c3-ad0e-447cd9bb9882}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>pitch</value>
+		</property>
+		<property name="rate">
+			<value>0.109999999</value>
+		</property>
+		<property name="depth">
+			<value>13.5</value>
+		</property>
+	</object>
+</objects>
