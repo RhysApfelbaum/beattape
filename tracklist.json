@@ -1,7 +1,111 @@
 [
     {
-        "name": "",
+        "name": "aquarium",
         "displayName": "",
+        "sliderData": {
+            "grit": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "synths": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "chops": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "vocals": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            }
+        }
+    },
+    {
+        "name": "rough",
+        "displayName": "",
+        "sliderData": {
+            "grit": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "synths": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "chops": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "vocals": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            }
+        }
+    },
+    {
+        "name": "echo",
+        "displayName": "",
+        "sliderData": {
+            "grit": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "synths": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "chops": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "vocals": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            }
+        }
+    },
+    {
+        "name": "snooze",
+        "displayName": "",
+        "sliderData": {
+            "grit": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "synths": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "chops": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "vocals": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            }
+        }
+    },
+    {
+        "name": "lazy",
+        "displayName": "l a z y",
         "sliderData": {
             "grit": {
                 "low": 0,

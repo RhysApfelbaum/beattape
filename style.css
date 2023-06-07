@@ -7,7 +7,7 @@ body {
     font-family: 'Courier New', Courier, monospace;
     text-align: center;
     color: white;
-    background-color: rgb(17, 55, 70);
+    background-color: rgb(40, 6, 63);
 }
 
 
@@ -19,14 +19,14 @@ body {
 
 button {
     border-radius: 0px;
-    box-shadow: 0 0 #999;
+    box-shadow: 5px 5px #999;
 }
 
 button :active {
-    box-shadow: 0 0 #666;
+    box-shadow: 0 0 0;
 }
 
-.slider {
+.slider-container {
     width: 50px;
     font-size: small;
 }
@@ -35,7 +35,13 @@ button :active {
     height: 150px;
 }
 
-.slider-container {
+.slider {
+    -webkit-appearance: slider-vertical;
+    appearance: default;
+    width: 50px;
+}
+
+.track-control-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
     justify-content: center;
