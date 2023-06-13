@@ -81,7 +81,7 @@ class Track {
     constructor(name) {
         this.name = name;
         this.eventPath = `event:/Tracks/${name}`;
-        this.bankURL = `/fmod/build/desktop/${name}.bank`;
+        this.bankURL = `./fmod/build/desktop/${name}.bank`;
         this.bankName = `${name}.bank`
         this.bankPath = `/${this.bankName}`;
         this.event = null;
