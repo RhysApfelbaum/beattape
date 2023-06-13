@@ -37,7 +37,7 @@
             <button id="toggle-pause" onclick="togglePause()">
                 <img src="pause.png" id="play-pause-icon"/>
             </button>
-            <button id="next-track" onclick="nextTrack()">next</button>
+            <button id="next-track" onclick="nextTrack(true)">next</button>
         </div>
         <div id="ambience-container">
             <div class="slider-container">
@@ -48,11 +48,11 @@
                 <label for="rain-amount">rain</label>
             </div>
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="rain-amount" onchange="updateRainAmount()"/>
-                <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('vinyl')">
+                <input type="range" orient="vertical" class="slider" id="vinyl-amount" onchange="updateVinylAmount()"/>
+                <button class="ambience-toggle" id="vinyl-toggle" onclick="toggleAmbience('vinyl')">
                     <div class="ambience-toggle-light"></div>
                 </button>
-                <label for="rain-amount">vinyl crackle</label>
+                <label for="vinyl-amount">vinyl crackle</label>
             </div>
             <div class="slider-container">
                 <input type="range" orient="vertical" class="slider" id="rain-amount" onchange="updateRainAmount()"/>

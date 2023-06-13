@@ -163,22 +163,17 @@ function CHECK_RESULT(result) {
 // Will be called before FMOD runs, but after the Emscripten runtime has initialized
 // Call FMOD file preloading functions here to mount local files.  Otherwise load custom data from memory or use own file system.
 function prerun() {
-    var fileUrl = "/fmod/build/desktop/";
-    var fileNames;
-    var folderName = "/";
-    var canRead = true;
-    var canWrite = false;
+    let fileParent = "./fmod/build/desktop/";    
+    let fileNames;
+    let folderName = "/";
+    let canRead = true;
+    let canWrite = false;
     
-    fileNames = [
-        "Master.bank",
-        "Master.strings.bank",
-    ];
+    fileNames = ['Master.bank', 'Master.strings.bank'];
     
     fileNames.forEach((name) => {
-        if (FMOD.FS_createPreloadedFile(folderName, name, fileUrl + name, canRead, canWrite) != FMOD.OK) {
-            console.error('Error making preloaded file:' + name);
-        }
-    })
+        FMOD.FS_createPreloadedFile(folderName, name, fileParent + name, canRead, canWrite);
+    });
 }
 
 // Called when the Emscripten runtime has initialized
@@ -220,11 +215,6 @@ function main() {
     return FMOD.OK;
 }
 
-function loadBank(name, url, handle_outval) {
-    
-    
-}
-
 // Called from main, does some application setup.  In our case we will load some sounds.
 function init() {
     let outval = {};
@@ -240,10 +230,12 @@ function init() {
 
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
+    vinylEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Vinyl');
 
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
     radioSnapshot.load();
     rainEvent.load();
+    vinylEvent.load();
 
     tracknames.forEach((name) => {
         tracklist.push(new Track(name));
@@ -252,31 +244,38 @@ function init() {
     // Load the first track in the paused state
     currentTrackIndex = 0;
     currentTrack = tracklist[currentTrackIndex];
-    console.log(currentTrack);
     currentTrack.load().then(() => {
-        console.log(currentTrack);
         currentTrack.event.instance.start();
         currentTrack.event.instance.setPaused(true);
         setPauseState(true);
     });
     //setPauseState(true);
-    console.log(currentTrack);
+    //console.log(currentTrack);
     
     document.querySelector('#current-track-name').innerHTML = currentTrack.name;
 }
 
-// Called from main, on an interval that updates at a regular rate (like in a game loop).
+// Called from main, on an interval that updates at a regular rate (like in a game loop)
 function updateApplication() {
+    
+    // This function may be called before a track has finished loading
+    if (currentTrack.isLoaded) {
+        
+        // Pause logic
+        let intensityFinal = {};
+        CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
+        if ((intensityFinal.val >= 100) && (! isPaused())) {
+            currentTrack.event.instance.setPaused(true);
+        }
+        
+        // Next track logic
+        let playbackState = {};
+        CHECK_RESULT( currentTrack.event.instance.getPlaybackState(playbackState) );
+        if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
+    }
+
     // Update FMOD
     gSystem.update();
-
-    // Pause logic
-    let intensityFinal = {};
-    CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
-    if ((intensityFinal.val >= 100) && (! isPaused())) {
-        currentTrack.event.instance.setPaused(true);
-    }
-    //currentTrack.event.instance.setParameterByName('Synthesized', document.querySelector('#synthesized').value / 100, false);
 }
 
 function isPaused() {
@@ -302,8 +301,8 @@ function setPauseState(state) {
     }
 }
 
-function nextTrack() {
-    playButtonSFX.oneShot();
+function nextTrack(buttonfx) {
+    if (buttonfx) playButtonSFX.oneShot();
 
     currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
     currentTrack.unload();
@@ -335,22 +334,37 @@ function toggleTrackFX(type) {
 }
 
 function toggleAmbience(type) {
-    if (type != 'rain') return;
+    
 
     let playBackState = {};
-
     playButtonSFX.oneShot();
-    updateRainAmount();
-    CHECK_RESULT( rainEvent.instance.getPlaybackState(playBackState) );
-    if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
-        // Turn rain on
-        rainEvent.instance.start();
-        document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+
+    if (type == 'rain') {
+        CHECK_RESULT( rainEvent.instance.getPlaybackState(playBackState) );
+        if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
+            // Turn rain on
+            rainEvent.instance.start();
+            document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+        } else {
+            // Turn rain off
+            rainEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+            document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+        }
+        updateRainAmount();
+    } else if (type == 'vinyl') {
+        CHECK_RESULT( vinylEvent.instance.getPlaybackState(playBackState) );
+        if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
+            // Turn vinyl on
+            vinylEvent.instance.start();
+            document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+        } else {
+            // Turn vinyl off
+            vinylEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+            document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+        }
+        updateVinylAmount();
     } else {
-        // Turn rain off
-        rainEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-        document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
-        
+
     }
 }
 
@@ -373,6 +387,11 @@ function updateRainAmount() {
     
 }
 
+function updateVinylAmount() {
+    let vinylAmount = document.querySelector('#vinyl-amount').value / 100;
+    vinylEvent.instance.setParameterByName('VinylAmount', vinylAmount, false);
+    
+}
 function togglePause() {
     playButtonSFX.oneShot();
     setPauseState(!isPaused());
