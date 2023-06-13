@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="MixerGroup" id="{54aa138a-ec3a-44b1-ae64-ef122df0ca16}">
+		<property name="name">
+			<value>Vinyl</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{9f9a8ae2-cc32-494a-8ca7-31eba9b6b376}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{c7021f63-76b7-41af-9942-b17d7d5bcdc4}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{635bb9d3-9c71-4ee6-afee-51aeaa9e452e}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{9f9a8ae2-cc32-494a-8ca7-31eba9b6b376}">
+		<relationship name="effects">
+			<destination>{9b68f47e-b2a8-4d45-a04b-b9ca206e2d90}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{c7021f63-76b7-41af-9942-b17d7d5bcdc4}" />
+	<object class="MixerBusFader" id="{9b68f47e-b2a8-4d45-a04b-b9ca206e2d90}" />
+</objects>
