@@ -76,12 +76,20 @@ button :active {
     margin: 2px 3px 3px 3px;
     background-color: rgb(48, 48, 48);
 }
+@keyframes track-change {
+    from {
+        color: yellow;
+    } to {
+        color: white;
+    }
+}
 
 .track-name {
     list-style-type: none;
-    display: inline-block;
+    /* display: inline-block; */
     animation-name: track-change;
     animation-duration: 1s;
+    animation-iteration-count: infinite;
 }
 
 #transport-container {
