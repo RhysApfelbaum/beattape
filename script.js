@@ -18,17 +18,18 @@ fetch('./tracklist.json')
     .then((json) => {
         trackInfo = json;
  });
-var tracknames = [
-    'aquarium',
-    'echo',
-    'rough',
-    'snooze',
-    'lazy',
-    'limp',
-    'schmaltzfordebby'
-];
 
-var tracklist = [];
+let tracklist = [];
+let playQueue = [];
+
+function fillPlayQueue() {
+    let newPlayQueue = [];
+
+    trackInfo.forEach((info) => {
+        document.querySelector('#play-queue').replaceChildren();
+
+    });
+}
 
 class SingleInstanceEvent {
     description = null;
@@ -237,8 +238,9 @@ function init() {
     rainEvent.load();
     vinylEvent.load();
 
-    tracknames.forEach((name) => {
-        tracklist.push(new Track(name));
+    trackInfo.forEach((item) => {
+        console.log(item);
+        tracklist.push(new Track(item.name));
     });
 
     // Load the first track in the paused state
@@ -267,11 +269,15 @@ function updateApplication() {
         if ((intensityFinal.val >= 100) && (! isPaused())) {
             currentTrack.event.instance.setPaused(true);
         }
+
+
         
         // Next track logic
         let playbackState = {};
         CHECK_RESULT( currentTrack.event.instance.getPlaybackState(playbackState) );
         if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
+
+        updateTrackSliders();
     }
 
     // Update FMOD
@@ -376,9 +382,10 @@ function updateTrackSliders() {
     // TODO: Implement this
     let vocals = document.querySelector('#vocals').value / 100;
 
-    currentTrack.event.instance.setParameterByName('Sampled', grit, false);
-    currentTrack.event.instance.setParameterByName('Synthesized', synths, false);
-    currentTrack.event.instance.setParameterByName('Chopped', chops, false);
+    currentTrack.event.instance.setParameterByName('Grit', grit, false);
+    currentTrack.event.instance.setParameterByName('Brightness', synths, false);
+    currentTrack.event.instance.setParameterByName('Chops', chops, false);
+    currentTrack.event.instance.setParameterByName('Vocals', vocals, false);
 }
 
 function updateRainAmount() {

@@ -19,7 +19,7 @@
 
             <div class="slider-container">
                 <input type="range" orient="vertical" class="slider" id="synths" onchange="updateTrackSliders()"/>
-                <label for="synths">synths</label>
+                <label for="synths">brightness</label>
             </div>
             <div class="slider-container">
                 <input type="range" orient="vertical" class="slider" id="chops" onchange="updateTrackSliders()"/>
@@ -29,9 +29,24 @@
                 <input type="range" orient="vertical" class="slider" id="vocals" onchange="updateTrackSliders()"/>
                 <label for="vocals">vocals</label>
             </div>
+            <p>a</p>
+            <p>a</p>
+            <p>a</p>
+            <p>a</p>
         </div>
         <div id="transport-container">
-            <p>now playing: </p>
+            <ul id="play-queue">
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+                <li class="track-name">asdf</li>
+            </ul>
             <p id="current-track-name">aquarium</p>
             <button id="last-track">last</button>
             <button id="toggle-pause" onclick="togglePause()">
@@ -65,8 +80,6 @@
                 <div class="ambience-toggle-light"></div>
             </button>
         </div>
-
-        
     </div>
 
     <script type="text/javascript" src="fmod/engine/fmodstudio.js"></script>
