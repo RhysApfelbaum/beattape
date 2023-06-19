@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{f5346e84-2b5f-4d70-a148-09726e0e32c1}">
+		<property name="assetPath">
+			<value>Tracks/limp/hats.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>154.48275000000001</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{7b3f5b74-9b34-4aad-9bf1-172249a21b6c}</destination>
+		</relationship>
+	</object>
+</objects>

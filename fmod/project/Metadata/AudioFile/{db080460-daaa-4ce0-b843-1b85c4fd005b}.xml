@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{db080460-daaa-4ce0-b843-1b85c4fd005b}">
+		<property name="assetPath">
+			<value>Tracks/limp/reverse_cymbal.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>164.13793749999999</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{7b3f5b74-9b34-4aad-9bf1-172249a21b6c}</destination>
+		</relationship>
+	</object>
+</objects>

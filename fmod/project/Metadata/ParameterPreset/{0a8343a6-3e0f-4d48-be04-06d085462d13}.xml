@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.02.00">
 	<object class="ParameterPreset" id="{0a8343a6-3e0f-4d48-be04-06d085462d13}">
 		<property name="name">
-			<value>SynthDiscrete</value>
+			<value>BrightnessDiscrete</value>
 		</property>
 		<relationship name="folder">
 			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>

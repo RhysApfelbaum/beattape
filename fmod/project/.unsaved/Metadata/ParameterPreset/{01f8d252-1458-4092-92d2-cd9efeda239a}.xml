@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{01f8d252-1458-4092-92d2-cd9efeda239a}">
+		<property name="name">
+			<value>ChopDiscrete</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{c46f0f46-6411-424c-8d1d-0b0d2c7db580}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{c46f0f46-6411-424c-8d1d-0b0d2c7db580}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="seekSpeed">
+			<value>1.8999999761581421</value>
+		</property>
+	</object>
+</objects>

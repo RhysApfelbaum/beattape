@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{c46683a2-9207-42b0-a239-1bf1fbd9b061}">
+		<property name="assetPath">
+			<value>Tracks/limp/bass.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>154.48275000000001</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{7b3f5b74-9b34-4aad-9bf1-172249a21b6c}</destination>
+		</relationship>
+	</object>
+</objects>

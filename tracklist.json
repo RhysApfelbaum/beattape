@@ -1,5 +1,31 @@
 [
     {
+        "name": "limp",
+        "displayName": "limp",
+        "sliderData": {
+            "grit": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "synths": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "chops": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            },
+            "vocals": {
+                "low": 0,
+                "high": 100,
+                "average": 0.5
+            }
+        }
+    },
+    {
         "name": "aquarium",
         "displayName": "",
         "sliderData": {

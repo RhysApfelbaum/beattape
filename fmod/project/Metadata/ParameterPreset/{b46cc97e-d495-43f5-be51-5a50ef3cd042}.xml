@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.02.00">
 	<object class="ParameterPreset" id="{b46cc97e-d495-43f5-be51-5a50ef3cd042}">
 		<property name="name">
-			<value>SampDiscrete</value>
+			<value>GritDiscrete</value>
 		</property>
 		<relationship name="folder">
 			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
