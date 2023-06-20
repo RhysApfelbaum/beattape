@@ -315,13 +315,29 @@ function nextTrack(buttonfx) {
     currentTrackIndex = (currentTrackIndex + 1) % tracklist.length;
     currentTrack = tracklist[currentTrackIndex];
     currentTrack.load().then(() => {
-        //updateTrackSliders();
         currentTrack.event.instance.start();
     });
 
 
     document.querySelector('#current-track-name').innerHTML = currentTrack.name;
+}
 
+function lastTrack(buttonfx) {
+    if (buttonfx) playButtonSFX.oneShot();
+
+    currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+    currentTrack.unload();
+
+    // Go back one track in the play queue until the first track played.
+    // If it's the first track, just start it again.
+    currentTrackIndex -= 1;
+    if (currentTrackIndex < 0) currentTrackIndex = 0;
+    currentTrack = tracklist[currentTrackIndex];
+
+    currentTrack.load().then(() => {
+        currentTrack.event.instance.start();
+    });
+    document.querySelector('#current-track-name').innerHTML = currentTrack.name;
 }
 
 let trackfx = true;
