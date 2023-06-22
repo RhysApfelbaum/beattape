@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{66657a8d-66db-4a91-a3c5-c7fc7c722fe1}">
+		<property name="name">
+			<value>GritAmount</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{1f74d410-c1fc-490b-a488-3023b77ff741}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{1f74d410-c1fc-490b-a488-3023b77ff741}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

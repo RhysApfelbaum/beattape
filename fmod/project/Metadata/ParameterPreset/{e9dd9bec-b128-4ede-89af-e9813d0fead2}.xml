@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.02.00">
 	<object class="ParameterPreset" id="{e9dd9bec-b128-4ede-89af-e9813d0fead2}">
 		<property name="name">
-			<value>test</value>
+			<value>Clock</value>
 		</property>
 		<relationship name="folder">
 			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
@@ -14,6 +14,23 @@
 	<object class="GameParameter" id="{2a04598e-2d16-4cd0-aaba-bcf828b77457}">
 		<property name="initialValue">
 			<value>0</value>
+		</property>
+		<relationship name="modulators">
+			<destination>{27bcab35-4538-4829-a418-35f8c8aa8014}</destination>
+		</relationship>
+	</object>
+	<object class="LFOModulator" id="{27bcab35-4538-4829-a418-35f8c8aa8014}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>cursorPosition</value>
+		</property>
+		<property name="shape">
+			<value>1</value>
+		</property>
+		<property name="rate">
+			<value>10</value>
+		</property>
+		<property name="depth">
+			<value>100</value>
 		</property>
 	</object>
 </objects>

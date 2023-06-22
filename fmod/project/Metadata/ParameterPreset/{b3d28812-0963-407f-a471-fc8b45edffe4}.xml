@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{b3d28812-0963-407f-a471-fc8b45edffe4}">
+		<property name="name">
+			<value>BrightnessAmount</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{d9009f5a-8627-4880-94fd-4ede775d8e47}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{d9009f5a-8627-4880-94fd-4ede775d8e47}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

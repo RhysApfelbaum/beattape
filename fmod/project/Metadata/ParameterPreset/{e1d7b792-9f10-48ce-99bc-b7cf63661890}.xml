@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{e1d7b792-9f10-48ce-99bc-b7cf63661890}">
+		<property name="name">
+			<value>ChopsAmount</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{bb2418b1-5d12-4f2f-b50a-ee2aad041818}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{bb2418b1-5d12-4f2f-b50a-ee2aad041818}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

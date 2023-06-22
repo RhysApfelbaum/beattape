@@ -239,7 +239,6 @@ function init() {
     vinylEvent.load();
 
     trackInfo.forEach((item) => {
-        console.log(item);
         tracklist.push(new Track(item.name));
     });
 
@@ -278,6 +277,7 @@ function updateApplication() {
         if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
 
         updateTrackSliders();
+        updateEffectivenessLights();
     }
 
     // Update FMOD
@@ -388,6 +388,29 @@ function toggleAmbience(type) {
     } else {
 
     }
+}
+
+function updateEffectivenessLights() {
+    document.querySelectorAll('.effectiveness-light').forEach((light) => {
+        let outval = {};
+        switch(light.id) {
+            case 'grit-effectiveness':
+                currentTrack.event.instance.getParameterByName('GritAmount', {}, outval);
+                break;
+            case 'brightness-effectiveness':
+                currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval);
+                break;
+            case 'chops-effectiveness':
+                currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval);
+                break;
+            case 'vocals-effectiveness':
+                currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval);
+                break; 
+        }
+        let min = [48, 48, 48];
+        let max = [255, 60, 0];
+        light.style['background-color'] = `rgb(${min[0] + (max[0] - min[0]) * outval.val}, ${min[1] + (max[1] - min[1]) * outval.val}, ${min[2] + (max[2] - min[2]) * outval.val})`;
+    })
 }
 
 function updateTrackSliders() {
