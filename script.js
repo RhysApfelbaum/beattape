@@ -268,8 +268,6 @@ function updateApplication() {
         if ((intensityFinal.val >= 100) && (! isPaused())) {
             currentTrack.event.instance.setPaused(true);
         }
-
-
         
         // Next track logic
         let playbackState = {};
