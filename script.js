@@ -1,33 +1,52 @@
 // Global 'System' object which has the Studio API functions.
-var gSystem;
+let gSystem;
 
 // Global 'SystemCore' object which has the Core API functions.
-var gSystemCore;
+let gSystemCore;
 
-var pauseSnapshot = {};
-var pauseSnapshotDescription = {};
+let pauseSnapshot = {};
+let pauseSnapshotDescription = {};
 
-var playButtonSFX;
-var currentTrack;
-var currentTrackIndex;
-var rainEvent;
+let playButtonSFX;
+let currentTrack;
+let currentTrackIndex;
+let rainEvent;
 
 let trackInfo;
+
 fetch('./tracklist.json')
-    .then((response) => response.json())
-    .then((json) => {
+    .then(response => response.json())
+    .then(json => {
         trackInfo = json;
- });
+    });
 
 let tracklist = [];
 let playQueue = [];
 
+function sliderDistance(track, otherTrack) {
+    let gritDist = (track.sliderData.grit - otherTrack.sliderData.grit);
+    let brightnessDist = (track.sliderData.brightness - otherTrack.sliderData.brightness);
+    let chopsDist = (track.sliderData.chops - otherTrack.sliderData.chops);
+    let vocalsDist = (track.sliderData.vocals - otherTrack.sliderData.vocals);
+    return gritDist * gritDist + brightnessDist * brightnessDist + chopsDist * chopsDist + vocalsDist * vocalsDist;
+}
+
 function fillPlayQueue() {
     let newPlayQueue = [];
+    let unorderedListElement = document.querySelector('#play-queue');
 
-    trackInfo.forEach((info) => {
-        document.querySelector('#play-queue').replaceChildren();
+    unorderedListElement.replaceChildren();
 
+    tracklist.forEach((track) => {
+        console.log(sliderDistance(currentTrack, track));
+        newPlayQueue.push(track);
+    });
+
+    newPlayQueue.forEach(track => {
+        let li = document.createElement('li');
+        li.innerHTML = track.displayName;
+
+        unorderedListElement.appendChild(li);
     });
 }
 
@@ -38,7 +57,6 @@ class SingleInstanceEvent {
         let outval = {};
         CHECK_RESULT( system.getEvent(path, outval) );
         this.description = outval.val;
-
         return FMOD.OK;
     }
 
@@ -79,15 +97,21 @@ class SingleInstanceEvent {
 
 class Track {
 
-    constructor(name, displayName) {
-        this.name = name;
-        this.displayName = displayName;
-        this.eventPath = `event:/Tracks/${name}`;
-        this.bankURL = `./fmod/build/desktop/${name}.bank`;
-        this.bankName = `${name}.bank`
+    constructor(trackData) {
+        this.name = trackData.name;
+        this.displayName = trackData.displayName;
+        this.eventPath = `event:/Tracks/${this.name}`;
+        this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
+        this.bankName = `${this.name}.bank`
         this.bankPath = `/${this.bankName}`;
         this.event = null;
         this.bankHandle = null;
+        this.sliderData = {
+            grit: trackData.grit,
+            brightness: trackData.brightness,
+            chops: trackData.chops,
+            vocals: trackData.vocals 
+        };
     }
 
     // A simple check to see whether the bank and the event have been loaded
@@ -95,6 +119,7 @@ class Track {
         return (this.event != null) && (this.bankHandle != null);
     }
 
+    // Load a remote bank file containing the track event, and then load that event.
     async load() {
         let canRead = true;
         let canWrite = false;
@@ -239,9 +264,10 @@ function init() {
     rainEvent.load();
     vinylEvent.load();
 
-    trackInfo.forEach((item) => {
-        tracklist.push(new Track(item.name, item.displayName));
+    trackInfo.forEach(item => {
+        tracklist.push(new Track(item));
     });
+
 
     // Load the first track in the paused state
     currentTrackIndex = 0;
@@ -254,6 +280,7 @@ function init() {
     //setPauseState(true);
     //console.log(currentTrack);
     
+    fillPlayQueue();
     document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
 }
 
@@ -437,6 +464,7 @@ function updateVinylAmount() {
     vinylEvent.instance.setParameterByName('VinylAmount', vinylAmount, false);
     
 }
+
 function togglePause() {
     playButtonSFX.oneShot();
     setPauseState(!isPaused());

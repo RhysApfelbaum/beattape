@@ -1,7 +1,6 @@
-# FMP PROJECT SO FAR
+# PROJECT SO FAR
 
-The FMOD build can be found in `/fmod/build/desktop/`. Right now it's my Game Audio 2 work.
-The FMOD project in `/fmod/project/` is a blank project, configured to build to `/fmod/build/desktop/`.
+The FMOD build can be found in `/fmod/build/desktop/`, and the FMOD project can be found in `/fmod/project/`.
 
 ## Documentation/resources that I've been using so far
 
