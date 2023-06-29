@@ -79,8 +79,9 @@ class SingleInstanceEvent {
 
 class Track {
 
-    constructor(name) {
+    constructor(name, displayName) {
         this.name = name;
+        this.displayName = displayName;
         this.eventPath = `event:/Tracks/${name}`;
         this.bankURL = `./fmod/build/desktop/${name}.bank`;
         this.bankName = `${name}.bank`
@@ -239,7 +240,7 @@ function init() {
     vinylEvent.load();
 
     trackInfo.forEach((item) => {
-        tracklist.push(new Track(item.name));
+        tracklist.push(new Track(item.name, item.displayName));
     });
 
     // Load the first track in the paused state
@@ -253,7 +254,7 @@ function init() {
     //setPauseState(true);
     //console.log(currentTrack);
     
-    document.querySelector('#current-track-name').innerHTML = currentTrack.name;
+    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
 }
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop)
@@ -317,7 +318,7 @@ function nextTrack(buttonfx) {
     });
 
 
-    document.querySelector('#current-track-name').innerHTML = currentTrack.name;
+    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
 }
 
 function lastTrack(buttonfx) {
@@ -335,7 +336,7 @@ function lastTrack(buttonfx) {
     currentTrack.load().then(() => {
         currentTrack.event.instance.start();
     });
-    document.querySelector('#current-track-name').innerHTML = currentTrack.name;
+    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
 }
 
 let trackfx = true;

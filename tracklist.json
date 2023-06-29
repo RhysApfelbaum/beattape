@@ -1,187 +1,51 @@
 [
     {
-        "name": "limp",
-        "displayName": "limp",
-        "length": "3:30",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "name": "bells",
+        "displayName": "3 a.m. doomscroll",
+        "grit": 0.5,
+        "brightness": 0.5,
+        "chops": 0,
+        "vocals": 0
     },
     {
-        "name": "bells",
-        "displayName": "bells",
-        "length": "3:30",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "name": "limp",
+        "displayName": "murky",
+        "grit": 0.6,
+        "brightness": 0.8,
+        "chops": 0.4,
+        "vocals": 0.6
     },
     {
         "name": "aquarium",
-        "displayName": "",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
-    },
-    {
-        "name": "rough",
-        "displayName": "",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "displayName": "aquarium",
+        "grit": 0.5,
+        "brightness": 0.5,
+        "chops": 0.5,
+        "vocals": 0.5
     },
     {
         "name": "echo",
-        "displayName": "",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "displayName": "echo",
+        "grit": 0.6,
+        "brightness": 0.7,
+        "chops": 0.8,
+        "vocals": 0
     },
     {
         "name": "snooze",
-        "displayName": "",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "displayName": "snooz.",
+        "grit": 0.4,
+        "brightness": 0.6,
+        "chops": 0,
+        "vocals": 0.7
     },
     {
         "name": "lazy",
         "displayName": "l a z y",
-        "sliderData": {
-            "grit": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "synths": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "chops": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            },
-            "vocals": {
-                "low": 0,
-                "high": 100,
-                "average": 0.5
-            }
-        }
+        "grit": 0.5,
+        "brightness": 0.5,
+        "chops": 0.5,
+        "vocals": 0.5
     }
 
     
