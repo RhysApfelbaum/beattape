@@ -1,15 +1,28 @@
+@keyframes track-change {
+    from {
+        color: yellow;
+    } to {
+        color: white;
+    }
+}
+
 * {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 body {
     font-family: 'Courier New', Courier, monospace;
+    font-size: small;
     text-align: center;
     color: white;
     background-color: rgb(40, 6, 63);
 }
 
+ul {
+    list-style-type: none;
+}
 
 #play-pause-icon {
     width: 2em;
@@ -28,7 +41,6 @@ button :active {
 
 .slider-container {
     width: 50px;
-    font-size: small;
 }
 
 .slider {
@@ -76,16 +88,8 @@ button :active {
     margin: 2px 3px 3px 3px;
     background-color: rgb(48, 48, 48);
 }
-@keyframes track-change {
-    from {
-        color: yellow;
-    } to {
-        color: white;
-    }
-}
 
 .track-name {
-    list-style-type: none;
     /* display: inline-block; */
     animation-name: track-change;
     animation-duration: 1s;
