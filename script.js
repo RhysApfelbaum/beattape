@@ -23,11 +23,15 @@ fetch('./tracklist.json')
 let tracklist = [];
 let playQueue = [];
 
-function sliderDistance(track, otherTrack) {
-    let gritDist = (track.sliderData.grit - otherTrack.sliderData.grit);
-    let brightnessDist = (track.sliderData.brightness - otherTrack.sliderData.brightness);
-    let chopsDist = (track.sliderData.chops - otherTrack.sliderData.chops);
-    let vocalsDist = (track.sliderData.vocals - otherTrack.sliderData.vocals);
+function sliderDistance(track) {
+    let grit = document.querySelector('#grit').value / 200 + currentTrack.sliderData.grit / 2;
+    let brightness = document.querySelector('#brightness').value / 200 + currentTrack.sliderData.brightness / 2;
+    let chops = document.querySelector('#chops').value / 200 + currentTrack.sliderData.chops / 2;
+    let vocals = document.querySelector('#vocals').value / 200 + currentTrack.sliderData.vocals / 2;
+    let gritDist = (grit - track.sliderData.grit);
+    let brightnessDist = (brightness - track.sliderData.brightness);
+    let chopsDist = (chops - track.sliderData.chops);
+    let vocalsDist = (vocals - track.sliderData.vocals);
     return gritDist * gritDist + brightnessDist * brightnessDist + chopsDist * chopsDist + vocalsDist * vocalsDist;
 }
 
@@ -38,14 +42,17 @@ function fillPlayQueue() {
     unorderedListElement.replaceChildren();
 
     tracklist.forEach((track) => {
-        console.log(sliderDistance(currentTrack, track));
         newPlayQueue.push(track);
     });
+
+    newPlayQueue.sort((a, b) => 
+        sliderDistance(a) > sliderDistance(b)
+    );
+
 
     newPlayQueue.forEach(track => {
         let li = document.createElement('li');
         li.innerHTML = track.displayName;
-
         unorderedListElement.appendChild(li);
     });
 }
@@ -339,7 +346,9 @@ function nextTrack(buttonfx) {
     currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
     currentTrack.unload();
     currentTrackIndex = (currentTrackIndex + 1) % tracklist.length;
-    currentTrack = tracklist[currentTrackIndex];
+    // currentTrack = tracklist[currentTrackIndex];
+    currentTrack = playQueue;
+    fillPlayQueue();
     currentTrack.load().then(() => {
         currentTrack.event.instance.start();
     });
@@ -441,14 +450,14 @@ function updateEffectivenessLights() {
 
 function updateTrackSliders() {
     let grit = document.querySelector('#grit').value / 100;
-    let synths = document.querySelector('#synths').value / 100;
+    let brightness = document.querySelector('#brightness').value / 100;
     let chops = document.querySelector('#chops').value / 100;
 
     // TODO: Implement this
     let vocals = document.querySelector('#vocals').value / 100;
 
     currentTrack.event.instance.setParameterByName('Grit', grit, false);
-    currentTrack.event.instance.setParameterByName('Brightness', synths, false);
+    currentTrack.event.instance.setParameterByName('Brightness', brightness, false);
     currentTrack.event.instance.setParameterByName('Chops', chops, false);
     currentTrack.event.instance.setParameterByName('Vocals', vocals, false);
 }

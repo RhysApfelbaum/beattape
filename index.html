@@ -11,20 +11,20 @@
     <div id="control-container">
         <div class="track-control-container">
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="grit" onchange="updateTrackSliders()"/>
+                <input type="range" orient="vertical" class="slider" id="grit" onchange="fillPlayQueue()"/>
                 <label for="grit">grit</label>
             </div>
 
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="synths" onchange="updateTrackSliders()"/>
-                <label for="synths">brightness</label>
+                <input type="range" orient="vertical" class="slider" id="brightness" onchange="fillPlayQueue()"/>
+                <label for="brightness">brightness</label>
             </div>
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="chops" onchange="updateTrackSliders()"/>
+                <input type="range" orient="vertical" class="slider" id="chops" onchange="fillPlayQueue()"/>
                 <label for="chops">chops</label>
             </div>
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="vocals" onchange="updateTrackSliders()"/>
+                <input type="range" orient="vertical" class="slider" id="vocals" onchange="fillPlayQueue()"/>
                 <label for="vocals">vocals</label>
             </div>
             <div class="effectiveness-light" id="grit-effectiveness"></div>

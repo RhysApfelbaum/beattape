@@ -18,10 +18,10 @@
     {
         "name": "aquarium",
         "displayName": "aquarium",
-        "grit": 0.5,
-        "brightness": 0.5,
-        "chops": 0.5,
-        "vocals": 0.5
+        "grit": 0.7,
+        "brightness": 0.4,
+        "chops": 0,
+        "vocals": 0
     },
     {
         "name": "echo",
