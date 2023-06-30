@@ -23,8 +23,6 @@
 			<destination>{b5a3bfe5-b838-4518-bbd8-c69bfe3e980a}</destination>
 			<destination>{b4eb4185-a35e-41b5-a94e-5e49e687392c}</destination>
 			<destination>{2eecdf40-0846-47e0-8b61-8d6741c3606d}</destination>
-			<destination>{58950fbb-ad89-46ca-87f6-4b76bc0b1160}</destination>
-			<destination>{a0638eb0-3867-462a-93bc-d78593dae69b}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{c678ecf5-c0e9-452f-bc12-c35d1d1f6001}" />
@@ -56,16 +54,16 @@
 			<value>9</value>
 		</property>
 		<property name="frequencyA">
-			<value>387.055267</value>
+			<value>411.877075</value>
 		</property>
 		<property name="frequencyB">
 			<value>2550.40649</value>
 		</property>
 		<property name="frequencyC">
-			<value>924.054321</value>
+			<value>905.105713</value>
 		</property>
 		<property name="qualityA">
-			<value>0.929931104</value>
+			<value>0.840758622</value>
 		</property>
 		<property name="qualityB">
 			<value>0.974517226</value>
@@ -73,29 +71,5 @@
 		<property name="qualityC">
 			<value>1.95000005</value>
 		</property>
-		<property name="gainC">
-			<value>1.03448153</value>
-		</property>
 	</object>
-	<object class="SFXReverbEffect" id="{58950fbb-ad89-46ca-87f6-4b76bc0b1160}">
-		<property name="earlyDelay">
-			<value>179</value>
-		</property>
-		<property name="lateDelay">
-			<value>100</value>
-		</property>
-		<property name="diffusion">
-			<value>21</value>
-		</property>
-		<property name="highCut">
-			<value>1670</value>
-		</property>
-		<property name="earlyLateMix">
-			<value>65</value>
-		</property>
-		<property name="wetLevel">
-			<value>-28</value>
-		</property>
-	</object>
-	<object class="LimiterEffect" id="{a0638eb0-3867-462a-93bc-d78593dae69b}" />
 </objects>

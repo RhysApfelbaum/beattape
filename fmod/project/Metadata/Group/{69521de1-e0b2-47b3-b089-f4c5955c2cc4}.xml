@@ -21,7 +21,8 @@
 		<relationship name="effects">
 			<destination>{c6d501ad-f569-474b-b653-1c7f7596f7e2}</destination>
 			<destination>{e76ce257-de31-4b8d-b03b-1341c7c9a994}</destination>
-			<destination>{5480d3ca-d54f-4d35-bd9b-ffb32486c581}</destination>
+			<destination>{6741b68e-ddcb-4a5b-b8e8-daedf2a0662a}</destination>
+			<destination>{aba0dbed-50d1-4f17-87b1-dc39062fb873}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{5ef91a2e-0e63-4315-bb35-0fa60686b42e}" />
@@ -37,23 +38,37 @@
 		</relationship>
 	</object>
 	<object class="MixerBusFader" id="{e76ce257-de31-4b8d-b03b-1341c7c9a994}" />
-	<object class="PitchShifterEffect" id="{5480d3ca-d54f-4d35-bd9b-ffb32486c581}">
+	<object class="PitchShifterEffect" id="{6741b68e-ddcb-4a5b-b8e8-daedf2a0662a}">
 		<property name="pitch">
 			<value>1</value>
 		</property>
+		<property name="fftSize">
+			<value>256</value>
+		</property>
+		<property name="overlap">
+			<value>1</value>
+		</property>
+		<property name="maxChannels">
+			<value>6.4000001</value>
+		</property>
 		<relationship name="modulators">
-			<destination>{650a0902-e858-48c3-ad0e-447cd9bb9882}</destination>
+			<destination>{e0a596c3-207e-4ac6-97a4-557d4f85c59f}</destination>
 		</relationship>
 	</object>
-	<object class="LFOModulator" id="{650a0902-e858-48c3-ad0e-447cd9bb9882}">
+	<object class="CompressorEffect" id="{aba0dbed-50d1-4f17-87b1-dc39062fb873}">
+		<property name="threshold">
+			<value>-7.5</value>
+		</property>
+	</object>
+	<object class="LFOModulator" id="{e0a596c3-207e-4ac6-97a4-557d4f85c59f}">
 		<property name="nameOfPropertyBeingModulated">
 			<value>pitch</value>
 		</property>
 		<property name="rate">
-			<value>0.109999999</value>
+			<value>4</value>
 		</property>
 		<property name="depth">
-			<value>13.5</value>
+			<value>2</value>
 		</property>
 	</object>
 </objects>
