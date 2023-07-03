@@ -7,24 +7,25 @@
 <body>
     <img src="art/balcony.gif" />
     <br>
+    <p>Up next:</p>
     <ul id="play-queue"></ul>
     <div id="control-container">
         <div class="track-control-container">
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="grit" onchange="fillPlayQueue()"/>
+                <input type="range" orient="vertical" class="slider" id="grit" onchange="updatePlayQueue()"/>
                 <label for="grit">grit</label>
             </div>
 
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="brightness" onchange="fillPlayQueue()"/>
+                <input type="range" orient="vertical" class="slider" id="brightness" onchange="updatePlayQueue()"/>
                 <label for="brightness">brightness</label>
             </div>
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="chops" onchange="fillPlayQueue()"/>
+                <input type="range" orient="vertical" class="slider" id="chops" onchange="updatePlayQueue()"/>
                 <label for="chops">chops</label>
             </div>
             <div class="slider-container">
-                <input type="range" orient="vertical" class="slider" id="vocals" onchange="fillPlayQueue()"/>
+                <input type="range" orient="vertical" class="slider" id="vocals" onchange="updatePlayQueue()"/>
                 <label for="vocals">vocals</label>
             </div>
             <div class="effectiveness-light" id="grit-effectiveness"></div>
