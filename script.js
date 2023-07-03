@@ -8,99 +8,18 @@ let pauseSnapshot = {};
 let pauseSnapshotDescription = {};
 
 let playButtonSFX;
-let currentTrack;
 let currentTrackIndex;
 let rainEvent;
 
 let trackInfo;
-
-fetch('./tracklist.json')
-    .then(response => response.json())
-    .then(json => {
-        trackInfo = json;
-    });
-
-let tracklist = [];
-let playQueue = [];
-
-function sliderDistance(track) {
-    let grit = document.querySelector('#grit').value / 200 + currentTrack.sliderData.grit / 2;
-    let brightness = document.querySelector('#brightness').value / 200 + currentTrack.sliderData.brightness / 2;
-    let chops = document.querySelector('#chops').value / 200 + currentTrack.sliderData.chops / 2;
-    let vocals = document.querySelector('#vocals').value / 200 + currentTrack.sliderData.vocals / 2;
-    let gritDist = (grit - track.sliderData.grit);
-    let brightnessDist = (brightness - track.sliderData.brightness);
-    let chopsDist = (chops - track.sliderData.chops);
-    let vocalsDist = (vocals - track.sliderData.vocals);
-    return gritDist * gritDist + brightnessDist * brightnessDist + chopsDist * chopsDist + vocalsDist * vocalsDist;
-}
-
-function fillPlayQueue() {
-    let newPlayQueue = [];
-    let unorderedListElement = document.querySelector('#play-queue');
-
-    unorderedListElement.replaceChildren();
-
-    tracklist.forEach((track) => {
-        newPlayQueue.push(track);
-    });
-
-    newPlayQueue.sort((a, b) => 
-        sliderDistance(a) > sliderDistance(b)
-    );
-
-
-    newPlayQueue.forEach(track => {
-        let li = document.createElement('li');
-        li.innerHTML = track.displayName;
-        unorderedListElement.appendChild(li);
-    });
-}
-
-class SingleInstanceEvent {
-    description = null;
-    instance = null;
-    constructor(system, path) {
-        let outval = {};
-        CHECK_RESULT( system.getEvent(path, outval) );
-        this.description = outval.val;
-        return FMOD.OK;
-    }
-
-    get isLoaded() {
-        return this.instance != null;
-    }
-
-    load() {
-        let outval = {};
-
-        // Create an event instance from our event description
-        CHECK_RESULT( this.description.createInstance(outval) );
-
-        // Point the instance property to our newly created event instance
-        this.instance = outval.val;
-
-        return FMOD.OK
-    }
-
-    unload() {
-        // Mark the event instance for destruction
-        CHECK_RESULT( this.instance.release() );
-
-        // Point instance to null
-        this.instance = null;
-
-        return FMOD.OK;
-    }
-
-    // Loads the event, plays it once, and immediately unloads it
-    oneShot() {
-        this.load();
-        this.instance.start();
-        this.instance.release();
-        this.instance = null;
-    }
-}
+let playQueue;
+const sliderState = {
+    changed: false,
+    grit: 0.0,
+    brightness: 0.0,
+    chops: 0.0,
+    vocals: 0.0
+};
 
 class Track {
 
@@ -174,6 +93,162 @@ class Track {
         FMOD.FS_unlink(this.bankPath);
 
         return FMOD.OK;
+    }
+}
+
+
+
+
+
+class SingleInstanceEvent {
+    description = null;
+    instance = null;
+    constructor(system, path) {
+        let outval = {};
+        CHECK_RESULT( system.getEvent(path, outval) );
+        this.description = outval.val;
+        return FMOD.OK;
+    }
+
+    get isLoaded() {
+        return this.instance != null;
+    }
+
+    load() {
+        let outval = {};
+
+        // Create an event instance from our event description
+        CHECK_RESULT( this.description.createInstance(outval) );
+
+        // Point the instance property to our newly created event instance
+        this.instance = outval.val;
+
+        return FMOD.OK
+    }
+
+    unload() {
+        // Mark the event instance for destruction
+        CHECK_RESULT( this.instance.release() );
+
+        // Point instance to null
+        this.instance = null;
+
+        return FMOD.OK;
+    }
+
+    // Loads the event, plays it once, and immediately unloads it
+    oneShot() {
+        this.load();
+        this.instance.start();
+        this.instance.release();
+        this.instance = null;
+    }
+}
+
+
+class PlayQueue {
+
+    constructor(tracklist) {
+        this.tracklist = tracklist;
+        this.currentTrack = this.tracklist[0];
+        this.nextTracks = [];
+        this.history = [];
+        this.playedTracks = new Set();
+
+        this.fillNextTracks();
+    }
+
+    trackDistance(track) {
+
+        let result = 0;
+        if (track == this.currentTrack) return 1000;
+        // let grit = document.querySelector('#grit').value / 200 + this.currentTrack.sliderData.grit / 2;
+        // let brightness = document.querySelector('#brightness').value / 200 + this.currentTrack.sliderData.brightness / 2;
+        // let chops = document.querySelector('#chops').value / 200 + this.currentTrack.sliderData.chops / 2;
+        // let vocals = document.querySelector('#vocals').value / 200 + this.currentTrack.sliderData.vocals / 2;
+        let grit = document.querySelector('#grit').value / 100;
+        let brightness = document.querySelector('#brightness').value / 100;
+        let chops = document.querySelector('#chops').value / 100;
+        let vocals = document.querySelector('#vocals').value / 100;
+        let gritDist = Math.abs(grit - track.sliderData.grit);
+        let brightnessDist = Math.abs(brightness - track.sliderData.brightness);
+        let chopsDist = Math.abs(chops - track.sliderData.chops);
+        let vocalsDist = Math.abs(vocals - track.sliderData.vocals);
+        result = (gritDist + brightnessDist + chopsDist + vocalsDist) / 4;
+        result += this.recentScore(track) / 2;
+        //console.log(result);
+        return result;
+    }
+
+    recentScore(track) {
+        if (this.history.length == 0) return 0;
+        let ordinal = this.history.length;
+        for (let i = 0; i < this.history.length; i++) {
+            if (this.history[i] == track) {
+                ordinal = i;
+                break;
+            }
+        }
+        //console.log('recency', track.displayName, ordinal, 1.0 - ordinal / this.tracklist.length);
+        return 1.0 - ordinal / this.tracklist.length;
+    }
+
+    nearestPlayedTrack() {
+        let result;
+        let minDistance = Infinity;
+        this.playedTracks.forEach(track => {
+            if (track == this.currentTrack) return;
+            let distance = this.trackDistance(track);
+            if (distance < minDistance) {
+                minDistance = distance;
+                result = track;
+            }
+            //console.log(track, distance);
+        });
+        return result;
+    }
+
+    fillNextTracks() {
+        let oldNext = this.nextTracks;
+         
+        //this.tracklist.forEach(track => console.log(this.trackDistance(track)));
+        this.tracklist.sort(
+            (a, b) => this.trackDistance(a) - this.trackDistance(b)
+        );
+        
+        this.nextTracks = [];
+        this.tracklist.forEach(track => {
+            // console.log(this.currentTrack.name, track.name, this.trackDistance(track));
+            if (track == this.currentTrack) return;
+
+            if (this.nextTracks.length >= this.tracklist.length) return;
+            this.nextTracks.push(track);
+        });
+        this.updateDisplay();
+    }
+
+    nextTrack() {
+        this.playedTracks.add(this.currentTrack);
+
+        // The track history begins the most recently played track
+        this.history.unshift(this.currentTrack);
+
+        this.nextTracks.push(this.currentTrack);
+        this.currentTrack = this.nextTracks.shift();
+        
+        //console.log(this);
+        this.updateDisplay();
+    }
+
+    updateDisplay() {
+        let unorderedListElement = document.querySelector('#play-queue');
+        unorderedListElement.replaceChildren();
+        this.nextTracks.forEach(track => {
+            //console.log(track);
+            let li = document.createElement('li');
+            li.innerText = track.displayName;
+            unorderedListElement.appendChild(li);
+        });
     }
 }
 
@@ -271,47 +346,63 @@ function init() {
     rainEvent.load();
     vinylEvent.load();
 
-    trackInfo.forEach(item => {
-        tracklist.push(new Track(item));
-    });
-
+    
 
     // Load the first track in the paused state
-    currentTrackIndex = 0;
-    currentTrack = tracklist[currentTrackIndex];
-    currentTrack.load().then(() => {
-        currentTrack.event.instance.start();
-        currentTrack.event.instance.setPaused(true);
+    // currentTrackIndex = 0;
+    // currentTrack = tracklist[currentTrackIndex];
+
+    fetch('./tracklist.json')
+    .then(response => response.json())
+    .then(json => {
+        let tracklist = [];
+        json.forEach(obj => {
+            tracklist.push(new Track(obj));
+        });
+        playQueue = new PlayQueue(tracklist);
+    })
+    .then(() => 
+        playQueue.currentTrack.load()
+    )
+    .then(() => {
+        playQueue.currentTrack.event.instance.start();
+        playQueue.currentTrack.event.instance.setPaused(true);
         setPauseState(true);
+        document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     });
+
+    
     //setPauseState(true);
     //console.log(currentTrack);
     
-    fillPlayQueue();
-    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
+    
+    
 }
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop)
 function updateApplication() {
     
     // This function may be called before a track has finished loading
-    if (currentTrack.isLoaded) {
+    if (!playQueue) return;
+    if (!playQueue.currentTrack.isLoaded) return;
+    
         
-        // Pause logic
-        let intensityFinal = {};
-        CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
-        if ((intensityFinal.val >= 100) && (! isPaused())) {
-            currentTrack.event.instance.setPaused(true);
-        }
-        
-        // Next track logic
-        let playbackState = {};
-        CHECK_RESULT( currentTrack.event.instance.getPlaybackState(playbackState) );
-        if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
-
-        updateTrackSliders();
-        updateEffectivenessLights();
+    // Pause logic
+    let intensityFinal = {};
+    CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
+    if ((intensityFinal.val >= 100) && (! isPaused())) {
+        playQueue.currentTrack.event.instance.setPaused(true);
     }
+    
+    // Next track logic
+    let playbackState = {};
+    CHECK_RESULT( playQueue.currentTrack.event.instance.getPlaybackState(playbackState) );
+    if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
+
+    updateSliderState();
+    if (sliderState.changed) updateTrackSliders();
+
+    updateEffectivenessLights();
 
     // Update FMOD
     gSystem.update();
@@ -322,7 +413,7 @@ function isPaused() {
     let paused;
     let pauseSnapshotPlayback;
 
-    CHECK_RESULT( currentTrack.event.instance.getPaused(outval) );
+    CHECK_RESULT( playQueue.currentTrack.event.instance.getPaused(outval) );
     paused = outval.val;
     CHECK_RESULT( pauseSnapshot.val.getPlaybackState(outval) );
     pauseSnapshotPlayback = outval.val;
@@ -335,44 +426,44 @@ function setPauseState(state) {
         CHECK_RESULT( pauseSnapshot.val.start() );
     } else {
         // Play the track
-        currentTrack.event.instance.setPaused(false);
+        playQueue.currentTrack.event.instance.setPaused(false);
         pauseSnapshot.val.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
     }
 }
 
 function nextTrack(buttonfx) {
     if (buttonfx) playButtonSFX.oneShot();
+    
+    // Stop and unload the current track.
+    playQueue.currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+    playQueue.currentTrack.unload();
 
-    currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    currentTrack.unload();
-    currentTrackIndex = (currentTrackIndex + 1) % tracklist.length;
-    // currentTrack = tracklist[currentTrackIndex];
-    currentTrack = playQueue;
-    fillPlayQueue();
-    currentTrack.load().then(() => {
-        currentTrack.event.instance.start();
+    // Next track 
+    playQueue.nextTrack();
+    playQueue.currentTrack = playQueue.currentTrack;
+    playQueue.currentTrack.load().then(() => {
+        playQueue.currentTrack.event.instance.start();
+        updateTrackSliders();
+        document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     });
-
-
-    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
 }
 
 function lastTrack(buttonfx) {
-    if (buttonfx) playButtonSFX.oneShot();
+    // if (buttonfx) playButtonSFX.oneShot();
 
-    currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    currentTrack.unload();
+    // currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+    // currentTrack.unload();
 
-    // Go back one track in the play queue until the first track played.
-    // If it's the first track, just start it again.
-    currentTrackIndex -= 1;
-    if (currentTrackIndex < 0) currentTrackIndex = 0;
-    currentTrack = tracklist[currentTrackIndex];
+    // // Go back one track in the play queue until the first track played.
+    // // If it's the first track, just start it again.
+    // currentTrackIndex -= 1;
+    // if (currentTrackIndex < 0) currentTrackIndex = 0;
+    // currentTrack = tracklist[currentTrackIndex];
 
-    currentTrack.load().then(() => {
-        currentTrack.event.instance.start();
-    });
-    document.querySelector('#current-track-name').innerHTML = currentTrack.displayName;
+    // currentTrack.load().then(() => {
+    //     currentTrack.event.instance.start();
+    // });
+    // document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
 }
 
 let trackfx = true;
@@ -430,16 +521,16 @@ function updateEffectivenessLights() {
         let outval = {};
         switch(light.id) {
             case 'grit-effectiveness':
-                currentTrack.event.instance.getParameterByName('GritAmount', {}, outval);
+                playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval);
                 break;
             case 'brightness-effectiveness':
-                currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval);
+                playQueue.currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval);
                 break;
             case 'chops-effectiveness':
-                currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval);
+                playQueue.currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval);
                 break;
             case 'vocals-effectiveness':
-                currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval);
+                playQueue.currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval);
                 break; 
         }
         let min = [48, 48, 48];
@@ -448,18 +539,42 @@ function updateEffectivenessLights() {
     })
 }
 
+function updateSliderState() {
+    let grit = document.querySelector('#grit').value / 100;
+    let brightness = document.querySelector('#brightness').value / 100;
+    let chops = document.querySelector('#chops').value / 100;
+    let vocals = document.querySelector('#vocals').value / 100;
+
+    if (
+        (grit == sliderState.grit)
+        & (brightness == sliderState.brightness)
+        & (chops == sliderState.chops)
+        & (vocals == sliderState.vocals)
+    ) {
+        sliderState.changed = false;
+    } else {
+        sliderState.grit = grit;
+        sliderState.brightness = brightness;
+        sliderState.chops = chops;
+        sliderState.vocals = vocals;
+        sliderState.changed = true;
+    }
+}
 function updateTrackSliders() {
     let grit = document.querySelector('#grit').value / 100;
     let brightness = document.querySelector('#brightness').value / 100;
     let chops = document.querySelector('#chops').value / 100;
-
-    // TODO: Implement this
     let vocals = document.querySelector('#vocals').value / 100;
 
-    currentTrack.event.instance.setParameterByName('Grit', grit, false);
-    currentTrack.event.instance.setParameterByName('Brightness', brightness, false);
-    currentTrack.event.instance.setParameterByName('Chops', chops, false);
-    currentTrack.event.instance.setParameterByName('Vocals', vocals, false);
+    
+    playQueue.currentTrack.event.instance.setParameterByName('Grit', grit, false);
+    playQueue.currentTrack.event.instance.setParameterByName('Brightness', brightness, false);
+    playQueue.currentTrack.event.instance.setParameterByName('Chops', chops, false);
+    playQueue.currentTrack.event.instance.setParameterByName('Vocals', vocals, false);
+}
+
+function updatePlayQueue() {
+    playQueue.fillNextTracks();
 }
 
 function updateRainAmount() {
