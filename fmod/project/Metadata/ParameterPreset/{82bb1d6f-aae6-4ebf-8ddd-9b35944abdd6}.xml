@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{82bb1d6f-aae6-4ebf-8ddd-9b35944abdd6}">
+		<property name="name">
+			<value>BirdAmount</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16423301-e3d8-440f-9fe8-7712b99fdce9}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{ba49e546-833f-4078-aee0-4c8b4f38837c}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{ba49e546-833f-4078-aee0-4c8b4f38837c}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="seekSpeed">
+			<value>0.5899999737739563</value>
+		</property>
+	</object>
+</objects>
