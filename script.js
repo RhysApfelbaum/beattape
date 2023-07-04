@@ -38,6 +38,7 @@ class Track {
             chops: trackData.chops,
             vocals: trackData.vocals 
         };
+        this.changed = false;
     }
 
     // A simple check to see whether the bank and the event have been loaded
@@ -96,10 +97,6 @@ class Track {
     }
 }
 
-
-
-
-
 class SingleInstanceEvent {
     description = null;
     instance = null;
@@ -145,7 +142,6 @@ class SingleInstanceEvent {
     }
 }
 
-
 class PlayQueue {
 
     constructor(tracklist) {
@@ -158,14 +154,12 @@ class PlayQueue {
         this.fillNextTracks();
     }
 
+    // WARNING: THIS SUCKS
+    // It's horrible and I'm just trying to make it work
     trackDistance(track) {
 
         let result = 0;
         if (track == this.currentTrack) return 1000;
-        // let grit = document.querySelector('#grit').value / 200 + this.currentTrack.sliderData.grit / 2;
-        // let brightness = document.querySelector('#brightness').value / 200 + this.currentTrack.sliderData.brightness / 2;
-        // let chops = document.querySelector('#chops').value / 200 + this.currentTrack.sliderData.chops / 2;
-        // let vocals = document.querySelector('#vocals').value / 200 + this.currentTrack.sliderData.vocals / 2;
         let grit = document.querySelector('#grit').value / 100;
         let brightness = document.querySelector('#brightness').value / 100;
         let chops = document.querySelector('#chops').value / 100;
@@ -176,7 +170,6 @@ class PlayQueue {
         let vocalsDist = Math.abs(vocals - track.sliderData.vocals);
         result = (gritDist + brightnessDist + chopsDist + vocalsDist) / 4;
         result += this.recentScore(track) / 2;
-        //console.log(result);
         return result;
     }
 
@@ -189,41 +182,39 @@ class PlayQueue {
                 break;
             }
         }
-        //console.log('recency', track.displayName, ordinal, 1.0 - ordinal / this.tracklist.length);
-        return 1.0 - ordinal / this.tracklist.length;
-    }
-
-    nearestPlayedTrack() {
-        let result;
-        let minDistance = Infinity;
-        this.playedTracks.forEach(track => {
-            if (track == this.currentTrack) return;
-            let distance = this.trackDistance(track);
-            if (distance < minDistance) {
-                minDistance = distance;
-                result = track;
-            }
-            //console.log(track, distance);
-        });
+        let result = 1.0 - ordinal / this.tracklist.length;
+        if (ordinal < this.history.length) result+= 2;
         return result;
     }
 
     fillNextTracks() {
         let oldNext = this.nextTracks;
-         
-        //this.tracklist.forEach(track => console.log(this.trackDistance(track)));
         this.tracklist.sort(
             (a, b) => this.trackDistance(a) - this.trackDistance(b)
         );
         
         this.nextTracks = [];
         this.tracklist.forEach(track => {
-            // console.log(this.currentTrack.name, track.name, this.trackDistance(track));
+            console.log(track.displayName, this.trackDistance(track));
             if (track == this.currentTrack) return;
+
 
             if (this.nextTracks.length >= this.tracklist.length) return;
             this.nextTracks.push(track);
         });
+        
+        // If oldNext is an empty array, the webpage has just loaded, so all tracks are considered not changed
+        if (oldNext.length == 0) {
+            this.updateDisplay();
+            return;
+        }
+
+        for (let i = 0; i < this.nextTracks.length; i++) {
+            if (this.nextTracks[i] != oldNext[i])
+                this.nextTracks[i].changed = true;
+            else
+                this.nextTracks[i].changed = false;
+        }
         this.updateDisplay();
     }
 
@@ -235,8 +226,6 @@ class PlayQueue {
 
         this.nextTracks.push(this.currentTrack);
         this.currentTrack = this.nextTracks.shift();
-        
-        //console.log(this);
         this.updateDisplay();
     }
 
@@ -247,6 +236,12 @@ class PlayQueue {
             //console.log(track);
             let li = document.createElement('li');
             li.innerText = track.displayName;
+            
+            if (track.changed) {
+                li.className = 'track-label-changed';
+                track.changed = false;
+            }
+            else li.className = 'track-label';
             unorderedListElement.appendChild(li);
         });
     }
@@ -346,12 +341,7 @@ function init() {
     rainEvent.load();
     vinylEvent.load();
 
-    
-
-    // Load the first track in the paused state
-    // currentTrackIndex = 0;
-    // currentTrack = tracklist[currentTrackIndex];
-
+    // Load the tracklist and initalize the play queue
     fetch('./tracklist.json')
     .then(response => response.json())
     .then(json => {

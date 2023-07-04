@@ -1,10 +1,3 @@
-@keyframes track-change {
-    from {
-        color: yellow;
-    } to {
-        color: white;
-    }
-}
 
 * {
     -webkit-box-sizing: border-box;
@@ -89,12 +82,23 @@ button :active {
     background-color: rgb(48, 48, 48);
 }
 
-.track-name {
-    /* display: inline-block; */
+.track-label-changed {
     animation-name: track-change;
     animation-duration: 1s;
-    animation-iteration-count: infinite;
 }
+
+.track-label {
+    animation-name: none;
+}
+
+@keyframes track-change {
+    from {
+        color: yellow;
+    } to {
+        color: white;
+    }
+}
+
 
 #transport-container {
     vertical-align: middle;
