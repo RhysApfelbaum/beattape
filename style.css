@@ -54,12 +54,21 @@ button :active {
     margin-top: 10px;
 }
 
+#active-label {
+    margin: 0px 0px 0px 0px;
+    grid-area: 3 /span 4;
+}
+
+#active-label.hr {
+    width: 450px;
+}
+
 #ambience-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
     justify-content: center;
     justify-items: center;
-    width: 450px;
+    width: 400px;
     height: 150px; 
     margin-top: 10px;
 }
@@ -85,10 +94,12 @@ button :active {
 .track-label-changed {
     animation-name: track-change;
     animation-duration: 1s;
+    text-align: left;
 }
 
 .track-label {
     animation-name: none;
+    text-align: left;
 }
 
 @keyframes track-change {
@@ -116,4 +127,5 @@ button :active {
     height: 10px;
     background-color: rgb(48, 48, 48);
     border-radius: 3px;
+    margin: 5px 5px 5px 5px;
 }
