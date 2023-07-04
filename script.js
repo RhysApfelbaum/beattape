@@ -229,6 +229,15 @@ class PlayQueue {
         this.updateDisplay();
     }
 
+    lastTrack() {
+        if (this.history.length == 0) return;
+        this.nextTracks.pop();
+        this.nextTracks.unshift(this.currentTrack);
+        
+        this.currentTrack = this.history.shift();
+        this.updateDisplay();
+    }
+
     updateDisplay() {
         let unorderedListElement = document.querySelector('#play-queue');
         unorderedListElement.replaceChildren();
@@ -360,13 +369,6 @@ function init() {
         setPauseState(true);
         document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     });
-
-    
-    //setPauseState(true);
-    //console.log(currentTrack);
-    
-    
-    
 }
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop)
@@ -439,21 +441,18 @@ function nextTrack(buttonfx) {
 }
 
 function lastTrack(buttonfx) {
-    // if (buttonfx) playButtonSFX.oneShot();
+    if (buttonfx) playButtonSFX.oneShot();
 
-    // currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    // currentTrack.unload();
+    playQueue.currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+    playQueue.currentTrack.unload();
 
-    // // Go back one track in the play queue until the first track played.
-    // // If it's the first track, just start it again.
-    // currentTrackIndex -= 1;
-    // if (currentTrackIndex < 0) currentTrackIndex = 0;
-    // currentTrack = tracklist[currentTrackIndex];
+    playQueue.lastTrack();
 
-    // currentTrack.load().then(() => {
-    //     currentTrack.event.instance.start();
-    // });
-    // document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
+    playQueue.currentTrack.load().then(() => {
+        playQueue.currentTrack.event.instance.start();
+        updateTrackSliders();
+        document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
+    });
 }
 
 let trackfx = true;
