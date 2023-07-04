@@ -10,6 +10,7 @@ let pauseSnapshotDescription = {};
 let playButtonSFX;
 let currentTrackIndex;
 let rainEvent;
+let birdEvent;
 
 let trackInfo;
 let playQueue;
@@ -344,11 +345,14 @@ function init() {
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
     vinylEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Vinyl');
+    birdEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Birds');
+
 
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
     radioSnapshot.load();
     rainEvent.load();
     vinylEvent.load();
+    birdEvent.load();
 
     // Load the tracklist and initalize the play queue
     fetch('./tracklist.json')
@@ -500,8 +504,18 @@ function toggleAmbience(type) {
             document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
         }
         updateVinylAmount();
-    } else {
-
+    } else if (type == 'birds') {
+        CHECK_RESULT( birdEvent.instance.getPlaybackState(playBackState) );
+        if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
+            // Turn vinyl on
+            birdEvent.instance.start();
+            document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+        } else {
+            // Turn vinyl off
+            birdEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+            document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+        }
+        updateBirdAmount();
     }
 }
 
@@ -575,9 +589,12 @@ function updateRainAmount() {
 function updateVinylAmount() {
     let vinylAmount = document.querySelector('#vinyl-amount').value / 100;
     vinylEvent.instance.setParameterByName('VinylAmount', vinylAmount, false);
-    
 }
 
+function updateBirdAmount() {
+    let birdAmount = document.querySelector('#bird-amount').value / 100;
+    birdEvent.instance.setParameterByName('BirdAmount', birdAmount, false);
+}
 function togglePause() {
     playButtonSFX.oneShot();
     setPauseState(!isPaused());
