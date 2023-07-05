@@ -6,31 +6,51 @@
 }
 
 body {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: monospace;
     font-size: small;
     text-align: center;
     color: white;
     background-color: rgb(40, 6, 63);
 }
 
-ul {
+ul#play-queue {
     list-style-type: none;
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+    outline: 1px solid #ca8baf;
+}
+
+button {
+    border-radius: 3px;
+    box-shadow: 5px 5px #91617c;
+    font-family: inherit;
+    font-weight: bold;
+    background-color: rgb(255, 238, 222);
+}
+
+button:active {
+    border-radius: 3px;
+    box-shadow: 2px 2px rgb(92, 45, 71);
+    font-family: inherit;
+    font-weight: bolder;
+    background-color: #cea8bd;
+    
+    /* This compensates for the shadow shrinking, and makes it look like the button is being pressed down.
+    It should be set to the difference between the box shadow when the button is active vs not active. */
+    translate: 3px 3px;
+}
+
+button > * {
+    box-shadow: none !important;
 }
 
 #play-pause-icon {
     width: 2em;
     height: 2em;
     margin: 1em 1em 1em 1em;
+    box-shadow: inherit;
 }
 
-button {
-    border-radius: 0px;
-    box-shadow: 5px 5px #999;
-}
-
-button :active {
-    box-shadow: 0 0 0;
-}
 
 .slider-container {
     width: 50px;
@@ -89,17 +109,25 @@ button :active {
     height: 8px;
     margin: 2px 3px 3px 3px;
     background-color: rgb(48, 48, 48);
+    border-radius: 2px;
+    box-shadow: inherit;
 }
 
 .track-label-changed {
     animation-name: track-change;
     animation-duration: 1s;
     text-align: left;
+    font-style: italic;
 }
 
 .track-label {
     animation-name: none;
     text-align: left;
+    font-style: italic;
+}
+
+#current-track-name {
+    font-style: italic;
 }
 
 @keyframes track-change {
