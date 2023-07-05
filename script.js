@@ -196,10 +196,7 @@ class PlayQueue {
         
         this.nextTracks = [];
         this.tracklist.forEach(track => {
-            console.log(track.displayName, this.trackDistance(track));
             if (track == this.currentTrack) return;
-
-
             if (this.nextTracks.length >= this.tracklist.length) return;
             this.nextTracks.push(track);
         });
