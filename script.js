@@ -520,24 +520,32 @@ function toggleAmbience(type) {
 function updateEffectivenessLights() {
     let trackColor, glowColor;
     let outval = {};
-    let glowId;
+    let glowId, sliderId, labelFor;
     document.querySelectorAll('.slider-track').forEach((element) => {
         switch(element.id) {
             case 'grit-slider-track':
                 glowId = '#grit-container';
+                sliderId = '#grit';
+                labelFor = 'grit';
                 CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval));
                 break;
             case 'brightness-slider-track':
                     
                 glowId = '#brightness-container';
+                sliderId = '#brightness';
+                labelFor = 'brightness';
                 CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval));
                 break;
             case 'chops-slider-track':
                 glowId = '#chops-container';
+                sliderId = '#chops';
+                labelFor = 'chops';
                 CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval));
                 break;
             case 'vocals-slider-track':
                 glowId = '#vocals-container';
+                sliderId = '#vocals';
+                labelFor = 'vocals';
                 CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval));
                 break; 
             default:
@@ -547,7 +555,9 @@ function updateEffectivenessLights() {
         let mix = 1 - (outval.val - 1) * (outval.val - 1);
         glowColor = rgbaMix([0, 0, 0, 0], [206, 168, 189, 1], outval.val);
         element.style['background'] = `color-mix(in srgb, rgb(48, 48, 48), rgb(206, 168, 189) ${mix * 100}%)`;
+        document.querySelector(sliderId).style.setProperty('--slider-thumb-background', `color-mix(in srgb, rgb(77, 77, 77), rgb(182, 222, 242) ${mix * 100}%)`);
         document.querySelector(glowId).style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%))`;
+        document.querySelector(`label[for=${labelFor}]`).style['color'] = `color-mix(in srgb, rgb(68, 68, 68), white ${mix * 100}%`;
     });
     
 }
