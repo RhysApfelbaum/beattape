@@ -72,6 +72,7 @@ button > * {
 
 input.slider {
     -webkit-appearance: none;
+    --slider-thumb-background: rgb(107, 107, 107); 
     appearance: none;
     width: 100px;
     height: 50px;
@@ -87,18 +88,15 @@ input.slider {
 ::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 5px;
-    background: #6b6b6b;
+    background: var(--slider-thumb-background);
     height: 20px;
-    transform: translateY(-8px);
+    transform: translateX(-8px);
     border-radius: 2px;
     
 }
 
 ::-webkit-slider-runnable-track {
-    background-color: #2e2e2ee5;
-    height: 4px;
-    border-radius: 2px;
-    filter: drop-shadow(0 0 20px red);
+    -webkit-appearance: none;
 }
 
 ::-moz-range-track {
@@ -109,7 +107,7 @@ input.slider {
     -moz-appearance: none transparent;
     -moz-transform: none;
     width: 5px;
-    background: #8d84ac;
+    background: var(--slider-thumb-background);
     height: 20px;
     border-radius: 2px;
     position: relative;
@@ -223,9 +221,12 @@ label {
 }
 
 .effectiveness-light {
-    width: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    /* width: 10px;
     height: 10px;
     background-color: rgb(48, 48, 48);
     border-radius: 3px;
-    margin: 5px 5px 5px 5px;
+    margin: 5px 5px 5px 5px; */
 }
