@@ -518,27 +518,48 @@ function toggleAmbience(type) {
 }
 
 function updateEffectivenessLights() {
-    document.querySelectorAll('.slider-track').forEach((light) => {
-        let outval = {};
-        switch(light.id) {
+    let trackColor, glowColor;
+    let outval = {};
+    let glowId;
+    document.querySelectorAll('.slider-track').forEach((element) => {
+        switch(element.id) {
             case 'grit-slider-track':
-                playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval);
+                glowId = '#grit-container';
+                CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval));
                 break;
             case 'brightness-slider-track':
-                playQueue.currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval);
+                    
+                glowId = '#brightness-container';
+                CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval));
                 break;
             case 'chops-slider-track':
-                playQueue.currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval);
+                glowId = '#chops-container';
+                CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval));
                 break;
             case 'vocals-slider-track':
-                playQueue.currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval);
+                glowId = '#vocals-container';
+                CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval));
                 break; 
+            default:
+                return;
         }
-        let min = [48, 48, 48];
-        let max = [255, 60, 0];
-        light.style['background-image'] = `linear-gradient(to right, transparent, rgb(${min[0] + (max[0] - min[0]) * outval.val}, ${min[1] + (max[1] - min[1]) * outval.val}, ${min[2] + (max[2] - min[2]) * outval.val}), transparent)`;
-        light.style['filter'] = 
-    })
+        trackColor = rgbaMix([48, 48, 48, 1], [206, 168, 189, 1], outval.val);
+        let mix = 1 - (outval.val - 1) * (outval.val - 1);
+        glowColor = rgbaMix([0, 0, 0, 0], [206, 168, 189, 1], outval.val);
+        element.style['background'] = `color-mix(in srgb, rgb(48, 48, 48), rgb(206, 168, 189) ${mix * 100}%)`;
+        document.querySelector(glowId).style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%))`;
+    });
+    
+}
+
+function rgbaMix(color1, color2, mix) {
+    result = [0, 0, 0, 0];
+    for (let i = 0; i < 4; i++) {
+        
+        result[i] = color1[i] + (Math.abs(color2[i] - color1[i]) * mix);
+        
+    }
+    return 1 - (result - 1) * (result - 1);
 }
 
 function updateSliderState() {

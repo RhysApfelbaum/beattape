@@ -22,10 +22,11 @@ ul#play-queue {
 
 button {
     border-radius: 3px;
-    box-shadow: 5px 5px #91617c;
+    box-shadow: 5px 5px rgb(145, 97, 124);
     font-family: inherit;
     font-weight: bold;
     background-color: rgb(255, 238, 222);
+    color: rgba(0, 0, 0, 0.801);
 }
 
 button:active {
@@ -33,7 +34,7 @@ button:active {
     box-shadow: 2px 2px rgb(92, 45, 71);
     font-family: inherit;
     font-weight: bolder;
-    background-color: #cea8bd;
+    background-color: rgb(206, 168, 189);
     
     /* This compensates for the shadow shrinking, and makes it look like the button is being pressed down.
     It should be set to the difference between the box shadow when the button is active vs not active. */
@@ -56,6 +57,7 @@ button > * {
     width: 100px;
     border-radius: 5px;
     margin-bottom: 10px;
+    /* filter: drop-shadow(0 0 10px rgb(255, 238, 222)); */
 }
 
 /* .slider {
@@ -107,7 +109,7 @@ input.slider {
     -moz-appearance: none transparent;
     -moz-transform: none;
     width: 5px;
-    background: #6b6b6b;
+    background: #8d84ac;
     height: 20px;
     border-radius: 2px;
     position: relative;
@@ -123,7 +125,7 @@ input.slider {
     height: 100px;
     width: 4px;
     border-radius: 2px;
-    filter: drop-shadow(0 0 20px red);
+    border: none;
 }
 
 label {
