@@ -14,6 +14,7 @@ let birdEvent;
 
 let trackInfo;
 let playQueue;
+
 const sliderState = {
     changed: false,
     grit: 0.0,
@@ -517,25 +518,26 @@ function toggleAmbience(type) {
 }
 
 function updateEffectivenessLights() {
-    document.querySelectorAll('.effectiveness-light').forEach((light) => {
+    document.querySelectorAll('.slider-track').forEach((light) => {
         let outval = {};
         switch(light.id) {
-            case 'grit-effectiveness':
+            case 'grit-slider-track':
                 playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval);
                 break;
-            case 'brightness-effectiveness':
+            case 'brightness-slider-track':
                 playQueue.currentTrack.event.instance.getParameterByName('BrightnessAmount', {}, outval);
                 break;
-            case 'chops-effectiveness':
+            case 'chops-slider-track':
                 playQueue.currentTrack.event.instance.getParameterByName('ChopsAmount', {}, outval);
                 break;
-            case 'vocals-effectiveness':
+            case 'vocals-slider-track':
                 playQueue.currentTrack.event.instance.getParameterByName('VocalsAmount', {}, outval);
                 break; 
         }
         let min = [48, 48, 48];
         let max = [255, 60, 0];
-        light.style['background-color'] = `rgb(${min[0] + (max[0] - min[0]) * outval.val}, ${min[1] + (max[1] - min[1]) * outval.val}, ${min[2] + (max[2] - min[2]) * outval.val})`;
+        light.style['background-image'] = `linear-gradient(to right, transparent, rgb(${min[0] + (max[0] - min[0]) * outval.val}, ${min[1] + (max[1] - min[1]) * outval.val}, ${min[2] + (max[2] - min[2]) * outval.val}), transparent)`;
+        light.style['filter'] = 
     })
 }
 
@@ -592,6 +594,7 @@ function updateBirdAmount() {
     let birdAmount = document.querySelector('#bird-amount').value / 100;
     birdEvent.instance.setParameterByName('BirdAmount', birdAmount, false);
 }
+
 function togglePause() {
     playButtonSFX.oneShot();
     setPauseState(!isPaused());
