@@ -9,20 +9,20 @@
     <br>
     <div id="control-container">
         <div class="track-control-container">
-            <div class="slider-container">
+            <div class="slider-container" id="grit-container">
                 <div class="slider-track" id="grit-slider-track"></div>
                 <input type="range" class="slider" id="grit" onchange="updatePlayQueue()"/>
             </div>
-            <div class="slider-container">
+            <div class="slider-container" id="brightness-container">
                 <div class="slider-track" id="brightness-slider-track"></div>
                 <input type="range" class="slider" id="brightness" onchange="updatePlayQueue()"/>
             </div>
-            <div class="slider-container">
+            <div class="slider-container" id="chops-container">
                 <div class="slider-track" id="chops-slider-track"></div>
                 <input type="range" class="slider" id="chops" onchange="updatePlayQueue()"/>
             </div>
-            <div class="slider-container" id="vocals-slider-track">
-                <div class="slider-track"></div>
+            <div class="slider-container" id="vocals-container">
+                <div class="slider-track" id="vocals-slider-track"></div>
                 <input type="range" class="slider" id="vocals" onchange="updatePlayQueue()"/>
             </div>
             <label for="grit">grit</label>
