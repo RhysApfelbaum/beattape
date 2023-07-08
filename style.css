@@ -53,20 +53,88 @@ button > * {
 
 
 .slider-container {
-    width: 50px;
+    width: 100px;
+    border-radius: 5px;
+    margin-bottom: 10px;
 }
 
-.slider {
-    -webkit-appearance: slider-vertical;
-    appearance: default;
+/* .slider {
+    -webkit-appearance: none;
     width: 50px;
     height: 100px;
+    cursor: pointer;
+    
+    -webkit-appearance: slider-vertical;
+    appearance: default;
+} */
+
+input.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 50px;
+    margin: 0 0 0 0 !important;
+    transform: translateY(25px) rotate(270deg);
+    transform-origin: center;
+    -webkit-transform: translateY(25px) rotate(270deg);
+    -webkit-transform-origin: center;
+    -moz-transform: translateY(25px) rotate(270deg);
+    background: transparent;
+    position: relative;
 }
+::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 5px;
+    background: #6b6b6b;
+    height: 20px;
+    transform: translateY(-8px);
+    border-radius: 2px;
+    
+}
+
+::-webkit-slider-runnable-track {
+    background-color: #2e2e2ee5;
+    height: 4px;
+    border-radius: 2px;
+    filter: drop-shadow(0 0 20px red);
+}
+
+::-moz-range-track {
+    -moz-appearance: none;
+}
+
+::-moz-range-thumb {
+    -moz-appearance: none transparent;
+    -moz-transform: none;
+    width: 5px;
+    background: #6b6b6b;
+    height: 20px;
+    border-radius: 2px;
+    position: relative;
+    z-index: 100;
+    border: none;
+
+}
+
+.slider-track {
+    position: absolute;
+    background-color: #2e2e2ee5;
+    margin-left: 48px;
+    height: 100px;
+    width: 4px;
+    border-radius: 2px;
+    filter: drop-shadow(0 0 20px red);
+}
+
+label {
+    margin-top: 10px;
+}
+
 
 .track-control-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
-    /* grid-template-rows: ; */
+    grid-template-rows: 100px;
     justify-content: center;
     justify-items: center;
     width: 450px;
@@ -76,7 +144,7 @@ button > * {
 
 #active-label {
     margin: 0px 0px 0px 0px;
-    grid-area: 3 /span 4;
+    grid-area: 4 / span 4;
 }
 
 #active-label.hr {
@@ -86,11 +154,13 @@ button > * {
 #ambience-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
+    grid-template-rows: 100px;
     justify-content: center;
     justify-items: center;
-    width: 400px;
-    height: 150px; 
+    width: 300px;
+    height: 150px;
     margin-top: 10px;
+    margin-right: 150px;
 }
 
 .slider-container > label {
