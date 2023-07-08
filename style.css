@@ -60,6 +60,21 @@ button > * {
     /* filter: drop-shadow(0 0 10px rgb(255, 238, 222)); */
 }
 
+.lit-slider-container {
+    width: 100px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px rgb(255, 238, 222));
+}
+
+.lit-slider-container > .slider-track {
+    background: rgb(206, 168, 189);
+}
+
+.lit-slider-container > .slider {
+    --slider-thumb-background: rgb(182, 222, 242);
+}
+
 /* .slider {
     -webkit-appearance: none;
     width: 50px;
@@ -79,7 +94,7 @@ input.slider {
     margin: 0 0 0 0 !important;
     transform: translateY(25px) rotate(270deg);
     transform-origin: center;
-    -webkit-transform: translateY(25px) rotate(270deg);
+    -webkit-transform: translateY(17px) rotate(270deg);
     -webkit-transform-origin: center;
     -moz-transform: translateY(25px) rotate(270deg);
     background: transparent;
@@ -128,6 +143,7 @@ input.slider {
 
 label {
     margin-top: 10px;
+    color: rgb(68, 68, 68);
 }
 
 
@@ -161,10 +177,6 @@ label {
     height: 150px;
     margin-top: 10px;
     margin-right: 150px;
-}
-
-.slider-container > label {
-    grid-row-start: 2;
 }
 
 .ambience-toggle {
@@ -207,7 +219,6 @@ label {
         color: white;
     }
 }
-
 
 #transport-container {
     vertical-align: middle;

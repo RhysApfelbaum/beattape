@@ -484,10 +484,14 @@ function toggleAmbience(type) {
             // Turn rain on
             rainEvent.instance.start();
             document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#rain-amount').parentElement.className = 'lit-slider-container';
+            document.querySelector(`label[for="rain-amount"]`).style['color'] = 'white';
         } else {
             // Turn rain off
             rainEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
             document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+            document.querySelector('#rain-amount').parentElement.className = 'slider-container';
+            document.querySelector(`label[for="rain-amount"]`).style['color'] = 'rgb(68, 68, 68)';
         }
         updateRainAmount();
     } else if (type == 'vinyl') {
@@ -496,10 +500,14 @@ function toggleAmbience(type) {
             // Turn vinyl on
             vinylEvent.instance.start();
             document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#vinyl-amount').parentElement.className = 'lit-slider-container';
+            document.querySelector(`label[for="vinyl-amount"]`).style['color'] = 'white';
         } else {
             // Turn vinyl off
             vinylEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
             document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+            document.querySelector('#vinyl-amount').parentElement.className = 'slider-container';
+            document.querySelector(`label[for="vinyl-amount"]`).style['color'] = 'rgb(68, 68, 68)';
         }
         updateVinylAmount();
     } else if (type == 'birds') {
@@ -508,10 +516,14 @@ function toggleAmbience(type) {
             // Turn vinyl on
             birdEvent.instance.start();
             document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#bird-amount').parentElement.className = 'lit-slider-container';
+            document.querySelector(`label[for="bird-amount"]`).style['color'] = 'white';
         } else {
             // Turn vinyl off
             birdEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
             document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+            document.querySelector('#bird-amount').parentElement.className = 'slider-container';
+            document.querySelector(`label[for="bird-amount"]`).style['color'] = 'rgb(68, 68, 68)';
         }
         updateBirdAmount();
     }
