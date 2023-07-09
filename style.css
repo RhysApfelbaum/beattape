@@ -229,6 +229,7 @@ label {
     grid-template-columns: 450px 300px 450px;
     justify-items: center;
     justify-content: center;
+    margin-top: 20px;
 }
 
 .effectiveness-light {
