@@ -131,16 +131,16 @@ class SingleInstanceEvent {
 
         // Point instance to null
         this.instance = null;
-
         return FMOD.OK;
     }
 
     // Loads the event, plays it once, and immediately unloads it
     oneShot() {
-        this.load();
+        //this.load();
+        console.log('hi')
         this.instance.start();
-        this.instance.release();
-        this.instance = null;
+        //this.instance.release();
+        //this.instance = null;
     }
 }
 
@@ -344,13 +344,15 @@ function init() {
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
     vinylEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Vinyl');
     birdEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Birds');
-
-
+    
+    
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
+    playButtonSFX.load();
     radioSnapshot.load();
     rainEvent.load();
     vinylEvent.load();
     birdEvent.load();
+    playButtonSFX.load();
 
     // Load the tracklist and initalize the play queue
     fetch('./tracklist.json')
@@ -426,7 +428,9 @@ function setPauseState(state) {
 }
 
 function nextTrack(buttonfx) {
-    if (buttonfx) playButtonSFX.oneShot();
+    if (buttonfx) {
+        playButtonSFX.oneShot();
+    }
     
     // Stop and unload the current track.
     playQueue.currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
@@ -473,8 +477,6 @@ function toggleTrackFX(type) {
 }
 
 function toggleAmbience(type) {
-    
-
     let playBackState = {};
     playButtonSFX.oneShot();
 
@@ -563,25 +565,16 @@ function updateEffectivenessLights() {
             default:
                 return;
         }
-        trackColor = rgbaMix([48, 48, 48, 1], [206, 168, 189, 1], outval.val);
+        
+        // This formula boosts lower values and squashes higher values in the interval [0 ... 1].
         let mix = 1 - (outval.val - 1) * (outval.val - 1);
-        glowColor = rgbaMix([0, 0, 0, 0], [206, 168, 189, 1], outval.val);
+
         element.style['background'] = `color-mix(in srgb, rgb(48, 48, 48), rgb(206, 168, 189) ${mix * 100}%)`;
         document.querySelector(sliderId).style.setProperty('--slider-thumb-background', `color-mix(in srgb, rgb(77, 77, 77), rgb(182, 222, 242) ${mix * 100}%)`);
         document.querySelector(glowId).style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%))`;
         document.querySelector(`label[for=${labelFor}]`).style['color'] = `color-mix(in srgb, rgb(68, 68, 68), white ${mix * 100}%`;
     });
     
-}
-
-function rgbaMix(color1, color2, mix) {
-    result = [0, 0, 0, 0];
-    for (let i = 0; i < 4; i++) {
-        
-        result[i] = color1[i] + (Math.abs(color2[i] - color1[i]) * mix);
-        
-    }
-    return 1 - (result - 1) * (result - 1);
 }
 
 function updateSliderState() {
