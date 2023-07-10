@@ -61,7 +61,7 @@ class Track {
             .then(buffer => new Uint8Array(buffer))
             .then(array => FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn))
             .then(() => {
-                let result = gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, handleOutval);
+                let result = gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NONBLOCKING, handleOutval);
                 if (result != FMOD.OK) {
                     throw new Error(`Error loading bank from downloaded file: ${FMOD.ErrorString(result)}`);
                 };
@@ -434,15 +434,16 @@ function nextTrack(buttonfx) {
     
     // Stop and unload the current track.
     playQueue.currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    playQueue.currentTrack.unload();
-
+    let oldTrack = playQueue.currentTrack;
+    
+    document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     // Next track 
     playQueue.nextTrack();
     playQueue.currentTrack = playQueue.currentTrack;
     playQueue.currentTrack.load().then(() => {
         playQueue.currentTrack.event.instance.start();
+        oldTrack.unload();
         updateTrackSliders();
-        document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     });
 }
 
