@@ -310,7 +310,7 @@ class PlayQueue {
     }
 
     pollLoading() {
-        this.nextTracks[0].fetchBankFile();
+        if (this.currentTrack.bankHandle == null) this.nextTracks[0].fetchBankFile();
         
 
         // Unload banks
