@@ -55,23 +55,50 @@ class Track {
         let canWrite = false;
         let canOwn = false;
 
-        
-        let response = await fetch(this.bankURL)
-        let buffer = await response.arrayBuffer();
-        FMOD.FS_createDataFile('/', this.bankName, new Uint8Array(buffer), canRead, canWrite, canOwn);
+        try {
+            let response = await fetch(this.bankURL)
+            let buffer = await response.arrayBuffer();
+            let array = new Uint8Array(buffer);
 
+            // Write buffer to local file using this completely undocumented emscripten function :)
+            FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn);
+        } catch(e) {
+            console.log(e);
+        }
     };
 
     async loadBankFile() {
         let outval = {};
-        let handle, loadingState;
 
-        gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NONBLOCKING, outval);
-        handle = outval.val;
+        CHECK_RESULT(gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+        this.bankHandle = outval.val;
 
-        handle.getLoadingState(outval);
-        loadingState = outval.val;
-        console.log(loadingState == FMOD.STUDIO_LOADING_STATE_LOADED);
+        //console.log(this.bankHandle.isValid(), outval.val, FMOD.STUDIO_LOADING_STATE_LOADING);
+        
+        // JANK
+        let bankLoadingState = await new Promise(async (resolve, reject) => {
+            let id = setInterval(() => {
+                CHECK_RESULT(this.bankHandle.getLoadingState(outval));
+                switch (outval.val) {
+                    case FMOD.STUDIO_LOADING_STATE_UNLOADING:
+                    case FMOD.STUDIO_LOADING_STATE_UNLOADED:
+                    case FMOD.STUDIO_LOADING_STATE_LOADING:
+                        break;
+                    case FMOD.STUDIO_LOADING_STATE_LOADED:
+                        clearInterval(id);
+                        resolve(outval.val);
+                    case FMOD.STUDIO_LOADING_STATE_ERROR:
+                        clearInterval(id);
+                        reject(outval.val);
+                }
+            })
+        });
+
+        console.log('hi');
+        this.event = new SingleInstanceEvent(gSystem, this.eventPath);
+        this.event.load();
+        console.log(this, this.event);
+        console.log('hi');
     }
 
     // Load a remote bank file containing the track event, and then load that event.
@@ -163,7 +190,6 @@ class SingleInstanceEvent {
     // Loads the event, plays it once, and immediately unloads it
     oneShot() {
         //this.load();
-        console.log('hi')
         this.instance.start();
         //this.instance.release();
         //this.instance = null;
@@ -179,6 +205,7 @@ class PlayQueue {
         this.history = [];
         this.playedTracks = new Set();
 
+        
         this.fillNextTracks();
     }
 
@@ -241,17 +268,18 @@ class PlayQueue {
                 this.nextTracks[i].changed = false;
         }
         this.updateDisplay();
+        this.pollLoading();
     }
 
     nextTrack() {
         this.playedTracks.add(this.currentTrack);
 
-        // The track history begins the most recently played track
+        // The track history begins with the most recently played track
         this.history.unshift(this.currentTrack);
-
         this.nextTracks.push(this.currentTrack);
         this.currentTrack = this.nextTracks.shift();
         this.updateDisplay();
+        this.pollLoading();
     }
 
     lastTrack() {
@@ -279,6 +307,14 @@ class PlayQueue {
             unorderedListElement.appendChild(li);
         });
         document.querySelector('#current-track-name').innerHTML = this.currentTrack.displayName;
+    }
+
+    pollLoading() {
+        this.nextTracks[0].fetchBankFile();
+        
+
+        // Unload banks
+        //for (let i = 1; i < this.history.length; i++) this.history[i].unload();
     }
 }
 
@@ -322,6 +358,7 @@ function prerun() {
             tracklist.push(new Track(obj));
         });
         playQueue = new PlayQueue(tracklist);
+        return playQueue.currentTrack.fetchBankFile();
     });
     
 }
@@ -395,12 +432,15 @@ function init() {
 
     // Load the tracklist and initalize the play queue
     tracklistPromise
-        .then(() => playQueue.currentTrack.load())
+        .then(() => playQueue.currentTrack.loadBankFile())
         .then(() => {
+            // console.log('hi');
             playQueue.currentTrack.event.instance.start();
             playQueue.currentTrack.event.instance.setPaused(true);
             setPauseState(true);
-            document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;playQueue.currentTrack.event.instance.start();
+            playQueue.currentTrack.event.instance.start();
+            document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
+            playQueue.nextTracks[0].fetchBankFile();
         });
 }
 
@@ -410,22 +450,22 @@ function updateApplication() {
     // This function may be called before a track has finished loading
     if (!playQueue) return;
     if (!playQueue.currentTrack.isLoaded) return;
-    
-        
+    if (!playQueue.currentTrack.event) return;
+
     // Pause logic
     let intensityFinal = {};
     CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
     if ((intensityFinal.val >= 100) && (! isPaused())) {
         playQueue.currentTrack.event.instance.setPaused(true);
     }
-    
+
     // Next track logic
     let playbackState = {};
     CHECK_RESULT( playQueue.currentTrack.event.instance.getPlaybackState(playbackState) );
     if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
 
     updateSliderState();
-    if (sliderState.changed) updateTrackSliders();
+    if (sliderState.changed) updateTrackSliders(false);
 
     updateEffectivenessLights();
 
@@ -468,12 +508,13 @@ function nextTrack(buttonfx) {
     
     // Next track 
     playQueue.nextTrack();
-    playQueue.currentTrack = playQueue.currentTrack;
-    playQueue.currentTrack.load().then(() => {
+    playQueue.currentTrack.loadBankFile().then(() => {
         playQueue.currentTrack.event.instance.start();
         oldTrack.unload();
-        updateTrackSliders();
+        updateTrackSliders(true);
     });
+
+
 }
 
 function lastTrack(buttonfx) {
@@ -486,7 +527,7 @@ function lastTrack(buttonfx) {
 
     playQueue.currentTrack.load().then(() => {
         playQueue.currentTrack.event.instance.start();
-        updateTrackSliders();
+        updateTrackSliders(true);
         document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
     });
 }
@@ -628,17 +669,18 @@ function updateSliderState() {
         sliderState.changed = true;
     }
 }
-function updateTrackSliders() {
+
+function updateTrackSliders(immediate) {
     let grit = document.querySelector('#grit').value / 100;
     let brightness = document.querySelector('#brightness').value / 100;
     let chops = document.querySelector('#chops').value / 100;
     let vocals = document.querySelector('#vocals').value / 100;
 
     
-    playQueue.currentTrack.event.instance.setParameterByName('Grit', grit, false);
-    playQueue.currentTrack.event.instance.setParameterByName('Brightness', brightness, false);
-    playQueue.currentTrack.event.instance.setParameterByName('Chops', chops, false);
-    playQueue.currentTrack.event.instance.setParameterByName('Vocals', vocals, false);
+    playQueue.currentTrack.event.instance.setParameterByName('Grit', grit, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Brightness', brightness, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Chops', chops, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Vocals', vocals, immediate);
 }
 
 function updatePlayQueue() {
