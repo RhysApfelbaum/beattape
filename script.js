@@ -24,6 +24,80 @@ const sliderState = {
     vocals: 0.0
 };
 
+// FMOD global object which must be declared to enable 'main' and 'preRun' and then call
+// the constructor function.
+var FMOD = {
+    'preRun': prerun,
+    'onRuntimeInitialized': main,
+    'INITIAL_MEMORY': 16 * 1024 * 1024
+};
+
+FMODModule(FMOD);
+
+class Bank {
+
+    constructor(url, localpath) {
+        this.url = url;
+        this.localpath = localpath;
+        this.handle = null;
+    }
+
+    // Does not require the FMOD system to be initialized.
+    async fetch() {
+        let canRead = true;
+        let canWrite = false;
+        let canOwn = false;
+
+        try {
+            let response = await fetch(this.bankURL)
+            let buffer = await response.arrayBuffer();
+            let array = new Uint8Array(buffer);
+
+            // Write buffer to local file using this completely undocumented emscripten function :)
+            FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn);
+        } catch(e) {
+            console.log(e);
+        }
+    };
+
+    async load() {
+        let outval = {};
+
+        CHECK_RESULT(gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+        this.bankHandle = outval.val;
+        
+        // CRINGE
+        let bankLoadingState = await new Promise(async (resolve, reject) => {
+            let id = setInterval(() => {
+                CHECK_RESULT(this.bankHandle.getLoadingState(outval));
+                switch (outval.val) {
+                    case FMOD.STUDIO_LOADING_STATE_UNLOADING:
+                    case FMOD.STUDIO_LOADING_STATE_UNLOADED:
+                    case FMOD.STUDIO_LOADING_STATE_LOADING:
+                        break;
+                    case FMOD.STUDIO_LOADING_STATE_LOADED:
+                        clearInterval(id);
+                        resolve(outval.val);
+                    case FMOD.STUDIO_LOADING_STATE_ERROR:
+                        clearInterval(id);
+                        reject(outval.val);
+                }
+            })
+        });
+    }
+
+    unloadMemory() {
+        this.handle.unload();
+    }
+
+    get loadingState() {
+        let outval = {};
+        if (this.handle == null) return FMOD.STUDIO_LOADING_STATE_UNLOADED;
+        this.handle.getLoadingState(outval);
+        return outval.val;
+    }
+}
+
 class Track {
 
     constructor(trackData) {
@@ -286,7 +360,6 @@ class PlayQueue {
         if (this.history.length == 0) return;
         this.nextTracks.pop();
         this.nextTracks.unshift(this.currentTrack);
-        
         this.currentTrack = this.history.shift();
         this.updateDisplay();
     }
@@ -309,8 +382,14 @@ class PlayQueue {
         document.querySelector('#current-track-name').innerHTML = this.currentTrack.displayName;
     }
 
-    pollLoading() {
-        if (this.currentTrack.bankHandle == null) this.nextTracks[0].fetchBankFile();
+    async pollLoading() {
+        
+        if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetchBankFile();
+        for (let i = 1; i < 5; i++) {
+            if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetchBankFile();
+
+            console.log('loading', this.nextTracks[i].name);
+        }
         
 
         // Unload banks
@@ -318,15 +397,7 @@ class PlayQueue {
     }
 }
 
-// FMOD global object which must be declared to enable 'main' and 'preRun' and then call
-// the constructor function.
-var FMOD = {
-    'preRun': prerun,
-    'onRuntimeInitialized': main,
-    'INITIAL_MEMORY': 16 * 1024 * 1024
-};
 
-FMODModule(FMOD);
 
 // Simple error checking function for all FMOD return values.
 function CHECK_RESULT(result) {
@@ -510,7 +581,7 @@ function nextTrack(buttonfx) {
     playQueue.nextTrack();
     playQueue.currentTrack.loadBankFile().then(() => {
         playQueue.currentTrack.event.instance.start();
-        oldTrack.unload();
+        //oldTrack.unload();
         updateTrackSliders(true);
     });
 
