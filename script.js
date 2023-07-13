@@ -36,105 +36,44 @@ FMODModule(FMOD);
 
 class Bank {
 
-    static loadingStates = Object.freeze({
-        UNFETCHED: 0,
-        FETCHING: 1,
-        FETCHED: 2,
-        LOADING: 3,
-        LOADED: 4,
-        ERROR: 5
-    });
-
     constructor(name, url) {
-        this.url = url;
         this.name = name;
-        this.handle = null;
-        this.loadingState = Bank.loadingStates.UNFETCHED;
-        this.fetchPromise = null;
-        this.loadPromise = null;
+        this.url = url;
+        this.buffer;
     }
 
-    // Does not require the FMOD system to be initialized.
-    // I have no idea what I'm doing
     fetch() {
-        this.loadingState = Bank.loadingStates.FETCHING;
-        this.fetchPromise = new Promise(async (resolve, reject) => {
-            const canRead = true;
-            const canWrite = false;
-            const canOwn = false;
-    
+        this.buffer = new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch(this.url)
-                const buffer = await response.arrayBuffer();
-                const array = new Uint8Array(buffer);
-    
-                // Write buffer to local file using this completely undocumented emscripten function :)
-                FMOD.FS_createDataFile('/', this.name, array, canRead, canWrite, canOwn);
-                this.loadingState = Bank.loadingStates.FETCHED;
-                resolve(`/${this.name}`);
-    
-            } catch(e) {
-                this.loadingState = Bank.loadingStates.ERROR;
-                reject(e);
+                let response = await fetch(this.url)
+                let buffer = await response.arrayBuffer();
+                resolve(new Uint8Array(buffer));
+            } catch(error) {
+                reject(error);
             }
         });
-        
-    };
+    }
 
-    // Loads a bank into memory
-    load() {
-        if (this.loadingState == Bank.loadingStates.UNFETCHED) this.fetch();
-
-        this.loadingState = Bank.loadingStates.LOADING;
+    async load() {
         let outval = {};
-        let intervalMilliseconds = 20; 
 
-        this.fetchPromise.then(() => {
-            CHECK_RESULT(gSystem.loadBankFile(`/${this.name}`, FMOD.STUDIO_LOAD_BANK_NONBLOCKING, outval));
-            this.handle = outval.val;
+        const canRead = true;
+        const canWrite = false;
+        const canOwn = false;
+
+        try {
             
-            // CRINGE: This asynchronously checks whether the bank has been loaded on a loop until it is.
-            // A callback for this would be nice, but alas...
-            this.loadPromise = new Promise(async (resolve, reject) => {
-                let id = setInterval(() => {
-                    CHECK_RESULT(this.handle.getLoadingState(outval));
-                    switch (outval.val) {
-                        case FMOD.STUDIO_LOADING_STATE_LOADED:
-                            clearInterval(id);
-                            this.loadingState = Bank.loadingStates.LOADED;
-                            resolve(this.handle);
-                            break;
-                        case FMOD.STUDIO_LOADING_STATE_ERROR:
-                            clearInterval(id);
-                            this.loadingState = Bank.loadingStates.ERROR;
-                            reject(outval.val);
-                            break;
-                    }
-                }, intervalMilliseconds);
-            });
-        });
-
-        
-        
-        
+            // Write buffer to local file using this completely undocumented emscripten function :)
+            FMOD.FS_createDataFile('/', `${this.name}.bank`, await this.buffer, canRead, canWrite, canOwn);
+            CHECK_RESULT(gSystem.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+            
+        }
+        catch(error) {
+            throw error;
+        }
     }
 
-    // Unloads the bank from memory, but keeps the local bank file
-    unload() {
-        this.handle.unload();
-    }
 
-    
-    purge() {
-        // if (this.loadingState >= this.   
-    }
-
-    // get loadingState() {
-    //     let outval = {};
-    //     if (this.handle == null) return FMOD.STUDIO_LOADING_STATE_UNLOADED;
-    //     this.handle.getLoadingState(outval);
-    //     return outval.val;
-    // }
 }
 
 class Track {
@@ -145,7 +84,6 @@ class Track {
         this.eventPath = `event:/Tracks/${this.name}`;
         this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
         this.bankName = `${this.name}.bank`
-        this.bankPath = `/${this.bankName}`;
         this.event = null;
         this.bankHandle = null;
         this.sliderData = {
@@ -155,98 +93,47 @@ class Track {
             vocals: trackData.vocals 
         };
         this.changed = false;
+
+        this.array;
     }
 
     // A simple check to see whether the bank and the event have been loaded
     get isLoaded() {
         return (this.event != null) && (this.bankHandle != null);
     }
-
-    // Does not require the FMOD system to be initialized.
-    async fetchBankFile() {
-        let canRead = true;
-        let canWrite = false;
-        let canOwn = false;
-
-        try {
-            let response = await fetch(this.bankURL)
-            let buffer = await response.arrayBuffer();
-
-            // I'm not too sure why I have to do this, but it doesn't seem to work if I don
-            let array = new Uint8Array(buffer);
-
-            // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn);
-        } catch(e) {
-            console.log(e);
-        }
-    };
-
-    async loadBankFile() {
-        let outval = {};
-
-        CHECK_RESULT(gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
-        this.bankHandle = outval.val;
-
-        //console.log(this.bankHandle.isValid(), outval.val, FMOD.STUDIO_LOADING_STATE_LOADING);
-        
-        // JANK
-        let bankLoadingState = await new Promise(async (resolve, reject) => {
-            let id = setInterval(() => {
-                CHECK_RESULT(this.bankHandle.getLoadingState(outval));
-                switch (outval.val) {
-                    case FMOD.STUDIO_LOADING_STATE_UNLOADING:
-                    case FMOD.STUDIO_LOADING_STATE_UNLOADED:
-                    case FMOD.STUDIO_LOADING_STATE_LOADING:
-                        break;
-                    case FMOD.STUDIO_LOADING_STATE_LOADED:
-                        clearInterval(id);
-                        resolve(outval.val);
-                    case FMOD.STUDIO_LOADING_STATE_ERROR:
-                        clearInterval(id);
-                        reject(outval.val);
-                }
-            })
+    
+    // Requires no FMOD functions
+    fetch() {
+        this.array = new Promise(async (resolve, reject) => {
+            try {
+                let response = await fetch(this.bankURL)
+                let buffer = await response.arrayBuffer();
+                resolve(new Uint8Array(buffer));
+            } catch(error) {
+                reject(error);
+            }
         });
-
-        console.log('hi');
-        this.event = new SingleInstanceEvent(gSystem, this.eventPath);
-        this.event.load();
-        console.log(this, this.event);
-        console.log('hi');
+        
     }
 
-    // Load a remote bank file containing the track event, and then load that event.
     async load() {
-        let canRead = true;
-        let canWrite = false;
-        let canOwn = false;
-        let handleOutval = {};
+        let outval = {};
 
-        return new Promise((resolve, reject) => {
-            fetch(this.bankURL)
-            .then(response => response.arrayBuffer())
-            .then(buffer => new Uint8Array(buffer))
-            .then(array => FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn))
-            .then(() => gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, handleOutval))
-            .then(fmodResult => {
-                if (fmodResult != FMOD.OK) {
-                    throw new Error(`Error loading bank from downloaded file: ${FMOD.ErrorString(result)}`);
-                };
-            })
-            .then(() => {
-                this.bankHandle = handleOutval.val;
-                this.event = new SingleInstanceEvent(gSystem, this.eventPath);
-                
-                this.event.load();
-                resolve(FMOD.OK);
-            })
-            .catch(e => {
-                console.error(`Error loading ${this.name} from ${this.bankURL}\n${e.message}\n`)
-                reject();
-            });
-        });
-        
+        const canRead = true;
+        const canWrite = false;
+        const canOwn = false;
+
+        try {
+            
+            // Write buffer to local file using this completely undocumented emscripten function :)
+            FMOD.FS_createDataFile('/', this.bankName, await this.array, canRead, canWrite, canOwn);
+            CHECK_RESULT(gSystem.loadBankFile(`/${this.bankName}`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+            this.bankHandle = outval.val;
+            this.event = new SingleInstanceEvent(gSystem, this.eventPath);
+            this.event.load();
+        } catch(error) {
+            console.error(error);
+        }
     }
 
     unload() {
@@ -425,9 +312,9 @@ class PlayQueue {
 
     async pollLoading() {
         
-        if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetchBankFile();
+        if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetch();
         for (let i = 1; i < 5; i++) {
-            if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetchBankFile();
+            if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
 
             console.log('loading', this.nextTracks[i].name);
         }
@@ -470,7 +357,7 @@ function prerun() {
             tracklist.push(new Track(obj));
         });
         playQueue = new PlayQueue(tracklist);
-        return playQueue.currentTrack.fetchBankFile();
+        return playQueue.currentTrack.fetch();
     });
     
 }
@@ -544,7 +431,7 @@ function init() {
 
     // Load the tracklist and initalize the play queue
     tracklistPromise
-        .then(() => playQueue.currentTrack.loadBankFile())
+        .then(() => playQueue.currentTrack.load())
         .then(() => {
             // console.log('hi');
             playQueue.currentTrack.event.instance.start();
@@ -552,7 +439,7 @@ function init() {
             setPauseState(true);
             playQueue.currentTrack.event.instance.start();
             document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
-            playQueue.nextTracks[0].fetchBankFile();
+            playQueue.nextTracks[0].fetch();
         });
 }
 
