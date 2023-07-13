@@ -36,66 +36,105 @@ FMODModule(FMOD);
 
 class Bank {
 
-    constructor(url, localpath) {
+    static loadingStates = Object.freeze({
+        UNFETCHED: 0,
+        FETCHING: 1,
+        FETCHED: 2,
+        LOADING: 3,
+        LOADED: 4,
+        ERROR: 5
+    });
+
+    constructor(name, url) {
         this.url = url;
-        this.localpath = localpath;
+        this.name = name;
         this.handle = null;
+        this.loadingState = Bank.loadingStates.UNFETCHED;
+        this.fetchPromise = null;
+        this.loadPromise = null;
     }
 
     // Does not require the FMOD system to be initialized.
-    async fetch() {
-        let canRead = true;
-        let canWrite = false;
-        let canOwn = false;
-
-        try {
-            let response = await fetch(this.bankURL)
-            let buffer = await response.arrayBuffer();
-            let array = new Uint8Array(buffer);
-
-            // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', this.bankName, array, canRead, canWrite, canOwn);
-        } catch(e) {
-            console.log(e);
-        }
+    // I have no idea what I'm doing
+    fetch() {
+        this.loadingState = Bank.loadingStates.FETCHING;
+        this.fetchPromise = new Promise(async (resolve, reject) => {
+            const canRead = true;
+            const canWrite = false;
+            const canOwn = false;
+    
+            try {
+                const response = await fetch(this.url)
+                const buffer = await response.arrayBuffer();
+                const array = new Uint8Array(buffer);
+    
+                // Write buffer to local file using this completely undocumented emscripten function :)
+                FMOD.FS_createDataFile('/', this.name, array, canRead, canWrite, canOwn);
+                this.loadingState = Bank.loadingStates.FETCHED;
+                resolve(`/${this.name}`);
+    
+            } catch(e) {
+                this.loadingState = Bank.loadingStates.ERROR;
+                reject(e);
+            }
+        });
+        
     };
 
-    async load() {
-        let outval = {};
+    // Loads a bank into memory
+    load() {
+        if (this.loadingState == Bank.loadingStates.UNFETCHED) this.fetch();
 
-        CHECK_RESULT(gSystem.loadBankFile(this.bankPath, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
-        this.bankHandle = outval.val;
-        
-        // CRINGE
-        let bankLoadingState = await new Promise(async (resolve, reject) => {
-            let id = setInterval(() => {
-                CHECK_RESULT(this.bankHandle.getLoadingState(outval));
-                switch (outval.val) {
-                    case FMOD.STUDIO_LOADING_STATE_UNLOADING:
-                    case FMOD.STUDIO_LOADING_STATE_UNLOADED:
-                    case FMOD.STUDIO_LOADING_STATE_LOADING:
-                        break;
-                    case FMOD.STUDIO_LOADING_STATE_LOADED:
-                        clearInterval(id);
-                        resolve(outval.val);
-                    case FMOD.STUDIO_LOADING_STATE_ERROR:
-                        clearInterval(id);
-                        reject(outval.val);
-                }
-            })
+        this.loadingState = Bank.loadingStates.LOADING;
+        let outval = {};
+        let intervalMilliseconds = 20; 
+
+        this.fetchPromise.then(() => {
+            CHECK_RESULT(gSystem.loadBankFile(`/${this.name}`, FMOD.STUDIO_LOAD_BANK_NONBLOCKING, outval));
+            this.handle = outval.val;
+            
+            // CRINGE: This asynchronously checks whether the bank has been loaded on a loop until it is.
+            // A callback for this would be nice, but alas...
+            this.loadPromise = new Promise(async (resolve, reject) => {
+                let id = setInterval(() => {
+                    CHECK_RESULT(this.handle.getLoadingState(outval));
+                    switch (outval.val) {
+                        case FMOD.STUDIO_LOADING_STATE_LOADED:
+                            clearInterval(id);
+                            this.loadingState = Bank.loadingStates.LOADED;
+                            resolve(this.handle);
+                            break;
+                        case FMOD.STUDIO_LOADING_STATE_ERROR:
+                            clearInterval(id);
+                            this.loadingState = Bank.loadingStates.ERROR;
+                            reject(outval.val);
+                            break;
+                    }
+                }, intervalMilliseconds);
+            });
         });
+
+        
+        
+        
     }
 
-    unloadMemory() {
+    // Unloads the bank from memory, but keeps the local bank file
+    unload() {
         this.handle.unload();
     }
 
-    get loadingState() {
-        let outval = {};
-        if (this.handle == null) return FMOD.STUDIO_LOADING_STATE_UNLOADED;
-        this.handle.getLoadingState(outval);
-        return outval.val;
+    
+    purge() {
+        // if (this.loadingState >= this.   
     }
+
+    // get loadingState() {
+    //     let outval = {};
+    //     if (this.handle == null) return FMOD.STUDIO_LOADING_STATE_UNLOADED;
+    //     this.handle.getLoadingState(outval);
+    //     return outval.val;
+    // }
 }
 
 class Track {
@@ -132,6 +171,8 @@ class Track {
         try {
             let response = await fetch(this.bankURL)
             let buffer = await response.arrayBuffer();
+
+            // I'm not too sure why I have to do this, but it doesn't seem to work if I don
             let array = new Uint8Array(buffer);
 
             // Write buffer to local file using this completely undocumented emscripten function :)
