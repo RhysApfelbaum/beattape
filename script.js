@@ -1,3 +1,6 @@
+// Bill: Comments below...
+
+
 // Global 'System' object which has the Studio API functions.
 let gSystem;
 
@@ -34,6 +37,8 @@ var FMOD = {
 
 FMODModule(FMOD);
 
+// Bill: Maybe move the classes into a seperate file for each class, so below move this class to bank.js
+// but you may find using a single .js file easier for release to the web server
 class Bank {
 
     static loadingStates = Object.freeze({
@@ -66,6 +71,7 @@ class Bank {
             try {
                 const response = await fetch(this.url)
                 const buffer = await response.arrayBuffer();
+                // Bill: 'array' name used by many languages, so rename to what it holds/used for such as 'data' or 'responseData''
                 const array = new Uint8Array(buffer);
     
                 // Write buffer to local file using this completely undocumented emscripten function :)
@@ -83,6 +89,7 @@ class Bank {
 
     // Loads a bank into memory
     load() {
+        // Bill: i'm old school I like the {} after an if even for one line
         if (this.loadingState == Bank.loadingStates.UNFETCHED) this.fetch();
 
         this.loadingState = Bank.loadingStates.LOADING;
@@ -143,6 +150,13 @@ class Track {
         this.name = trackData.name;
         this.displayName = trackData.displayName;
         this.eventPath = `event:/Tracks/${this.name}`;
+        // Bill: you may want to add these constant paths as a predefined constant at the top of this file
+        // so changing any path you do not need to go through the code every time
+        // so
+        // const FMOD_DESKTOP_PATH = './fmod/build/desktop';
+        // ...
+        // this.bankURL = `${FMOD_DESKTOP_PATH}/${this.name}.bank`;
+
         this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
         this.bankName = `${this.name}.bank`
         this.bankPath = `/${this.bankName}`;
@@ -164,6 +178,7 @@ class Track {
 
     // Does not require the FMOD system to be initialized.
     async fetchBankFile() {
+        // Bill: should these be `const` ? as they are not re-assigned
         let canRead = true;
         let canWrite = false;
         let canOwn = false;
@@ -202,6 +217,7 @@ class Track {
                     case FMOD.STUDIO_LOADING_STATE_LOADED:
                         clearInterval(id);
                         resolve(outval.val);
+                        // Bill: is a `break` missing here and also below ..
                     case FMOD.STUDIO_LOADING_STATE_ERROR:
                         clearInterval(id);
                         reject(outval.val);
@@ -330,6 +346,12 @@ class PlayQueue {
 
         let result = 0;
         if (track == this.currentTrack) return 1000;
+        // Bill: best to move the document access to the values into the main loop below.
+        // I noticed the same code is used in `updateTrackSliders` funciton
+        //
+        // This is so that the code in this class is not dependent on the html document
+        // this class would have the following properties .grit .brightness, .chops, .vocals, or as parameters to the
+        // `trackDistance` method
         let grit = document.querySelector('#grit').value / 100;
         let brightness = document.querySelector('#brightness').value / 100;
         let chops = document.querySelector('#chops').value / 100;
@@ -404,6 +426,9 @@ class PlayQueue {
         this.currentTrack = this.history.shift();
         this.updateDisplay();
     }
+
+    // Bill: maybe have this method as a function, so that the html is seperated from the class
+    // updatePlayQueueDisplay(playQueue)
 
     updateDisplay() {
         let unorderedListElement = document.querySelector('#play-queue');
@@ -528,6 +553,19 @@ function init() {
     CHECK_RESULT( pauseSnapshot.val.createInstance(pauseSnapshot) );
     
 
+    // Bill: better to alpha order the list of creation of each element, with a .load after each create
+    // or create first and then load but in the same order as you have done below
+    // so:
+    // aa = new XX();
+    // aa.load();
+
+    // xx = new XX();
+    // xx.load();
+
+    // Bill: or you can add these events into a new class, and have an array of of event texts so that
+    // you can loop around and create each event and load
+    // const eventList = {'playButtonSFX': 'event:/SFX/tapeStop', 'rainEvent': '....}
+
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
     vinylEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Vinyl');
@@ -540,6 +578,7 @@ function init() {
     rainEvent.load();
     vinylEvent.load();
     birdEvent.load();
+    // Bill: duplicated ?
     playButtonSFX.load();
 
     // Load the tracklist and initalize the play queue
