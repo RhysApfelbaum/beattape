@@ -1,10 +1,18 @@
 [
     {
+        "name": "heavyFog",
+        "displayName": "heavy fog",
+        "grit": 0.5,
+        "brightness": 0.4,
+        "chops": 0.4,
+        "vocals": 0
+    },
+    {
         "name": "bells",
         "displayName": "3 a.m. doomscroll",
         "grit": 0.4,
         "brightness": 0.6,
-        "chops": 0,
+        "chops": 0, 
         "vocals": 0
     },
     {
@@ -46,7 +54,5 @@
         "brightness": 0.5,
         "chops": 0.9,
         "vocals": 0
-    }
-
-    
+    }   
 ]
