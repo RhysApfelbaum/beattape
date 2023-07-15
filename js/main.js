@@ -1,3 +1,8 @@
+
+// FMOD global object which must be declared to enable 'main' and 'preRun' and then call
+// the constructor function.
+
+
 // Global 'System' object which has the Studio API functions.
 let gSystem;
 
@@ -28,9 +33,9 @@ const sliderState = {
     vocals: 0.0
 };
 
-// FMOD global object which must be declared to enable 'main' and 'preRun' and then call
-// the constructor function.
-var FMOD = {
+
+
+const FMOD = {
     'preRun': prerun,
     'onRuntimeInitialized': main,
     'INITIAL_MEMORY': 16 * 1024 * 1024
@@ -38,314 +43,23 @@ var FMOD = {
 
 FMODModule(FMOD);
 
-
-const LOADING_STATE = Object.freeze({
-    UNLOADED: 0,
-    FETCHED: 1,
-    LOADED: 2,
-    ERROR: 3
-});
-
-class Bank {
-
-    constructor(name, url) {
-        this.name = name;
-        this.url = url;
-        this.buffer;
-        this.loadingState = LOADING_STATE.UNLOADED;
-    }
-
-    fetch() {
-        this.buffer = new Promise(async (resolve, reject) => {
-            try {
-                let response = await fetch(this.url)
-                let buffer = await response.arrayBuffer();
-                this.loadingState = LOADING_STATE.FETCHED;
-                resolve(new Uint8Array(buffer));
-            } catch(error) {
-                this.loadingState = LOADING_STATE.ERROR;
-                reject(error);
-            }
-        });
-    }
-
-    async load() {
-        let outval = {};
-
-        const canRead = true;
-        const canWrite = false;
-        const canOwn = false;
-
-        try {
-            // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', `${this.name}.bank`, await this.buffer, canRead, canWrite, canOwn);
-            CHECK_RESULT(gSystem.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
-            this.loadingState = LOADING_STATE.LOADED;
-     
-            return outval.val;
-            
-        }
-        catch(error) {
-            this.loadingState = LOADING_STATE.ERROR;
-            throw error;
-        }
-    }
-
-
-}
-
-
-class Track {
-
-    constructor(trackData) {
-        this.name = trackData.name;
-        this.displayName = trackData.displayName;
-        this.eventPath = `event:/Tracks/${this.name}`;
-        this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
-        this.event = null;
-        this.bank = new Bank(this.name, `${FMOD_BUILD_FOLDER}/${this.name}.bank`);
-        this.bankHandle = null;
-        this.sliderData = {
-            grit: trackData.grit,
-            brightness: trackData.brightness,
-            chops: trackData.chops,
-            vocals: trackData.vocals 
-        };
-        this.changed = false;
-        this.array;
-    }
-
-    // A simple check to see whether the bank and the event have been loaded
-    get isLoaded() {
-        return (this.event != null) & (this.bank != null) & (this.bank.loadingState == LOADING_STATE.LOADED);
-    }
-    
-    // Requires no FMOD functions
-    fetch() {
-        this.bank.fetch();
-    }
-
-    async load() {
-        let outval = {};
-        console.log(this.bankHandle);
-
-        try {
-            // The loaded bank handle MUST BE STORED IN this.bankHandle otherwise everything breaks.
-            // WHAT??!!?!?!
-            // I HAVE NO IDEA WHY THIS IS
-            this.bankHandle = await this.bank.load();
-
-            // Load the track event which is now available because of the newly loaded bank.
-            this.event = new SingleInstanceEvent(gSystem, this.eventPath);
-            this.event.load();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    unload() {
-        // Unload the track event if it's loaded
-        if (this.event.isLoaded) {
-            this.event.unload();
-            this.event = null;
-        }
-
-        // Unload the bank
-        this.bankHandle.unload();
-        this.bankHandle = null;
-
-        // Unlink the bank file, which should destroy it, because it should be the only reference to it.
-        FMOD.FS_unlink(this.bankPath);
-
-        // Update loading state
-        this.loadingState = UNLOADED;
-
-    }
-}
-
-class SingleInstanceEvent {
-    description = null;
-    instance = null;
-    constructor(system, path) {
-        let outval = {};
-        CHECK_RESULT( system.getEvent(path, outval) );
-        this.description = outval.val;
-        return FMOD.OK;
-    }
-
-    get isLoaded() {
-        return this.instance != null;
-    }
-
-    load() {
-        let outval = {};
-
-        // Create an event instance from our event description
-        CHECK_RESULT( this.description.createInstance(outval) );
-
-        // Point the instance property to our newly created event instance
-        this.instance = outval.val;
-
-        return FMOD.OK
-    }
-
-    unload() {
-        // Mark the event instance for destruction
-        CHECK_RESULT( this.instance.release() );
-
-        // Point instance to null
-        this.instance = null;
-        return FMOD.OK;
-    }
-
-    // Loads the event, plays it once, and immediately unloads it
-    oneShot() {
-        //this.load();
-        this.instance.start();
-        //this.instance.release();
-        //this.instance = null;
-    }
-}
-
-const masterBank = new Bank('Master', './fmod/build/desktop/Master.bank');
-const stringsBank = new Bank('Master.strings', './fmod/build/desktop/Master.strings.bank');
-let firstTrack = new Bank('snooze', './fmod/build/desktop/snooze.bank')
-
-class PlayQueue {
-    
-    constructor(tracklist) {
-        this.tracklist = tracklist;
-        this.currentTrack = this.tracklist[0];
-        this.nextTracks = [];
-        this.history = [];
-        this.playedTracks = new Set();
-        
-        
-        this.fillNextTracks();
-    }
-    
-    // WARNING: THIS SUCKS
-    // It's horrible and I'm just trying to make it work
-    trackDistance(track) {
-        
-        let result = 0;
-        if (track == this.currentTrack) return 1000;
-        let grit = document.querySelector('#grit').value / 100;
-        let brightness = document.querySelector('#brightness').value / 100;
-        let chops = document.querySelector('#chops').value / 100;
-        let vocals = document.querySelector('#vocals').value / 100;
-        let gritDist = Math.abs(grit - track.sliderData.grit);
-        let brightnessDist = Math.abs(brightness - track.sliderData.brightness);
-        let chopsDist = Math.abs(chops - track.sliderData.chops);
-        let vocalsDist = Math.abs(vocals - track.sliderData.vocals);
-        result = (gritDist + brightnessDist + chopsDist + vocalsDist) / 4;
-        result += this.recentScore(track) / 2;
-        return result;
-    }
-    
-    recentScore(track) {
-        if (this.history.length == 0) return 0;
-        let ordinal = this.history.length;
-        for (let i = 0; i < this.history.length; i++) {
-            if (this.history[i] == track) {
-                ordinal = i;
-                break;
-            }
-        }
-        let result = 1.0 - ordinal / this.tracklist.length;
-        if (ordinal < this.history.length) result+= 2;
-        return result;
-    }
-    
-    fillNextTracks() {
-        let oldNext = this.nextTracks;
-        this.tracklist.sort(
-            (a, b) => this.trackDistance(a) - this.trackDistance(b)
-            );
-            
-            this.nextTracks = [];
-            this.tracklist.forEach(track => {
-                if (track == this.currentTrack) return;
-                if (this.nextTracks.length >= this.tracklist.length) return;
-                this.nextTracks.push(track);
-            });
-            
-        // If oldNext is an empty array, the webpage has just loaded, so all tracks are considered not changed
-        if (oldNext.length == 0) {
-            this.updateDisplay();
-            return;
-        }
-        
-        for (let i = 0; i < this.nextTracks.length; i++) {
-            if (this.nextTracks[i] != oldNext[i])
-            this.nextTracks[i].changed = true;
-            else
-            this.nextTracks[i].changed = false;
-        }
-        this.updateDisplay();
-        this.pollLoading();
-    }
-    
-    nextTrack() {
-        this.playedTracks.add(this.currentTrack);
-        
-        // The track history begins with the most recently played track
-        this.history.unshift(this.currentTrack);
-        this.nextTracks.push(this.currentTrack);
-        this.currentTrack = this.nextTracks.shift();
-        this.updateDisplay();
-        this.pollLoading();
-    }
-    
-    lastTrack() {
-        if (this.history.length == 0) return;
-        this.nextTracks.pop();
-        this.nextTracks.unshift(this.currentTrack);
-        this.currentTrack = this.history.shift();
-        this.updateDisplay();
-    }
-    
-    updateDisplay() {
-        let unorderedListElement = document.querySelector('#play-queue');
-        unorderedListElement.replaceChildren();
-        this.nextTracks.forEach(track => {
-            //console.log(track);
-            let li = document.createElement('li');
-            li.innerText = track.displayName;
-            
-            if (track.changed) {
-                li.className = 'track-label-changed';
-                track.changed = false;
-            }
-            else li.className = 'track-label';
-            unorderedListElement.appendChild(li);
-        });
-        document.querySelector('#current-track-name').innerHTML = this.currentTrack.displayName;
-    }
-    
-    async pollLoading() {
-        
-        if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetch();
-        // for (let i = 1; i < 5; i++) {
-        //     if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
-            
-        //     console.log('loading', this.nextTracks[i].name);
-        // }
-        
-        
-        // Unload banks
-        //for (let i = 1; i < this.history.length; i++) this.history[i].unload();
-    }
-}
-
-
-
-// Simple error checking function for all FMOD return values.
 function CHECK_RESULT(result) {
     if (result != FMOD.OK) {
         throw new Error (FMOD.ErrorString(result));
     }
 }
+
+
+
+
+
+
+const masterBank = new Bank('Master', './fmod/build/desktop/Master.bank');
+const stringsBank = new Bank('Master.strings', './fmod/build/desktop/Master.strings.bank');
+
+
+
+
 
 // Will be called before FMOD runs, but after the Emscripten runtime has initialized
 // Call FMOD file preloading functions here to mount local files.  Otherwise load custom data from memory or use own file system.
@@ -425,7 +139,6 @@ async function init() {
     // Load Master bank from preloaded file
     // CHECK_RESULT( gSystem.loadBankFile('/Master.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
     // CHECK_RESULT( gSystem.loadBankFile('/Master.strings.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
-
     await masterBank.load();
     await stringsBank.load();
 
@@ -566,6 +279,7 @@ function toggleTrackFX(type) {
 
 }
 
+// TODO: This is god-awful
 function toggleAmbience(type) {
     let playBackState = {};
     playButtonSFX.oneShot();
