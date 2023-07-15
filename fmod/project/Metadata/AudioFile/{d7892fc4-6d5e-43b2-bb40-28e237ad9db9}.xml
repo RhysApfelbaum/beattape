@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{d7892fc4-6d5e-43b2-bb40-28e237ad9db9}">
+		<property name="assetPath">
+			<value>Tracks/heavyFog/bass.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>25.945937499999999</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{7b3f5b74-9b34-4aad-9bf1-172249a21b6c}</destination>
+		</relationship>
+	</object>
+</objects>
