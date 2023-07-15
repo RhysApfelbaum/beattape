@@ -16,6 +16,10 @@ let trackInfo;
 let playQueue;
 let tracklistPromise;
 
+
+const FMOD_BUILD_FOLDER = './fmod/build/desktop';
+
+
 const sliderState = {
     changed: false,
     grit: 0.0,
@@ -34,12 +38,21 @@ var FMOD = {
 
 FMODModule(FMOD);
 
+
+const LOADING_STATE = Object.freeze({
+    UNLOADED: 0,
+    FETCHED: 1,
+    LOADED: 2,
+    ERROR: 3
+});
+
 class Bank {
 
     constructor(name, url) {
         this.name = name;
         this.url = url;
         this.buffer;
+        this.loadingState = LOADING_STATE.UNLOADED;
     }
 
     fetch() {
@@ -47,8 +60,10 @@ class Bank {
             try {
                 let response = await fetch(this.url)
                 let buffer = await response.arrayBuffer();
+                this.loadingState = LOADING_STATE.FETCHED;
                 resolve(new Uint8Array(buffer));
             } catch(error) {
+                this.loadingState = LOADING_STATE.ERROR;
                 reject(error);
             }
         });
@@ -62,13 +77,16 @@ class Bank {
         const canOwn = false;
 
         try {
-            
             // Write buffer to local file using this completely undocumented emscripten function :)
             FMOD.FS_createDataFile('/', `${this.name}.bank`, await this.buffer, canRead, canWrite, canOwn);
             CHECK_RESULT(gSystem.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+            this.loadingState = LOADING_STATE.LOADED;
+     
+            return outval.val;
             
         }
         catch(error) {
+            this.loadingState = LOADING_STATE.ERROR;
             throw error;
         }
     }
@@ -83,9 +101,9 @@ class Track {
         this.displayName = trackData.displayName;
         this.eventPath = `event:/Tracks/${this.name}`;
         this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
-        this.bankName = `${this.name}.bank`
         this.event = null;
         this.bankHandle = null;
+        this.bank = new Bank(this.name, `${FMOD_BUILD_FOLDER}/${this.name}.bank`);
         this.sliderData = {
             grit: trackData.grit,
             brightness: trackData.brightness,
@@ -104,36 +122,50 @@ class Track {
     
     // Requires no FMOD functions
     fetch() {
-        this.array = new Promise(async (resolve, reject) => {
-            try {
-                let response = await fetch(this.bankURL)
-                let buffer = await response.arrayBuffer();
-                resolve(new Uint8Array(buffer));
-            } catch(error) {
-                reject(error);
-            }
-        });
-        
+        // this.array = new Promise(async (resolve, reject) => {
+        //     try {
+        //         let response = await fetch(this.bankURL)
+        //         let buffer = await response.arrayBuffer();
+        //         resolve(new Uint8Array(buffer));
+        //     } catch(error) {
+        //         reject(error);
+        //     }
+        // });   
+        this.bank.fetch();
     }
 
     async load() {
         let outval = {};
-
-        const canRead = true;
-        const canWrite = false;
-        const canOwn = false;
-
         try {
-            
-            // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', this.bankName, await this.array, canRead, canWrite, canOwn);
-            CHECK_RESULT(gSystem.loadBankFile(`/${this.bankName}`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
-            this.bankHandle = outval.val;
+            // WHAT??!!?!?!
+            // This doesn't do anything. It just moves the reference around.
+            this.bankHandle = await this.bank.load();
+        
             this.event = new SingleInstanceEvent(gSystem, this.eventPath);
             this.event.load();
-        } catch(error) {
+
+            this.event.description.getSampleLoadingState(outval);
+            console.log(outval.val);
+            this.event.description.isValid()
+        } catch (error) {
             console.error(error);
         }
+       
+        // const canRead = true;
+        // const canWrite = false;
+        // const canOwn = false;
+
+        // try {
+            
+        //     // Write buffer to local file using this completely undocumented emscripten function :)
+        //     FMOD.FS_createDataFile('/', this.bankName, await this.array, canRead, canWrite, canOwn);
+        //     CHECK_RESULT(gSystem.loadBankFile(`/${this.bankName}`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
+        //     this.bankHandle = outval.val;
+        //     this.event = new SingleInstanceEvent(gSystem, this.eventPath);
+        //     this.event.load();
+        // } catch(error) {
+        //     console.error(error);
+        // }
     }
 
     unload() {
@@ -198,23 +230,27 @@ class SingleInstanceEvent {
     }
 }
 
-class PlayQueue {
+const masterBank = new Bank('Master', './fmod/build/desktop/Master.bank');
+const stringsBank = new Bank('Master.strings', './fmod/build/desktop/Master.strings.bank');
+let firstTrack = new Bank('snooze', './fmod/build/desktop/snooze.bank')
 
+class PlayQueue {
+    
     constructor(tracklist) {
         this.tracklist = tracklist;
         this.currentTrack = this.tracklist[0];
         this.nextTracks = [];
         this.history = [];
         this.playedTracks = new Set();
-
+        
         
         this.fillNextTracks();
     }
-
+    
     // WARNING: THIS SUCKS
     // It's horrible and I'm just trying to make it work
     trackDistance(track) {
-
+        
         let result = 0;
         if (track == this.currentTrack) return 1000;
         let grit = document.querySelector('#grit').value / 100;
@@ -229,7 +265,7 @@ class PlayQueue {
         result += this.recentScore(track) / 2;
         return result;
     }
-
+    
     recentScore(track) {
         if (this.history.length == 0) return 0;
         let ordinal = this.history.length;
@@ -243,39 +279,39 @@ class PlayQueue {
         if (ordinal < this.history.length) result+= 2;
         return result;
     }
-
+    
     fillNextTracks() {
         let oldNext = this.nextTracks;
         this.tracklist.sort(
             (a, b) => this.trackDistance(a) - this.trackDistance(b)
-        );
-        
-        this.nextTracks = [];
-        this.tracklist.forEach(track => {
-            if (track == this.currentTrack) return;
-            if (this.nextTracks.length >= this.tracklist.length) return;
-            this.nextTracks.push(track);
-        });
-        
+            );
+            
+            this.nextTracks = [];
+            this.tracklist.forEach(track => {
+                if (track == this.currentTrack) return;
+                if (this.nextTracks.length >= this.tracklist.length) return;
+                this.nextTracks.push(track);
+            });
+            
         // If oldNext is an empty array, the webpage has just loaded, so all tracks are considered not changed
         if (oldNext.length == 0) {
             this.updateDisplay();
             return;
         }
-
+        
         for (let i = 0; i < this.nextTracks.length; i++) {
             if (this.nextTracks[i] != oldNext[i])
-                this.nextTracks[i].changed = true;
+            this.nextTracks[i].changed = true;
             else
-                this.nextTracks[i].changed = false;
+            this.nextTracks[i].changed = false;
         }
         this.updateDisplay();
         this.pollLoading();
     }
-
+    
     nextTrack() {
         this.playedTracks.add(this.currentTrack);
-
+        
         // The track history begins with the most recently played track
         this.history.unshift(this.currentTrack);
         this.nextTracks.push(this.currentTrack);
@@ -283,7 +319,7 @@ class PlayQueue {
         this.updateDisplay();
         this.pollLoading();
     }
-
+    
     lastTrack() {
         if (this.history.length == 0) return;
         this.nextTracks.pop();
@@ -291,7 +327,7 @@ class PlayQueue {
         this.currentTrack = this.history.shift();
         this.updateDisplay();
     }
-
+    
     updateDisplay() {
         let unorderedListElement = document.querySelector('#play-queue');
         unorderedListElement.replaceChildren();
@@ -309,17 +345,17 @@ class PlayQueue {
         });
         document.querySelector('#current-track-name').innerHTML = this.currentTrack.displayName;
     }
-
+    
     async pollLoading() {
         
         if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetch();
-        for (let i = 1; i < 5; i++) {
-            if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
-
-            console.log('loading', this.nextTracks[i].name);
-        }
+        // for (let i = 1; i < 5; i++) {
+        //     if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
+            
+        //     console.log('loading', this.nextTracks[i].name);
+        // }
         
-
+        
         // Unload banks
         //for (let i = 1; i < this.history.length; i++) this.history[i].unload();
     }
@@ -343,12 +379,15 @@ function prerun() {
     let canRead = true;
     let canWrite = false;
     
-    fileNames = ['Master.bank', 'Master.strings.bank'];
+    //fileNames = ['Master.bank', 'Master.strings.bank'];
     
-    fileNames.forEach((name) => {
-        FMOD.FS_createPreloadedFile(folderName, name, fileParent + name, canRead, canWrite);
-    });
-
+    // fileNames.forEach((name) => {
+    //     FMOD.FS_createPreloadedFile(folderName, name, fileParent + name, canRead, canWrite);
+    // });
+    
+    masterBank.fetch();
+    stringsBank.fetch();
+    
     tracklistPromise = fetch('./tracklist.json')
     .then(response => response.json())
     .then(json => {
@@ -363,7 +402,7 @@ function prerun() {
 }
 
 // Called when the Emscripten runtime has initialized
-function main() {
+async function main() {
     // A temporary empty object to hold our system
     
     let outval = {};
@@ -394,7 +433,7 @@ function main() {
     result = gSystem.initialize(32, FMOD.STUDIO_INIT_NORMAL, FMOD.INIT_NORMAL, null);
     CHECK_RESULT(result);
     
-    init();
+    await init();
     
     // Set the framerate to 50 frames per second, or 20ms.
     window.setInterval(updateApplication, 20);
@@ -403,12 +442,15 @@ function main() {
 }
 
 // Called from main, does some application setup.  In our case we will load some sounds.
-function init() {
+async function init() {
     let outval = {};
     
     // Load Master bank from preloaded file
-    CHECK_RESULT( gSystem.loadBankFile('/Master.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
-    CHECK_RESULT( gSystem.loadBankFile('/Master.strings.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
+    // CHECK_RESULT( gSystem.loadBankFile('/Master.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
+    // CHECK_RESULT( gSystem.loadBankFile('/Master.strings.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
+
+    await masterBank.load();
+    await stringsBank.load();
 
 
     CHECK_RESULT( gSystem.getEvent('snapshot:/Paused', pauseSnapshot));
@@ -416,18 +458,22 @@ function init() {
     
 
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
+    playButtonSFX.load();
+
     rainEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Rain');
+    rainEvent.load();
+
     vinylEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Vinyl');
+    vinylEvent.load();
+
     birdEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Birds');
+    birdEvent.load();
     
     
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
-    playButtonSFX.load();
     radioSnapshot.load();
-    rainEvent.load();
-    vinylEvent.load();
-    birdEvent.load();
-    playButtonSFX.load();
+    //firstTrack.fetch();
+    
 
     // Load the tracklist and initalize the play queue
     tracklistPromise
@@ -495,7 +541,7 @@ function setPauseState(state) {
     }
 }
 
-function nextTrack(buttonfx) {
+async function nextTrack(buttonfx) {
     if (buttonfx) {
         playButtonSFX.oneShot();
     }
@@ -507,13 +553,10 @@ function nextTrack(buttonfx) {
     
     // Next track 
     playQueue.nextTrack();
-    playQueue.currentTrack.loadBankFile().then(() => {
-        playQueue.currentTrack.event.instance.start();
-        //oldTrack.unload();
-        updateTrackSliders(true);
-    });
-
-
+    await playQueue.currentTrack.load();
+    playQueue.currentTrack.event.instance.start();
+    updateTrackSliders(true);
+    //oldTrack.unload();
 }
 
 function lastTrack(buttonfx) {
@@ -699,7 +742,7 @@ function updateVinylAmount() {
 
 function updateBirdAmount() {
     let birdAmount = document.querySelector('#bird-amount').value / 100;
-    birdEvent.instance.setParameterByName('BirdAmount', birdAmount, false);
+    CHECK_RESULT(birdEvent.instance.setParameterByName('BirdAmount', birdAmount, false));
 }
 
 function togglePause() {
