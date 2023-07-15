@@ -94,6 +94,7 @@ class Bank {
 
 }
 
+
 class Track {
 
     constructor(trackData) {
@@ -102,8 +103,8 @@ class Track {
         this.eventPath = `event:/Tracks/${this.name}`;
         this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
         this.event = null;
-        this.bankHandle = null;
         this.bank = new Bank(this.name, `${FMOD_BUILD_FOLDER}/${this.name}.bank`);
+        this.bankHandle = null;
         this.sliderData = {
             grit: trackData.grit,
             brightness: trackData.brightness,
@@ -111,61 +112,35 @@ class Track {
             vocals: trackData.vocals 
         };
         this.changed = false;
-
         this.array;
     }
 
     // A simple check to see whether the bank and the event have been loaded
     get isLoaded() {
-        return (this.event != null) && (this.bankHandle != null);
+        return (this.event != null) & (this.bank != null) & (this.bank.loadingState == LOADING_STATE.LOADED);
     }
     
     // Requires no FMOD functions
     fetch() {
-        // this.array = new Promise(async (resolve, reject) => {
-        //     try {
-        //         let response = await fetch(this.bankURL)
-        //         let buffer = await response.arrayBuffer();
-        //         resolve(new Uint8Array(buffer));
-        //     } catch(error) {
-        //         reject(error);
-        //     }
-        // });   
         this.bank.fetch();
     }
 
     async load() {
         let outval = {};
+        console.log(this.bankHandle);
+
         try {
+            // The loaded bank handle MUST BE STORED IN this.bankHandle otherwise everything breaks.
             // WHAT??!!?!?!
-            // This doesn't do anything. It just moves the reference around.
+            // I HAVE NO IDEA WHY THIS IS
             this.bankHandle = await this.bank.load();
-        
+
+            // Load the track event which is now available because of the newly loaded bank.
             this.event = new SingleInstanceEvent(gSystem, this.eventPath);
             this.event.load();
-
-            this.event.description.getSampleLoadingState(outval);
-            console.log(outval.val);
-            this.event.description.isValid()
         } catch (error) {
             console.error(error);
         }
-       
-        // const canRead = true;
-        // const canWrite = false;
-        // const canOwn = false;
-
-        // try {
-            
-        //     // Write buffer to local file using this completely undocumented emscripten function :)
-        //     FMOD.FS_createDataFile('/', this.bankName, await this.array, canRead, canWrite, canOwn);
-        //     CHECK_RESULT(gSystem.loadBankFile(`/${this.bankName}`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
-        //     this.bankHandle = outval.val;
-        //     this.event = new SingleInstanceEvent(gSystem, this.eventPath);
-        //     this.event.load();
-        // } catch(error) {
-        //     console.error(error);
-        // }
     }
 
     unload() {
@@ -182,7 +157,9 @@ class Track {
         // Unlink the bank file, which should destroy it, because it should be the only reference to it.
         FMOD.FS_unlink(this.bankPath);
 
-        return FMOD.OK;
+        // Update loading state
+        this.loadingState = UNLOADED;
+
     }
 }
 
