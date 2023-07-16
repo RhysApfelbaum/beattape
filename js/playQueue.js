@@ -90,6 +90,7 @@ class PlayQueue {
         this.nextTracks.unshift(this.currentTrack);
         this.currentTrack = this.history.shift();
         this.updateDisplay();
+        this.pollLoading();
     }
     
     updateDisplay() {
@@ -111,8 +112,15 @@ class PlayQueue {
     }
     
     async pollLoading() {
-        
-        if (this.nextTracks[0].bankHandle == null) await this.nextTracks[0].fetch();
+        if (this.nextTracks[0].bank.loadingState == LOADING_STATE.UNLOADED) {
+            await this.nextTracks[0].fetch();
+        }
+
+        for (let i = 1; i < this.nextTracks.length; i++) {
+            if (this.nextTracks[i].bank.loadingState == LOADING_STATE.LOADED) {
+                this.nextTracks[i].unload();
+            }
+        }
         // for (let i = 1; i < 5; i++) {
         //     if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
             
