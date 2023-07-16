@@ -21,7 +21,9 @@ let trackInfo;
 let playQueue;
 let tracklistPromise;
 
-
+// A list of banks to be fetched as soon as possible
+const preloadBanks = [];
+const mainEvents = []
 const FMOD_BUILD_FOLDER = './fmod/build/desktop';
 
 
@@ -49,45 +51,24 @@ function CHECK_RESULT(result) {
     }
 }
 
-
-
-
-
-
-const masterBank = new Bank('Master', './fmod/build/desktop/Master.bank');
-const stringsBank = new Bank('Master.strings', './fmod/build/desktop/Master.strings.bank');
-
-
-
-
-
 // Will be called before FMOD runs, but after the Emscripten runtime has initialized
 // Call FMOD file preloading functions here to mount local files.  Otherwise load custom data from memory or use own file system.
 function prerun() {
-    let fileParent = "./fmod/build/desktop/";    
-    let fileNames;
-    let folderName = "/";
-    let canRead = true;
-    let canWrite = false;
+    preloadBanks.push(new Bank('Master', `${FMOD_BUILD_FOLDER}/Master.bank`));
+    preloadBanks.push(new Bank('Master.strings', `${FMOD_BUILD_FOLDER}/Master.strings.bank`));
     
-    //fileNames = ['Master.bank', 'Master.strings.bank'];
-    
-    // fileNames.forEach((name) => {
-    //     FMOD.FS_createPreloadedFile(folderName, name, fileParent + name, canRead, canWrite);
-    // });
-    
-    masterBank.fetch();
-    stringsBank.fetch();
-    
-    tracklistPromise = fetch('./tracklist.json')
-    .then(response => response.json())
-    .then(json => {
-        let tracklist = [];
+    preloadBanks.map(bank => bank.fetch());
+
+    tracklistPromise = new Promise(async (resolve, reject) => {
+        const tracklist = [];
+        let response = await fetch('./tracklist.json');
+        let json = await response.json();
         json.forEach(obj => {
             tracklist.push(new Track(obj));
         });
         playQueue = new PlayQueue(tracklist);
-        return playQueue.currentTrack.fetch();
+        playQueue.currentTrack.fetch();
+        resolve(playQueue.currentTrack.fetchPromise);
     });
     
 }
@@ -136,12 +117,8 @@ async function main() {
 async function init() {
     let outval = {};
     
-    // Load Master bank from preloaded file
-    // CHECK_RESULT( gSystem.loadBankFile('/Master.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
-    // CHECK_RESULT( gSystem.loadBankFile('/Master.strings.bank', FMOD.STUDIO_LOAD_BANK_NORMAL, outval) );
-    await masterBank.load();
-    await stringsBank.load();
-
+    // Load all fetched banks
+    await Promise.all(preloadBanks.map(bank => bank.load()));
 
     CHECK_RESULT( gSystem.getEvent('snapshot:/Paused', pauseSnapshot));
     CHECK_RESULT( pauseSnapshot.val.createInstance(pauseSnapshot) );
@@ -158,7 +135,6 @@ async function init() {
 
     birdEvent = new SingleInstanceEvent(gSystem, 'event:/Ambiences/Birds');
     birdEvent.load();
-    
     
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
     radioSnapshot.load();

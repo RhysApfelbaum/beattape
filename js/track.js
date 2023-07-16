@@ -55,11 +55,6 @@ class Track {
         this.bankHandle.unload();
         this.bankHandle = null;
 
-        // Unlink the bank file, which should destroy it, because it should be the only reference to it.
-        FMOD.FS_unlink(this.bankPath);
-
-        // Update loading state
-        this.loadingState = UNLOADED;
-
+        this.bank.loadingState = LOADING_STATE.FETCHED;
     }
 }

@@ -13,44 +13,56 @@ class Bank {
     constructor(name, url) {
         this.name = name;
         this.url = url;
-        this.buffer;
+        this.fetchPromise = null;
         this.loadingState = LOADING_STATE.UNLOADED;
     }
 
 
     fetch() {
-        this.buffer = new Promise(async (resolve, reject) => {
+        const canRead = true;
+        const canWrite = false;
+        const canOwn = false;
+        if (this.loadingState != LOADING_STATE.UNLOADED) {
+            console.error(`${this.name}.bank has already been fetched`);
+        }
+        this.fetchPromise = new Promise(async (resolve, reject) => {
             try {
-                let response = await fetch(this.url)
-                let buffer = await response.arrayBuffer();
+                const response = await fetch(this.url)
+                const responseBuffer = await response.arrayBuffer();
+                const responseData = new Uint8Array(responseBuffer);
+
+                // Write buffer to local file using this completely undocumented emscripten function :)
+                FMOD.FS_createDataFile('/', `${this.name}.bank`, responseData, canRead, canWrite, canOwn);
+
                 this.loadingState = LOADING_STATE.FETCHED;
-                resolve(new Uint8Array(buffer));
+                resolve();
             } catch(error) {
                 this.loadingState = LOADING_STATE.ERROR;
+                console.error(error);
                 reject(error);
             }
         });
     }
 
     async load() {
-        let outval = {};
-
-        const canRead = true;
-        const canWrite = false;
-        const canOwn = false;
-
+        const outval = {};
         try {
-            // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', `${this.name}.bank`, await this.buffer, canRead, canWrite, canOwn);
+            await this.fetchPromise;
             CHECK_RESULT(gSystem.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
             this.loadingState = LOADING_STATE.LOADED;
-     
+
+            // Return the newly created bank handle
             return outval.val;
-            
         }
         catch(error) {
             this.loadingState = LOADING_STATE.ERROR;
             throw error;
         }
+    }
+
+    unlink() {
+        FMOD.unlink(`/${this.name}.bank`);
+        this.fetchPromise = null;
+        this.loadingState = LOADING_STATE.UNLOADED;
     }
 }
