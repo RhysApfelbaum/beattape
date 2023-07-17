@@ -52,6 +52,15 @@ class Bank {
             this.loadingState = LOADING_STATE.LOADED;
 
             // Return the newly created bank handle
+
+            /* Bill
+
+            I would assign a local property
+
+                this.handle = outval.val;
+                return this.handle;
+
+            */
             return outval.val;
         }
         catch(error) {
