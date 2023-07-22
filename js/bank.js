@@ -15,6 +15,7 @@ class Bank {
         this.url = url;
         this.fetchPromise = null;
         this.loadingState = LOADING_STATE.UNLOADED;
+        this.handle = null;
     }
 
 
@@ -50,9 +51,7 @@ class Bank {
             await this.fetchPromise;
             CHECK_RESULT(gSystem.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval));
             this.loadingState = LOADING_STATE.LOADED;
-
-            // Return the newly created bank handle
-            return outval.val;
+            this.handle = outval.val;
         }
         catch(error) {
             this.loadingState = LOADING_STATE.ERROR;

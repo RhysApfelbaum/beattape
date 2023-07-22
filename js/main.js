@@ -26,6 +26,7 @@ const preloadBanks = [];
 const mainEvents = []
 const FMOD_BUILD_FOLDER = './fmod/build/desktop';
 
+const LOADING_MESSAGE = 'loading...';
 
 const sliderState = {
     changed: false,
@@ -142,17 +143,22 @@ async function init() {
     
 
     // Load the tracklist and initalize the play queue
-    tracklistPromise
-        .then(() => playQueue.currentTrack.load())
-        .then(() => {
-            // console.log('hi');
-            playQueue.currentTrack.event.instance.start();
-            playQueue.currentTrack.event.instance.setPaused(true);
-            setPauseState(true);
-            playQueue.currentTrack.event.instance.start();
-            document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
-            playQueue.nextTracks[0].fetch();
-        });
+    await tracklistPromise;
+
+    const trackNameElement = document.querySelector('#current-track-name');
+
+    trackNameElement.innerHTML = LOADING_MESSAGE;
+    trackNameElement.classList.add('loading-message');
+
+    await playQueue.currentTrack.load();
+
+    playQueue.currentTrack.event.instance.start();
+    playQueue.currentTrack.event.instance.setPaused(true);
+    setPauseState(true);
+    playQueue.currentTrack.event.instance.start();
+    trackNameElement.innerHTML = playQueue.currentTrack.displayName;
+    trackNameElement.classList.remove('loading-message');
+    playQueue.nextTracks[0].fetch();
 }
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop)
