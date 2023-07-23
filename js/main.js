@@ -225,7 +225,14 @@ async function nextTrack(buttonfx) {
     
     // Next track 
     playQueue.nextTrack();
+
+    const trackNameElement = document.querySelector('#current-track-name');
+    trackNameElement.innerHTML = LOADING_MESSAGE;
+    trackNameElement.classList.add('loading-message');
+
     await playQueue.currentTrack.load();
+    trackNameElement.innerHTML = playQueue.currentTrack.displayName;
+    trackNameElement.classList.remove('loading-message');
     playQueue.currentTrack.event.instance.start();
     updateTrackSliders(true);
     //oldTrack.unload();

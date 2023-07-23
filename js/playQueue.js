@@ -121,14 +121,5 @@ class PlayQueue {
                 this.nextTracks[i].unload();
             }
         }
-        // for (let i = 1; i < 5; i++) {
-        //     if (this.nextTracks[i].bankHandle == null) this.nextTracks[i].fetch();
-            
-        //     console.log('loading', this.nextTracks[i].name);
-        // }
-        
-        
-        // Unload banks
-        //for (let i = 1; i < this.history.length; i++) this.history[i].unload();
     }
 }

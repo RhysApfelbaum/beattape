@@ -32,10 +32,8 @@ class Track {
         let outval = {};
 
         try {
-            // The loaded bank handle MUST BE STORED IN this.bankHandle otherwise no sound plays.
-            // WHAT??!!?!?!
-            this.bankHandle = await this.bank.load();
-
+            await this.bank.load();
+            
             // Load the track event which is now available because of the newly loaded bank.
             this.event = new SingleInstanceEvent(gSystem, this.eventPath);
             this.event.load();
@@ -50,11 +48,7 @@ class Track {
             this.event.unload();
             this.event = null;
         }
-
-        // Unload the bank
-        this.bankHandle.unload();
-        this.bankHandle = null;
-
+        this.bank.unload();
         this.bank.loadingState = LOADING_STATE.FETCHED;
     }
 }
