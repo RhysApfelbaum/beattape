@@ -85,6 +85,11 @@ button > * {
     appearance: default;
 } */
 
+img#art {
+    width: 440px;
+    height: auto;
+}
+
 input.slider {
     -webkit-appearance: none;
     --slider-thumb-background: rgb(107, 107, 107); 

@@ -50,12 +50,14 @@ class PlayQueue {
             (a, b) => this.trackDistance(a) - this.trackDistance(b)
             );
             
-            this.nextTracks = [];
-            this.tracklist.forEach(track => {
-                if (track == this.currentTrack) return;
-                if (this.nextTracks.length >= this.tracklist.length) return;
-                this.nextTracks.push(track);
-            });
+        this.nextTracks = [];
+        this.tracklist.forEach(track => {
+            if (track == this.currentTrack) {
+                return;
+            }
+            if (this.nextTracks.length >= this.tracklist.length) return;
+            this.nextTracks.push(track);
+        });
             
         // If oldNext is an empty array, the webpage has just loaded, so all tracks are considered not changed
         if (oldNext.length == 0) {
