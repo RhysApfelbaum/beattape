@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <head>
-    
     <title>BEATTAPE</title>
     <meta name="robots" content="index, follow" />
     <meta name="viewport" content="width=device-width" />
@@ -10,7 +9,25 @@
     <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
 </head>
 <body>
-    <img src="art/ai.jpg" id="art"/>
+    <div id="top-container">
+        <div class="credit-container">
+            <p class="credit" id="music-credit">
+                Music by
+                <a href="https://soundtomb.bandcamp.com/" target="_blank" rel="noreferrer noopener">
+                    Soundtomb
+                </a>
+            </p>
+        </div>
+        <img src="art/midjourney/purple_cityscape.png" id="art"/>
+        <div class="credit-container">
+            <p class="credit" id="art-credit">
+                Art by
+                <a href="https://www.midjourney.com/app/" target="_blank" rel="noreferrer noopener">
+                    Midjourney
+                </a>
+            </p>
+        </div>
+    </div>
     <br>
     <div id="control-container">
         <div class="track-control-container">
@@ -40,7 +57,7 @@
             <div class="effectiveness-light" id="vocals-effectiveness"></div>
             <div id="active-label">
                 <hr>
-                <p>each slider's brightness shows how active is in the current track<br>---<br>all four sliders affect the play queue</p>
+                <p>- each slider's brightness shows how active is in the current track</p>
             </div>
         </div>
         <div id="transport-container">

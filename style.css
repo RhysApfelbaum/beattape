@@ -68,26 +68,36 @@ button > * {
 }
 
 .lit-slider-container > .slider-track {
-    background: rgb(206, 168, 189);
+    background: rgb(250, 165, 140);
 }
 
 .lit-slider-container > .slider {
     --slider-thumb-background: rgb(182, 222, 242);
 }
 
-/* .slider {
-    -webkit-appearance: none;
-    width: 50px;
-    height: 100px;
-    cursor: pointer;
-    
-    -webkit-appearance: slider-vertical;
-    appearance: default;
-} */
-
 img#art {
     width: 440px;
     height: auto;
+}
+
+div#top-container {
+    display: grid;
+    grid-template-columns: 200px 440px 200px;
+    align-items: center;
+    justify-content: center;
+}
+
+a {
+    color: rgb(250, 186, 83);
+}
+a:hover {
+    color: rgb(253, 240, 143);
+}
+a:visited {
+    color: rgb(247, 101, 73);
+}
+a:visited:hover {
+    color: rgb(253, 240, 143);
 }
 
 input.slider {
