@@ -13,6 +13,14 @@ body {
     background-color: rgb(40, 6, 63);
 }
 
+:root {
+    --slider-track-color: #fdb8ba;
+    --slider-thumb-color: #fdf8c2;
+    --slider-track-grey: rgb(48, 48, 48);
+    --slider-thumb-grey: rgb(107, 107, 107);
+
+}
+
 ul#play-queue {
     list-style-type: none;
     border-radius: 5px;
@@ -68,16 +76,17 @@ button > * {
 }
 
 .lit-slider-container > .slider-track {
-    background: rgb(250, 165, 140);
+    background: var(--slider-track-color);
 }
 
 .lit-slider-container > .slider {
-    --slider-thumb-background: rgb(182, 222, 242);
+    --slider-thumb-background: var(--slider-thumb-color);
 }
 
 img#art {
     width: 440px;
     height: auto;
+    filter: drop-shadow(0 0 10px #822c68);
 }
 
 div#top-container {
@@ -101,12 +110,12 @@ a:visited:hover {
 }
 
 input.slider {
-    -webkit-appearance: none;
-    --slider-thumb-background: rgb(107, 107, 107); 
+    -webkit-appearance: none; 
     appearance: none;
     width: 100px;
     height: 50px;
     margin: 0 0 0 0 !important;
+    --slider-thumb-background: var(--slider-thumb-grey);
     transform: translateY(25px) rotate(270deg);
     transform-origin: center;
     -webkit-transform: translateY(17px) rotate(270deg);

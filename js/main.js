@@ -361,9 +361,14 @@ function updateEffectivenessLights() {
         
         // This formula boosts lower values and squashes higher values in the interval [0 ... 1].
         let mix = 1 - (outval.val - 1) * (outval.val - 1);
-
-        element.style['background'] = `color-mix(in srgb, rgb(48, 48, 48), rgb(206, 168, 189) ${mix * 100}%)`;
-        document.querySelector(sliderId).style.setProperty('--slider-thumb-background', `color-mix(in srgb, rgb(77, 77, 77), rgb(182, 222, 242) ${mix * 100}%)`);
+        
+        // ew
+        /*
+            This uses CSS's color-mix() function to interpolate betweeen greyed out and full colour with each track.
+            The mix between 0 and 1, so it needs to be scaled up.
+        */
+        element.style['background'] = `color-mix(in srgb, var(--slider-track-grey), var(--slider-track-color) ${mix * 100}%)`;
+        document.querySelector(sliderId).style.setProperty('--slider-thumb-background', `color-mix(in srgb, rgb(111, 111, 111), var(--slider-thumb-color) ${mix * 100}%)`);
         document.querySelector(glowId).style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%))`;
         document.querySelector(`label[for=${labelFor}]`).style['color'] = `color-mix(in srgb, rgb(68, 68, 68), white ${mix * 100}%`;
     });
