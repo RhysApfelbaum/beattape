@@ -1,0 +1,74 @@
+[
+    {
+        "name": "heavyFog",
+        "displayName": "heavy fog",
+        "grit": 0.5,
+        "brightness": 0.4,
+        "chops": 0.4,
+        "vocals": 0
+    },
+    {
+        "name": "court",
+        "displayName": "court",
+        "grit": 0.6,
+        "brightness": 0.2,
+        "chops": 0,
+        "vocals": 0.7
+    },
+    {
+        "name": "bubbles",
+        "displayName": "bubbles",
+        "grit": 0.3,
+        "brightness": 0.5,
+        "chops": 0.8,
+        "vocals": 0
+    },
+    {
+        "name": "bells",
+        "displayName": "3 a.m. doomscroll",
+        "grit": 0.4,
+        "brightness": 0.6,
+        "chops": 0, 
+        "vocals": 0
+    },
+    {
+        "name": "limp",
+        "displayName": "murky",
+        "grit": 0.6,
+        "brightness": 0.8,
+        "chops": 0.4,
+        "vocals": 0.6
+    },
+    {
+        "name": "aquarium",
+        "displayName": "aquarium",
+        "grit": 0.7,
+        "brightness": 0.4,
+        "chops": 0,
+        "vocals": 0
+    },
+    {
+        "name": "echo",
+        "displayName": "echo",
+        "grit": 0.6,
+        "brightness": 0.7,
+        "chops": 0.8,
+        "vocals": 0
+    },
+    {
+        "name": "snooze",
+        "displayName": "snooz.",
+        "grit": 0.4,
+        "brightness": 0.6,
+        "chops": 0,
+        "vocals": 0.7
+    },
+    {
+        "name": "lazy",
+        "displayName": "l a z y",
+        "grit": 0.4,
+        "brightness": 0.5,
+        "chops": 0.9,
+        "vocals": 0
+    }
+]
