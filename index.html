@@ -51,13 +51,9 @@
             <label for="brightness">brightness</label>
             <label for="chops">chops</label>
             <label for="vocals">vocals</label>
-            <div class="effectiveness-light" id="grit-effectiveness"></div>
-            <div class="effectiveness-light" id="brightness-effectiveness"></div>
-            <div class="effectiveness-light" id="chops-effectiveness"></div>
-            <div class="effectiveness-light" id="vocals-effectiveness"></div>
             <div id="active-label">
                 <hr>
-                <p>- each slider's brightness shows how active is in the current track</p>
+                <p>- each slider's brightness shows how active it is in the current track</p>
             </div>
         </div>
         <div id="transport-container">
@@ -73,40 +69,51 @@
             <p>up next:</p>
             <ul id="play-queue"></ul>
         </div>
-        <div id="ambience-container">
-            <div class="slider-container">
-                <div class="slider-track"></div>
-                <input type="range" class="slider" id="rain-amount" onchange="updateRainAmount()"/>
+        <div id="background-control-container">
+            <div id="ambience-container">
+                <div class="slider-container">
+                    <div class="slider-track"></div>
+                    <input type="range" class="slider" id="rain-amount" onchange="updateRainAmount()"/>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-track"></div>
+                    <input type="range" class="slider" id="vinyl-amount" onchange="updateVinylAmount()"/>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-track"></div>
+                    <input type="range" class="slider" id="bird-amount" onchange="updateBirdAmount()"/>
+                </div>
+                <label for="rain-amount">rain</label>
+                <label for="vinyl-amount">vinyl<br>crackle</label>
+                <label for="bird-amount">birds<br>chirping</label>
+                <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('rain')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
+                <button class="ambience-toggle" id="vinyl-toggle" onclick="toggleAmbience('vinyl')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
+                <button class="ambience-toggle" id="birds-toggle" onclick="toggleAmbience('birds')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
             </div>
-            <div class="slider-container">
-                <div class="slider-track"></div>
-                <input type="range" class="slider" id="vinyl-amount" onchange="updateVinylAmount()"/>
-            </div>
-            <div class="slider-container">
-                <div class="slider-track"></div>
-                <input type="range" class="slider" id="bird-amount" onchange="updateBirdAmount()"/>
-            </div>
-            <label for="rain-amount">rain</label>
-            <label for="vinyl-amount">vinyl<br>crackle</label>
-            <label for="bird-amount">birds<br>chirping</label>
-            <button class="ambience-toggle" id="rain-toggle" onclick="toggleAmbience('rain')">
-                <div class="ambience-toggle-light"></div>
-            </button>
-            <button class="ambience-toggle" id="vinyl-toggle" onclick="toggleAmbience('vinyl')">
-                <div class="ambience-toggle-light"></div>
-            </button>
-            <button class="ambience-toggle" id="birds-toggle" onclick="toggleAmbience('birds')">
-                <div class="ambience-toggle-light"></div>
-            </button>
-            <!-- <div>
+            <div id="fx-container">
                 <button class="ambience-toggle" id="radio-toggle" onclick="toggleTrackFX('radio')">
                     <div class="ambience-toggle-light"></div>
                 </button>
+                <button class="ambience-toggle" id="pitch-wobble-toggle" onclick="toggleTrackFX('pitch-wobble')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
                 <br>
+                <button class="ambience-toggle" id="distortion-toggle" onclick="toggleTrackFX('distortion')">
+                    <div class="ambience-toggle-light"></div>
+                </button>
                 <label for="radio-toggle">small radio</label>
-            </div> -->
-           
+                <label for="distortion-toggle">distortion</label>
+                <label for="pitch-wobble-toggle">pitch wobble</label>
+            </div>
         </div>
+        
+        
     </div>
 
     <script src="fmod/engine/fmodstudio.js"></script>

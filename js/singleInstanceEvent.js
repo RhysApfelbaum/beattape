@@ -35,9 +35,9 @@ class SingleInstanceEvent {
 
     // Loads the event, plays it once, and immediately unloads it
     oneShot() {
-        //this.load();
+        this.load();
         this.instance.start();
-        //this.instance.release();
-        //this.instance = null;
+        this.instance.release();
+        this.instance = null;
     }
 }

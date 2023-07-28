@@ -17,6 +17,10 @@ let currentTrackIndex;
 let rainEvent;
 let birdEvent;
 
+let radioSnapshot;
+let pitchWobbleSnapshot;
+let distortionSnapshot;
+
 let trackInfo;
 let playQueue;
 let tracklistPromise;
@@ -139,6 +143,12 @@ async function init() {
     
     radioSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Radio');
     radioSnapshot.load();
+
+    pitchWobbleSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/PitchWobble');
+    pitchWobbleSnapshot.load();
+
+    distortionSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Distortion');
+    distortionSnapshot.load();
     //firstTrack.fetch();
     
 
@@ -238,7 +248,7 @@ async function nextTrack(buttonfx) {
     //oldTrack.unload();
 }
 
-function lastTrack(buttonfx) {
+async function lastTrack(buttonfx) {
     if (buttonfx) playButtonSFX.oneShot();
 
     playQueue.currentTrack.event.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
@@ -246,26 +256,53 @@ function lastTrack(buttonfx) {
 
     playQueue.lastTrack();
 
-    playQueue.currentTrack.load().then(() => {
-        playQueue.currentTrack.event.instance.start();
-        updateTrackSliders(true);
-        document.querySelector('#current-track-name').innerHTML = playQueue.currentTrack.displayName;
-    });
+    const trackNameElement = document.querySelector('#current-track-name');
+    trackNameElement.innerHTML = LOADING_MESSAGE;
+    trackNameElement.classList.add('loading-message');
+
+    await playQueue.currentTrack.load();
+    trackNameElement.innerHTML = playQueue.currentTrack.displayName;
+    trackNameElement.classList.remove('loading-message');
+    playQueue.currentTrack.event.instance.start();
+    updateTrackSliders(true);
 }
 
-let trackfx = true;
+const trackfx = {
+    'radio': false,
+    'pitch-wobble': false,
+    'distortion': false
+};
 function toggleTrackFX(type) {
     playButtonSFX.oneShot();
-    if (type != 'radio') return;
-    if (trackfx) {
-        radioSnapshot.instance.start();
-        document.querySelector('#radio-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
-    } else {
-        radioSnapshot.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-        document.querySelector('#radio-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
+    let toggle, label, snapshot;
+    switch (type) {
+        case 'radio':
+            toggle = document.querySelector('#radio-toggle');
+            label = document.querySelector('label[for="radio-toggle"]');
+            snapshot = radioSnapshot;
+            break;
+        case 'pitch-wobble':
+            toggle = document.querySelector('#pitch-wobble-toggle');
+            label = document.querySelector('label[for="pitch-wobble-toggle"]');
+            snapshot = pitchWobbleSnapshot;
+            break;
+        case 'distortion':
+            toggle = document.querySelector('#distortion-toggle');
+            label = document.querySelector('label[for="distortion-toggle"]');
+            snapshot = distortionSnapshot;
+            break;
     }
-    trackfx = !trackfx;
-
+    if (! trackfx[type]) {
+        snapshot.instance.start();
+        toggle.children[0].style['background-color'] = 'rgb(211, 40, 40)';
+        label.style['color'] = 'white';
+    } else {
+        snapshot.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
+        toggle.children[0].style['background-color'] = 'rgb(48, 48, 48)';
+        label.style['color'] = 'rgb(68, 68, 68)';
+    }
+    trackfx[type] = !trackfx[type];
+    
 }
 
 // TODO: This is god-awful

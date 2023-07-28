@@ -18,7 +18,6 @@ body {
     --slider-thumb-color: #fdf8c2;
     --slider-track-grey: rgb(48, 48, 48);
     --slider-thumb-grey: rgb(107, 107, 107);
-
 }
 
 ul#play-queue {
@@ -60,7 +59,6 @@ button > * {
     box-shadow: inherit;
 }
 
-
 .slider-container {
     width: 100px;
     border-radius: 5px;
@@ -86,7 +84,7 @@ button > * {
 img#art {
     width: 440px;
     height: auto;
-    filter: drop-shadow(0 0 10px #822c68);
+    filter: drop-shadow(0 0 40px #822c68);
 }
 
 div#top-container {
@@ -99,12 +97,15 @@ div#top-container {
 a {
     color: rgb(250, 186, 83);
 }
+
 a:hover {
     color: rgb(253, 240, 143);
 }
+
 a:visited {
     color: rgb(247, 101, 73);
 }
+
 a:visited:hover {
     color: rgb(253, 240, 143);
 }
@@ -170,7 +171,6 @@ label {
     color: rgb(68, 68, 68);
 }
 
-
 .track-control-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
@@ -182,6 +182,11 @@ label {
     margin-top: 10px;
 }
 
+#background-control-container {
+    width: 500px;
+    display: grid;
+    grid-template-columns: 300px 300px;
+}
 #active-label {
     margin: 0px 0px 0px 0px;
     grid-area: 4 / span 4;
@@ -200,7 +205,42 @@ label {
     width: 300px;
     height: 150px;
     margin-top: 10px;
-    margin-right: 150px;
+}
+
+#fx-container {
+    display: grid;
+    grid-template-columns: 50px, repeat(auto-fill, 100px);
+    grid-template-rows: 50px 50px 50px;
+    width: fit-content;
+    align-items: center;
+    justify-items: center;
+    
+}
+
+#fx-container > .ambience-toggle {
+    grid-column-start: 1;
+}
+
+#fx-container > label {
+    grid-column-start: 2;
+    margin-left: 10px;
+}
+
+
+label[for="radio-toggle"] {
+    grid-row-start: 1;
+}
+
+label[for="pitch-wobble-toggle"] {
+    grid-row-start: 2;
+}
+
+label[for="distortion-toggle"] {
+    grid-row-start: 3;
+}
+
+#distortion-toggle {
+    grid-row-start: 3;
 }
 
 .ambience-toggle {
@@ -268,15 +308,4 @@ p.loading-message {
     justify-items: center;
     justify-content: center;
     margin-top: 20px;
-}
-
-.effectiveness-light {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    /* width: 10px;
-    height: 10px;
-    background-color: rgb(48, 48, 48);
-    border-radius: 3px;
-    margin: 5px 5px 5px 5px; */
 }
