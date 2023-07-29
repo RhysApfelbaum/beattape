@@ -399,7 +399,6 @@ function updateEffectivenessLights() {
         // This formula boosts lower values and squashes higher values in the interval [0 ... 1].
         let mix = 1 - (outval.val - 1) * (outval.val - 1);
         
-        // ew
         /*
             This uses CSS's color-mix() function to interpolate betweeen greyed out and full colour with each track.
             The mix between 0 and 1, so it needs to be scaled up.
