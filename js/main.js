@@ -25,6 +25,9 @@ let trackInfo;
 let playQueue;
 let tracklistPromise;
 
+let tapeStopAmount = 0;
+
+
 // A list of banks to be fetched as soon as possible
 const preloadBanks = [];
 const mainEvents = []
@@ -40,7 +43,7 @@ const sliderState = {
     vocals: 0.0
 };
 
-
+let paused = true;
 
 const FMOD = {
     'preRun': prerun,
@@ -180,11 +183,19 @@ function updateApplication() {
     if (!playQueue.currentTrack.event) return;
 
     // Pause logic
-    let intensityFinal = {};
-    CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, intensityFinal) );
-    if ((intensityFinal.val >= 100) && (! isPaused())) {
-        playQueue.currentTrack.event.instance.setPaused(true);
-    }
+    // const outval = {};
+    // CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, outval) );
+    // let intensity = outval.val;
+
+    // if (intensity >= 100) {
+    //     if (!paused) {
+    //         alert(isPaused());
+    //         playQueue.currentTrack.event.instance.setPaused(true);
+    //         paused = true;
+    //     }
+        
+    //     //paused = true;
+    // }
 
     // Next track logic
     let playbackState = {};
@@ -200,27 +211,22 @@ function updateApplication() {
     gSystem.update();
 }
 
-function isPaused() {
-    let outval = {};
-    let paused;
-    let pauseSnapshotPlayback;
-
-    CHECK_RESULT( playQueue.currentTrack.event.instance.getPaused(outval) );
-    paused = outval.val;
-    CHECK_RESULT( pauseSnapshot.val.getPlaybackState(outval) );
-    pauseSnapshotPlayback = outval.val;
-    if (paused) return true;
-    return pauseSnapshotPlayback != FMOD.STUDIO_PLAYBACK_STOPPED;
+function pauseTrack() {
+    pauseSnapshot.val.start();
+    const intervalID = setInterval(() => {
+        const outval = {};
+        CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, outval) );
+        const intensity = outval.val;
+        if (intensity >= 100) {
+            playQueue.currentTrack.event.instance.setPaused(true);
+            clearInterval(intervalID);
+        }
+    }, 50);
 }
 
-function setPauseState(state) {
-    if (state) {
-        CHECK_RESULT( pauseSnapshot.val.start() );
-    } else {
-        // Play the track
-        playQueue.currentTrack.event.instance.setPaused(false);
-        pauseSnapshot.val.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
-    }
+function playTrack() {
+    playQueue.currentTrack.event.instance.setPaused(false);
+    pauseSnapshot.val.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
 }
 
 async function nextTrack(buttonfx) {
@@ -302,7 +308,6 @@ function toggleTrackFX(type) {
         label.style['color'] = 'rgb(68, 68, 68)';
     }
     trackfx[type] = !trackfx[type];
-    
 }
 
 // TODO: This is god-awful
@@ -468,5 +473,10 @@ function updateBirdAmount() {
 
 function togglePause() {
     playButtonSFX.oneShot();
-    setPauseState(!isPaused());
+    if (paused) {
+        playTrack();
+    } else {
+        pauseTrack();
+    }
+    paused = !paused;
 }
