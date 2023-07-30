@@ -167,7 +167,6 @@ async function init() {
 
     playQueue.currentTrack.event.instance.start();
     playQueue.currentTrack.event.instance.setPaused(true);
-    setPauseState(true);
     playQueue.currentTrack.event.instance.start();
     trackNameElement.innerHTML = playQueue.currentTrack.displayName;
     trackNameElement.classList.remove('loading-message');
@@ -178,32 +177,24 @@ async function init() {
 function updateApplication() {
     
     // This function may be called before a track has finished loading
+    // There appear to be some issues with this, but they don't seem to cause any important errors so :P
     if (!playQueue) return;
     if (!playQueue.currentTrack.isLoaded) return;
     if (!playQueue.currentTrack.event) return;
+    
+    const outval = {};
 
-    // Pause logic
-    // const outval = {};
-    // CHECK_RESULT( pauseSnapshot.val.getParameterByName('Intensity', {}, outval) );
-    // let intensity = outval.val;
-
-    // if (intensity >= 100) {
-    //     if (!paused) {
-    //         alert(isPaused());
-    //         playQueue.currentTrack.event.instance.setPaused(true);
-    //         paused = true;
-    //     }
-        
-    //     //paused = true;
-    // }
-
-    // Next track logic
-    let playbackState = {};
-    CHECK_RESULT( playQueue.currentTrack.event.instance.getPlaybackState(playbackState) );
-    if (playbackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) nextTrack(false);
+    // Go to the next track if the current track has finished
+    CHECK_RESULT( playQueue.currentTrack.event.instance.getPlaybackState(outval) );
+    let playBackState = outval.val;
+    if (playBackState == FMOD.STUDIO_PLAYBACK_STOPPED) {
+        nextTrack(false);
+    }
 
     updateSliderState();
-    if (sliderState.changed) updateTrackSliders(false);
+    if (sliderState.changed) {
+        updateTrackSliders(false);
+    }
 
     updateEffectivenessLights();
 
