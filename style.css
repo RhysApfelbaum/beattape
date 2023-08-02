@@ -9,9 +9,10 @@ body {
     font-family: monospace;
     /* font-size: small; */
     font-size: 15px;
+    /* font-weight: 600; */
     text-align: center;
     color: white;
-    background-color: rgb(40, 6, 63);
+    background-color: rgb(32, 46, 45);
 }
 
 :root {
@@ -71,7 +72,7 @@ button > * {
     width: 100px;
     border-radius: 5px;
     margin-bottom: 10px;
-    filter: drop-shadow(0 0 10px rgb(255, 238, 222));
+    filter: drop-shadow(0 0 10px rgb(255, 255, 255));
 }
 
 .lit-slider-container > .slider-track {
@@ -85,7 +86,7 @@ button > * {
 img#art {
     width: 440px;
     height: auto;
-    filter: drop-shadow(0 0 10px #822c68);
+    outline: 1px solid #ca8baf;
 }
 
 div#top-container {

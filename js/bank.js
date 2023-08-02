@@ -66,7 +66,6 @@ class Bank {
             console.error(`Tried to unload ${this.name}.bank - only loaded banks can be unloaded.`);
             return;
         }
-        console.log(`Unloading ${this.name}`);
         CHECK_RESULT(this.handle.unload());
 
         this.lastUnloadTime = Date.now();
