@@ -20,6 +20,7 @@ body {
     --slider-thumb-color: #fdf8c2;
     --slider-track-grey: rgb(48, 48, 48);
     --slider-thumb-grey: rgb(107, 107, 107);
+    --toggle-light: #e87356;
 }
 
 ul#play-queue {
@@ -250,6 +251,9 @@ label[for="distortion-toggle"] {
     height: 30px;
     margin: 10px;
     background-color: default;
+
+    /* TODO: Add glow to lit up buttons */
+    /*filter: drop-shadow(0 0 10px rgb(221, 192, 128)); */
 }
 
 .ambience-toggle-light {
@@ -259,6 +263,7 @@ label[for="distortion-toggle"] {
     background-color: rgb(48, 48, 48);
     border-radius: 2px;
     box-shadow: inherit;
+    
 }
 
 .track-label-changed {

@@ -291,7 +291,7 @@ function toggleTrackFX(type) {
     }
     if (! trackfx[type]) {
         snapshot.instance.start();
-        toggle.children[0].style['background-color'] = 'rgb(211, 40, 40)';
+        toggle.children[0].style['background-color'] = 'var(--toggle-light)';
         label.style['color'] = 'white';
     } else {
         snapshot.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
@@ -311,7 +311,7 @@ function toggleAmbience(type) {
         if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
             // Turn rain on
             rainEvent.instance.start();
-            document.querySelector('#rain-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#rain-toggle').children[0].style['background-color'] = 'var(--toggle-light)';
             document.querySelector('#rain-amount').parentElement.className = 'lit-slider-container';
             document.querySelector(`label[for="rain-amount"]`).style['color'] = 'white';
         } else {
@@ -327,7 +327,7 @@ function toggleAmbience(type) {
         if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
             // Turn vinyl on
             vinylEvent.instance.start();
-            document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#vinyl-toggle').children[0].style['background-color'] = 'var(--toggle-light)';
             document.querySelector('#vinyl-amount').parentElement.className = 'lit-slider-container';
             document.querySelector(`label[for="vinyl-amount"]`).style['color'] = 'white';
         } else {
@@ -343,7 +343,7 @@ function toggleAmbience(type) {
         if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
             // Turn vinyl on
             birdEvent.instance.start();
-            document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(211, 40, 40)';
+            document.querySelector('#birds-toggle').children[0].style['background-color'] = 'var(--toggle-light)';
             document.querySelector('#bird-amount').parentElement.className = 'lit-slider-container';
             document.querySelector(`label[for="bird-amount"]`).style['color'] = 'white';
         } else {
