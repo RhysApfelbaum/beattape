@@ -11,16 +11,17 @@ class PlayQueue {
         this.fillNextTracks();
     }
     
-    // WARNING: THIS SUCKS
-    // It's horrible and I'm just trying to make it work
     trackDistance(track) {
         
         let result = 0;
         if (track == this.currentTrack) return 1000;
+
+        // Current slider values
         let grit = document.querySelector('#grit').value / 100;
         let brightness = document.querySelector('#brightness').value / 100;
         let chops = document.querySelector('#chops').value / 100;
         let vocals = document.querySelector('#vocals').value / 100;
+
         let gritDist = Math.abs(grit - track.sliderData.grit);
         let brightnessDist = Math.abs(brightness - track.sliderData.brightness);
         let chopsDist = Math.abs(chops - track.sliderData.chops);
@@ -48,7 +49,7 @@ class PlayQueue {
         let oldNext = this.nextTracks;
         this.tracklist.sort(
             (a, b) => this.trackDistance(a) - this.trackDistance(b)
-            );
+        );
             
         this.nextTracks = [];
         this.tracklist.forEach(track => {
@@ -67,9 +68,9 @@ class PlayQueue {
         
         for (let i = 0; i < this.nextTracks.length; i++) {
             if (this.nextTracks[i] != oldNext[i])
-            this.nextTracks[i].changed = true;
+                this.nextTracks[i].changed = true;
             else
-            this.nextTracks[i].changed = false;
+                this.nextTracks[i].changed = false;
         }
         this.updateDisplay();
         this.pollLoading();

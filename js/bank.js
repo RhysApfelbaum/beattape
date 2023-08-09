@@ -57,7 +57,7 @@ class Bank {
         }
         catch(error) {
             this.loadingState = LOADING_STATE.ERROR;
-            throw error;
+            console.error(error);
         }
     }
 

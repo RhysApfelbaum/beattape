@@ -16,6 +16,14 @@
         "vocals": 0.7
     },
     {
+        "name": "butternutSquash",
+        "displayName": "butternut squash",
+        "grit": 0.8,
+        "brightness": 0.8,
+        "chops": 0,
+        "vocals": 0
+    },
+    {
         "name": "bubbles",
         "displayName": "bubbles",
         "grit": 0.3,
@@ -24,7 +32,7 @@
         "vocals": 0
     },
     {
-        "name": "bells",
+        "name": "doomscroll",
         "displayName": "3 a.m. doomscroll",
         "grit": 0.4,
         "brightness": 0.6,
@@ -32,7 +40,7 @@
         "vocals": 0
     },
     {
-        "name": "limp",
+        "name": "murky",
         "displayName": "murky",
         "grit": 0.6,
         "brightness": 0.8,
