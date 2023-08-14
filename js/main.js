@@ -1,4 +1,3 @@
-
 // FMOD global object which must be declared to enable 'main' and 'preRun' and then call
 // the constructor function.
 
@@ -74,7 +73,7 @@ function prerun() {
         json.forEach(obj => {
             tracklist.push(new Track(obj));
         });
-        playQueue = new PlayQueue(tracklist);
+        playQueue = new PlayQueue(tracklist, sliderState);
         playQueue.currentTrack.fetch();
         resolve(playQueue.currentTrack.fetchPromise);
     });
@@ -430,16 +429,10 @@ function updateSliderState() {
 }
 
 function updateTrackSliders(immediate) {
-    let grit = document.querySelector('#grit').value / 100;
-    let brightness = document.querySelector('#brightness').value / 100;
-    let chops = document.querySelector('#chops').value / 100;
-    let vocals = document.querySelector('#vocals').value / 100;
-
-    
-    playQueue.currentTrack.event.instance.setParameterByName('Grit', grit, immediate);
-    playQueue.currentTrack.event.instance.setParameterByName('Brightness', brightness, immediate);
-    playQueue.currentTrack.event.instance.setParameterByName('Chops', chops, immediate);
-    playQueue.currentTrack.event.instance.setParameterByName('Vocals', vocals, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Grit', sliderState.grit, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Brightness', sliderState.brightness, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Chops', sliderState.chops, immediate);
+    playQueue.currentTrack.event.instance.setParameterByName('Vocals', sliderState.vocals, immediate);
 }
 
 function updatePlayQueue() {
@@ -449,7 +442,6 @@ function updatePlayQueue() {
 function updateRainAmount() {
     let rainAmount = document.querySelector('#rain-amount').value / 100;
     rainEvent.instance.setParameterByName('RainAmount', rainAmount, false);
-    
 }
 
 function updateVinylAmount() {

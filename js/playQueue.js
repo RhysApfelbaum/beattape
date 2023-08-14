@@ -1,32 +1,31 @@
 class PlayQueue {
     
-    constructor(tracklist) {
+    constructor(tracklist, sliderState) {
         this.tracklist = tracklist;
         this.currentTrack = this.tracklist[0];
         this.nextTracks = [];
         this.history = [];
         this.playedTracks = new Set();
-        
-        
+        this.sliderState = sliderState;
         this.fillNextTracks();
     }
     
     trackDistance(track) {
-        
         let result = 0;
-        if (track == this.currentTrack) return 1000;
 
-        // Current slider values
-        let grit = document.querySelector('#grit').value / 100;
-        let brightness = document.querySelector('#brightness').value / 100;
-        let chops = document.querySelector('#chops').value / 100;
-        let vocals = document.querySelector('#vocals').value / 100;
+        // The current track should always be at the end of the playQueue, so it gets the biggest track distance.
+        if (track == this.currentTrack) {
+            return 1000;
+        }
 
-        let gritDist = Math.abs(grit - track.sliderData.grit);
-        let brightnessDist = Math.abs(brightness - track.sliderData.brightness);
-        let chopsDist = Math.abs(chops - track.sliderData.chops);
-        let vocalsDist = Math.abs(vocals - track.sliderData.vocals);
-        result = (gritDist + brightnessDist + chopsDist + vocalsDist) / 4;
+        // The mean difference between the current slider state and the track slider data...
+        result += Math.abs(this.sliderState.grit - track.sliderData.grit);
+        result += Math.abs(this.sliderState.brightness - track.sliderData.brightness);
+        result += Math.abs(this.sliderState.chops - track.sliderData.chops);
+        result += Math.abs(this.sliderState.vocals - track.sliderData.vocals);
+        result /= 4;
+
+        // ...with bias against tracks that have been recently played.
         result += this.recentScore(track) / 2;
         return result;
     }
