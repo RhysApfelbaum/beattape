@@ -26,8 +26,14 @@ let tracklistPromise;
 
 let tapeStopAmount = 0;
 
+const snapshots = {
+    tapeStop: null,
+    radio: null,
+    pitchWobble: null,
+    distortion: null,
+};
 
-// A list of banks to be fetched as soon as possible
+
 const preloadBanks = [];
 const mainEvents = []
 const FMOD_BUILD_FOLDER = './fmod/build/desktop';
@@ -63,10 +69,8 @@ function CHECK_RESULT(result) {
 function prerun() {
     preloadBanks.push(new Bank('Master', `${FMOD_BUILD_FOLDER}/Master.bank`));
     preloadBanks.push(new Bank('Master.strings', `${FMOD_BUILD_FOLDER}/Master.strings.bank`));
-    
     preloadBanks.map(bank => bank.fetch());
-
-    tracklistPromise = new Promise(async (resolve, reject) => {
+    tracklistPromise = new Promise(async (resolve) => {
         const tracklist = [];
         let response = await fetch('./tracklist.json');
         let json = await response.json();
@@ -83,8 +87,7 @@ function prerun() {
 // Called when the Emscripten runtime has initialized
 async function main() {
     // A temporary empty object to hold our system
-    
-    let outval = {};
+    const outval = {};
     let result;
     
     
@@ -129,7 +132,7 @@ async function init() {
 
     CHECK_RESULT( gSystem.getEvent('snapshot:/Paused', pauseSnapshot));
     CHECK_RESULT( pauseSnapshot.val.createInstance(pauseSnapshot) );
-    
+
 
     playButtonSFX = new SingleInstanceEvent(gSystem, 'event:/SFX/tapeStop');
     playButtonSFX.load();
@@ -151,7 +154,6 @@ async function init() {
 
     distortionSnapshot = new SingleInstanceEvent(gSystem, 'snapshot:/Distortion');
     distortionSnapshot.load();
-    //firstTrack.fetch();
     
 
     // Load the tracklist and initalize the play queue
@@ -174,12 +176,14 @@ async function init() {
 
 // Called from main, on an interval that updates at a regular rate (like in a game loop)
 function updateApplication() {
+    // Update FMOD
+    gSystem.update();
     
     // This function may be called before a track has finished loading
     // There appear to be some issues with this, but they don't seem to cause any important errors so :P
     if (!playQueue) return;
     if (!playQueue.currentTrack.isLoaded) return;
-    if (!playQueue.currentTrack.event) return;
+    if (playQueue.currentTrack.event == null) return;
     
     const outval = {};
 
@@ -197,8 +201,6 @@ function updateApplication() {
 
     updateEffectivenessLights();
 
-    // Update FMOD
-    gSystem.update();
 }
 
 function pauseTrack() {
@@ -340,13 +342,13 @@ function toggleAmbience(type) {
     } else if (type == 'birds') {
         CHECK_RESULT( birdEvent.instance.getPlaybackState(playBackState) );
         if (playBackState.val == FMOD.STUDIO_PLAYBACK_STOPPED) {
-            // Turn vinyl on
+            // Turn birds on
             birdEvent.instance.start();
             document.querySelector('#birds-toggle').children[0].style['background-color'] = 'var(--toggle-light)';
             document.querySelector('#bird-amount').parentElement.className = 'lit-slider-container';
             document.querySelector(`label[for="bird-amount"]`).style['color'] = 'white';
         } else {
-            // Turn vinyl off
+            // Turn birds off
             birdEvent.instance.stop(FMOD.STUDIO_STOP_ALLOWFADEOUT);
             document.querySelector('#birds-toggle').children[0].style['background-color'] = 'rgb(48, 48, 48)';
             document.querySelector('#bird-amount').parentElement.className = 'slider-container';
@@ -357,9 +359,13 @@ function toggleAmbience(type) {
 }
 
 function updateEffectivenessLights() {
+    if (playQueue.currentTrack.event == null) {
+        return;
+    }
     let trackColor, glowColor;
     let outval = {};
     let glowId, sliderId, labelFor;
+    const parameterNames = ['GritAmount', 'BrightnessAmount', 'ChopsAmount', 'VocalsAmount'];
     document.querySelectorAll('.slider-track').forEach((element) => {
         switch(element.id) {
             case 'grit-slider-track':
@@ -369,7 +375,6 @@ function updateEffectivenessLights() {
                 CHECK_RESULT(playQueue.currentTrack.event.instance.getParameterByName('GritAmount', {}, outval));
                 break;
             case 'brightness-slider-track':
-                    
                 glowId = '#brightness-container';
                 sliderId = '#brightness';
                 labelFor = 'brightness';
