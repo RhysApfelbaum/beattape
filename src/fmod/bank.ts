@@ -1,7 +1,7 @@
 import { FMOD } from './system';
 import { Pointer } from './pointer';
 
-enum LoadingState {
+export enum LoadingState {
     UNLOADED = 'UNLOADED',
     FETCHED = 'FETCHED',
     LOADED = 'LOADED',
@@ -50,8 +50,7 @@ export class Bank {
             FMOD.Result = FMOD.Studio.loadBankFile(`/${this.name}.bank`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval);
             this.loadingState = LoadingState.LOADED;
             this.handle = outval.deref();
-        }
-        catch(error) {
+        } catch(error) {
             this.loadingState = LoadingState.ERROR;
             console.error(error);
         }
@@ -62,7 +61,7 @@ export class Bank {
             console.error(`Tried to unload ${this.name}.bank - only loaded banks can be unloaded.`);
             return;
         }
-        CHECK_RESULT(this.handle.unload());
+        FMOD.Result = this.handle.unload();
     }
 
     unlink() {

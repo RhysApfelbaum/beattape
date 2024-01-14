@@ -1,0 +1,44 @@
+
+import FMODModule from './fmod/fmodstudio.js';
+import { FMOD } from './fmod/system';
+import { Bank } from './fmod/bank';
+import { Event } from './fmod/event'
+import { Pointer } from './fmod/pointer';
+import './css/test.css';
+
+FMOD.onSystemInitialized = async () => {
+    const master = new Bank('Master', '/fmod_banks/Master.bank');
+
+    const strings = new Bank('Master.strings', '/fmod_banks/Master.strings.bank');
+
+    const test = new Bank('court', '/fmod_banks/doomscroll.bank');
+    strings.fetch();
+    master.fetch();
+    test.fetch();
+    await Promise.all([ master.load(), strings.load(), test.load() ]);
+
+    const song = new Event('event:/Tracks/doomscroll');
+    song.load();
+
+    let anim: CSSAnimation;
+    document.getAnimations().forEach((a: CSSAnimation) => {
+        if (a.animationName === 'beat') {
+            anim = a;
+        }
+    });
+
+    const callback = (type: number, event: any, parameters: any): number => {
+        const e = document.querySelector('h1');
+        anim.cancel();
+        anim.play();
+        return FMOD.OK;
+    };
+    FMOD.Result = song.instance.setCallback(callback, FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT);
+    song.start();
+
+    window.setInterval(() => {
+        FMOD.Result = FMOD.Studio.update();
+    }, 20)
+};
+
+FMODModule(FMOD);

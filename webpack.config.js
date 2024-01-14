@@ -52,6 +52,11 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.json$/i,
+                loader: 'json-loader',
+                type: 'javascript/auto',
             }
         ]
     },

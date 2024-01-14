@@ -362,10 +362,7 @@ function updateEffectivenessLights() {
     if (playQueue.currentTrack.event == null) {
         return;
     }
-    let trackColor, glowColor;
-    let outval = {};
     let glowId, sliderId, labelFor;
-    const parameterNames = ['GritAmount', 'BrightnessAmount', 'ChopsAmount', 'VocalsAmount'];
     document.querySelectorAll('.slider-track').forEach((element) => {
         switch(element.id) {
             case 'grit-slider-track':

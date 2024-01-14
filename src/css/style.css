@@ -90,7 +90,7 @@ img#art {
     outline: 1px solid #ca8baf;
 }
 
-div#top-container {
+#top-container {
     display: grid;
     grid-template-columns: 200px 440px 200px;
     align-items: center;
@@ -283,6 +283,19 @@ p.loading-message {
     animation-name: loading-pulse;
     animation-duration: 1s;
     animation-iteration-count: infinite;
+}
+
+.beat-pulse {
+    animation: 1s beat;
+}
+
+@keyframes beat {
+    from {
+        background-color: red;
+    } to {
+        background-color: black
+    }
+
 }
 
 @keyframes loading-pulse {

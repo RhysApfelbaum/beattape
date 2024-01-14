@@ -29,8 +29,6 @@ class Track {
     }
 
     async load() {
-        let outval = {};
-
         try {
             await this.bank.load();
             

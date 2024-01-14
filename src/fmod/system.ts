@@ -1,9 +1,10 @@
 import { Pointer } from './pointer';
+import './fmodstudio.wasm';
 
 export const FMOD: any = {
     preRun: () => {},
     onSystemInitialized: () => {},
-    onRuntimeInitialized: () => {
+    onRuntimeInitialized() {
         const outval = new Pointer<any>();
         const sampleRate = new Pointer<number>();
 
@@ -23,7 +24,6 @@ export const FMOD: any = {
         
         // 1024 virtual channels
         FMOD.Result = FMOD.Studio.initialize(32, FMOD.STUDIO_INIT_NORMAL, FMOD.INIT_NORMAL, null);
-
         FMOD.onSystemInitialized();
     },
     set Result(code: number) {
