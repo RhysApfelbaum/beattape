@@ -28,7 +28,7 @@ export class Bank {
         const canWrite = false;
         const canOwn = false;
 
-        if (this.loadingState != LoadingState.UNLOADED) {
+        if (this.loadingState !== LoadingState.UNLOADED) {
             console.error(`${this.name}.bank has already been fetched`);
         }
         this.fetchPromise = (async (): Promise<void> => {

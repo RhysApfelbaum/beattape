@@ -1,13 +1,23 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/",
-        "noImplicitAny": true,
-        "module": "es6",
-        "target": "es5",
-        "jsx": "react",
+        "lib": ["ESNext", "dom"],
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "bundler",
+        "moduleDetection": "force",
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "composite": true,
+        "strict": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "jsx": "preserve",
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
         "allowJs": true,
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true
+        "include": "src/**/*",
+        "types": [
+            "bun-types" // add Bun global
+        ]
     }
 }

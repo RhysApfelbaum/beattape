@@ -2,7 +2,7 @@ import { FMOD } from './system';
 import { Pointer } from './pointer';
 
 // Supports a single instance
-export class Event {
+export class EventInstance {
     private path: string;
 
     public description: any;

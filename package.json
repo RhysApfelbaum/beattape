@@ -1,42 +1,24 @@
 {
-    "name": "beattape",
-    "version": "1.0.0",
-    "description": "The FMOD build can be found in `/fmod/build/desktop/`, and the FMOD project can be found in `/fmod/project/`.",
-    "main": "index.js",
-    "devDependencies": {
-        "buffer": "^6.0.3",
-        "copy-webpack-plugin": "^11.0.0",
-        "crypto-browserify": "^3.12.0",
-        "css-loader": "^6.8.1",
-        "file-loader": "^6.2.0",
-        "html-webpack-plugin": "^5.5.3",
-        "json-loader": "^0.5.7",
-        "path-browserify": "^1.0.1",
-        "stream-browserify": "^3.0.0",
-        "style-loader": "^3.3.3",
-        "ts-loader": "^9.5.0",
-        "typescript": "^5.2.2",
-        "wasm-loader": "^1.3.0",
-        "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^4.15.1"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "webpack",
-        "clean": "rm -r ./dist && echo 'Done.'",
-        "start": "webpack serve"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "webpack": "^5.89.0"
-    },
-    "browser": {
-        "path": false,
-        "stream": false,
-        "fs": false,
-        "os": false,
-        "crypto": false
-    }
+  "name": "beattape",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/bun": "^1.0.7",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.2.19",
+    "http-server": "^14.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "clean": "rm -rf ./dist/*",
+    "build": "cp -R ./static/* ./dist && bun build ./src/index.tsx --outdir ./dist --watch",
+    "dev": "bunx http-server ./dist"
+  }
 }

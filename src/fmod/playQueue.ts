@@ -107,18 +107,23 @@ export class PlayQueue {
     }
     
     updateDisplay() {
+        // return (
+        //     <li className='track-label-changed'>
+        //     </li>
+        // );
+
         let unorderedListElement = document.querySelector('#play-queue');
         unorderedListElement.replaceChildren();
         this.nextTracks.forEach(track => {
-            //console.log(track);
             let li = document.createElement('li');
             li.innerText = track.displayName;
             
             if (track.changed) {
                 li.className = 'track-label-changed';
                 track.changed = false;
+            } else {
+                li.className = 'track-label';
             }
-            else li.className = 'track-label';
             unorderedListElement.appendChild(li);
         });
         document.querySelector('#current-track-name').innerHTML = this.currentTrack.displayName;

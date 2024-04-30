@@ -1,7 +1,7 @@
 import { FMOD } from './system';
 import { SliderState } from './sliderState';
 import { Bank, LoadingState } from './bank';
-import { Event } from './event';
+import { EventInstance } from './event';
 import { beatAnimation } from './callbacks';
 
 export class Track {
@@ -12,7 +12,7 @@ export class Track {
     public name: string;
     public displayName: string;
     public averageSliderState: SliderState;
-    public event: Event;
+    public event: EventInstance;
     public bank: Bank;
     public changed = false;
 
@@ -22,7 +22,7 @@ export class Track {
         this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
         this.bank = new Bank(this.name, `./fmod_banks/${this.name}.bank`);
         this.averageSliderState = averageSliderState;
-        this.event = new Event(`event:/Tracks/${this.name}`);
+        this.event = new EventInstance(`event:/Tracks/${this.name}`);
     }
 
     // A simple check to see whether the bank and the event have been loaded

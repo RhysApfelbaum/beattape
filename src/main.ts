@@ -1,15 +1,16 @@
-import FMODModule from './fmod/fmodstudio.js';
 import { FMOD } from './fmod/system';
 import { Bank } from './fmod/bank';
 import { SliderState } from './fmod/sliderState';
-import { Event } from './fmod/event'
+import { FMODEvent } from './fmod/event'
 import { Track } from './fmod/track'
 import { Pointer } from './fmod/pointer';
 import { PlayQueue } from './fmod/playQueue';
 import './css/style.css';
 import tracklistData from './tracklist.json';
 
-console.log(tracklistData);
+// AHHHHH
+export declare var FMODModule: any;
+
 const preloadBanks: Bank[] = [];
 let playQueue: PlayQueue;
 
@@ -18,14 +19,14 @@ const LOADING_MESSAGE = 'loading...';
 
 // Contains events that are constantly available from the master bank
 const globalEvents = {
-    paused:      new Event('snapshot:/Paused'),
-    pitchWobble: new Event('snapshot:/PitchWobble'),
-    radio:       new Event('snapshot:/Radio'),
-    distortion:  new Event('snapshot:/Distortion'),
-    tapeStop:    new Event('event:/SFX/tapeStop'),
-    rain:        new Event('event:/Ambiences/Rain'),
-    vinyl:       new Event('event:/Ambiences/Vinyl'),
-    birds:       new Event('event:/Ambiences/Birds'),
+    paused:      new FMODEvent('snapshot:/Paused'),
+    pitchWobble: new FMODEvent('snapshot:/PitchWobble'),
+    radio:       new FMODEvent('snapshot:/Radio'),
+    distortion:  new FMODEvent('snapshot:/Distortion'),
+    tapeStop:    new FMODEvent('event:/SFX/tapeStop'),
+    rain:        new FMODEvent('event:/Ambiences/Rain'),
+    vinyl:       new FMODEvent('event:/Ambiences/Vinyl'),
+    birds:       new FMODEvent('event:/Ambiences/Birds'),
 };
 
 const sliderState: SliderState = {
@@ -140,11 +141,7 @@ FMOD.onSystemInitialized = async () => {
         el.addEventListener('click', clicks[el.id as keyof typeof clicks]);
     })
 
-
-    window.setInterval(() => {
-    FMOD.Result = FMOD.Studio.update();
-        mainLoop();
-    }, 20)
+    window.setInterval(mainLoop, 20);
 };
 
 function mainLoop() {
@@ -280,7 +277,7 @@ function toggleTrackFX(type: keyof typeof trackfx) {
     let toggleId: string;
     let labelSelector: string;
 
-    let snapshot: Event;
+    let snapshot: FMODEvent;
     switch (type) {
         case 'radio':
             toggleId = 'radio-toggle';
@@ -411,10 +408,9 @@ function updateEffectivenessLights() {
 
         sliderTrack.style.background = `color-mix(in srgb, var(--slider-track-grey), var(--slider-track-color) ${mix * 100}%)`;
         slider.style.setProperty('--slider-thumb-background', `color-mix(in srgb, rgb(111, 111, 111), var(--slider-thumb-color) ${mix * 100}%)`);
-        glow.style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%))`;
+        glow.style['filter'] = `drop-shadow(0 0 10px color-mix(in srgb, rgb(255, 238, 222, 0), rgb(255, 238, 222, 1) ${mix * 100}%)`;
         label.style['color'] = `color-mix(in srgb, rgb(68, 68, 68), white ${mix * 100}%`;
     });
-    
 }
 
 // Get the value of a number input
@@ -467,5 +463,3 @@ function togglePause() {
     }
     paused = !paused;
 }
-
-
