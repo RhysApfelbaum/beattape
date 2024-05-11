@@ -5,9 +5,7 @@ import { EventInstance } from './event';
 import { beatAnimation } from './callbacks';
 
 export class Track {
-    private eventPath: string;
     private bankURL: string;
-    private bankHandle: any;
 
     public name: string;
     public displayName: string;
@@ -48,7 +46,6 @@ export class Track {
         // Unload the track event if it's loaded
         if (this.event.isLoaded) {
             this.event.unload();
-            this.event = null;
         }
         this.bank.unload();
         this.bank.loadingState = LoadingState.FETCHED;

@@ -50,5 +50,5 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
 };
 
-export const usePlayQueue = () => useContext(PlayQueueContext);
+export const usePlayQueue = () => useContext(PlayQueueContext)!;
 export default PlayQueueProvider;
