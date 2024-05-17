@@ -1,24 +1,32 @@
 {
-    "name": "beattape",
-    "module": "index.ts",
-    "type": "module",
-    "devDependencies": {
-        "bun-types": "latest"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "@types/bun": "^1.0.7",
-        "@types/react": "^18.3.1",
-        "@types/react-dom": "^18.2.19",
-        "http-server": "^14.1.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
-    },
-    "scripts": {
-        "clean": "rm -rf ./dist/*",
-        "build": "cp -R ./static/* ./dist && bun build ./src/index.tsx --outdir ./dist --watch",
-        "dev": "bunx http-server -S -C cert.pem -K key.pem ./dist"
-    }
+  "name": "beattape",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/bun": "^1.0.7",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.2.19",
+    "bun-style-loader": "^0.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@styled/typescript-styled-plugin": "^1.0.1",
+    "@types/styled-components": "^5.1.34",
+    "bun-plugin-html": "^2.0.0",
+    "chokidar": "^3.6.0",
+    "http-server": "^14.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "style-it": "^2.1.4",
+    "styled-components": "^6.1.11"
+  },
+  "scripts": {
+    "clean": "rm -rf ./dist/*",
+    "build": "bun build.ts",
+    "watch": "bun build.ts --watch",
+    "dev": "bunx http-server -p 3000 -S -C cert.pem -K key.pem ./dist"
+  }
 }
