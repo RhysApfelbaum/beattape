@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
-import Slider from './Slider';
+import Slider from './components/Slider';
 
 const PlayQueue: React.FC = () => {
 
@@ -106,7 +106,6 @@ const PlayQueue: React.FC = () => {
             <button>prev</button>
             <button onClick={handlePause}>play/pause</button>
             <button onClick={nextTrack}>next</button>
-            <Slider update={() => {}} />
             <div>
                 <p>Now playing...</p>
                 <p>{playQueue.currentTrack.displayName}</p>

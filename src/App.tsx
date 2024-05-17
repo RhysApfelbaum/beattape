@@ -1,11 +1,10 @@
 import React from 'react';
-import Slider from './Slider';
+import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
 import { Track } from './fmod/track';
 import PlayQueueProvider from './PlayQueueProvider';
 import PlayQueue from './PlayQueue';
 
-declare const FMODModule: any;
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -35,9 +34,11 @@ const App: React.FC = () => {
 
     return (
         <PlayQueueProvider>
-            <p onClick={loadTrack}>Hello world</p>
-            <Slider update={updateVinyl}/>
             <PlayQueue />
+            <br />
+            <br />
+            <br />
+            <Slider update={updateVinyl}/>
         </PlayQueueProvider>
     );
 };

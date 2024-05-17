@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { FMOD } from './fmod/system';
 import { Bank } from './fmod/bank';
 import { EventInstance } from './fmod/event';
-import { Track } from './fmod/track';
 
 declare const FMODModule: any;
 const preloadBanks: Bank[] = [];
@@ -68,10 +67,15 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         FMODModule(FMOD);
     },[]);
 
+    const ref = useRef<HTMLDivElement>(null);
+
+    if (ref.current) {
+        ref.current.style.setProperty('--thumb-color', '#ff0000');
+    }
 
     return (
         <FMODContext.Provider value={fmod}>
-            {children}
+            <div ref={ref}>{children}</div>
         </FMODContext.Provider>
     );
 };

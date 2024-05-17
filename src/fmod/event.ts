@@ -67,7 +67,6 @@ export class EventInstance {
     }
 
     setParameter(name: string, value: number, immediate: boolean) {
-        console.log(name, this.isLoaded)
         FMOD.Result = this.instance.setParameterByName(name, value, immediate);
     }
 
