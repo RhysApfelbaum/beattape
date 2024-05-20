@@ -1,6 +1,5 @@
 import { Pointer } from './pointer';
 
-const preloadBanks: Bank[] = [];
 // This way madness lies.
 export const FMOD: any = {
     preRun: () => {},
@@ -14,14 +13,13 @@ export const FMOD: any = {
         FMOD.Result = FMOD.Studio.getCoreSystem(outval);
         FMOD.Core = outval.deref();
 
-
         // Optional. Setting DSP Buffer size can affect latency and stability.
         // Processing is currently done in the main thread so anything lower than 2048 samples can cause stuttering on some devices.
         FMOD.Result = FMOD.Core.setDSPBufferSize(2048, 2);
         
         // await waitForFocus();
 
-        // Optional.    Set sample rate of mixer to be the same as the OS output rate.
+        // Optional. Set sample rate of mixer to be the same as the OS output rate.
         // This can save CPU time and latency by avoiding the automatic insertion of a resampler at the output stage.
         FMOD.Result = FMOD.Core.getDriverInfo(0, null, null, sampleRate, null, null);
         FMOD.Result = FMOD.Core.setSoftwareFormat(sampleRate.deref(), FMOD.SPEAKERMODE_DEFAULT, 0)

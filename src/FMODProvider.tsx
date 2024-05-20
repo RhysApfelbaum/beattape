@@ -8,7 +8,6 @@ const preloadBanks: Bank[] = [];
 
 
 const fmodInitialState = {
-    ready: false,
     events: {
         paused:      new EventInstance('snapshot:/Paused'),
         pitchWobble: new EventInstance('snapshot:/PitchWobble'),
@@ -19,6 +18,8 @@ const fmodInitialState = {
         vinyl:       new EventInstance('event:/Ambiences/Vinyl'),
         birds:       new EventInstance('event:/Ambiences/Birds'),
     },
+    ref: null as React.RefObject<HTMLElement> | null,
+    ready: false
 };
 
 FMOD.preRun = () => {
@@ -32,6 +33,8 @@ const mainLoop = () => {
     FMOD.Result = FMOD.Studio.update();
 };
 
+let x: React.RefObject<HTMLDivElement>;
+
 
 const FMODContext = createContext<typeof fmodInitialState>(fmodInitialState);
 
@@ -39,14 +42,12 @@ const FMODContext = createContext<typeof fmodInitialState>(fmodInitialState);
 export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const [ fmod, setFmod ] = useState(fmodInitialState);
-
+    const ref = useRef<HTMLDivElement>(null);
 
     FMOD.onSystemInitialized = async () => {
 
         // Load all fetched banks
         await Promise.all<void>(preloadBanks.map((bank: Bank) => bank.load()));
-        // const evnt = new EventInstance('event:/Ambiences/Vinyl');
-
 
         // Load all global events into memory
         for (const name in fmodInitialState.events) {
@@ -54,20 +55,19 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             event.init();
             event.load();
         }
-
         
         // Start FMOD main loop
         window.setInterval(mainLoop, 20);
 
         // Mark FMOD state as ready
-        setFmod(prevFmod => ({ ...prevFmod, ready: true }));
+        console.log('ref = ', ref);
+        setFmod(prevFmod => ({ ...prevFmod, ref: ref, ready: true}));
     };
 
     useEffect(() => {
         FMODModule(FMOD);
     },[]);
 
-    const ref = useRef<HTMLDivElement>(null);
 
     if (ref.current) {
         ref.current.style.setProperty('--thumb-color', '#ff0000');

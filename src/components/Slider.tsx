@@ -49,7 +49,8 @@ const Slider: React.FC<{ update: (value: number) => any }> = ({ update }) => {
             -moz-appearance: none transparent;
             -moz-transform: none;
             width: 5px;
-            background: var(--thumb-color);
+        
+            background: hsl(120, 100%, var(--grit));
             height: 20px;
             border-radius: 2px;
             position: relative;

@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
-import Slider from './components/Slider';
 
 const PlayQueue: React.FC = () => {
 
     const [ paused, setPaused ] = useState(true);
     const [ playQueue, setPlayQueue ] = usePlayQueue();
+    const [ amountPoll, setAmountPoll ] = useState<Timer | null>(null);
     
     const fmod = useFMOD();
 
@@ -17,6 +17,28 @@ const PlayQueue: React.FC = () => {
 
     useEffect(() => {
         updatePlayQueueLoading();
+
+        if (amountPoll) {
+            clearInterval(amountPoll);
+        }
+
+        const interval = setInterval(() => {
+            const grit = playQueue.currentTrack.event.getParameter('GritAmount');
+            const brightness = playQueue.currentTrack.event.getParameter('BrightnessAmount');
+            const chops = playQueue.currentTrack.event.getParameter('ChopsAmount');
+            const vocals = playQueue.currentTrack.event.getParameter('VocalsAmount');
+            console.log(grit, brightness, chops, vocals);
+            
+            if (fmod.ref?.current) {
+                const style = fmod.ref.current.style;
+                style.setProperty('--grit', `${grit * 100}%`); 
+                style.setProperty('--brightness', `${brightness * 100}%`); 
+                style.setProperty('--chops', `${chops * 100}%`); 
+                style.setProperty('--vocals', `${vocals * 100}%`); 
+            }
+        }, 100);
+
+        setAmountPoll(interval);
     }, [playQueue]);
 
     const updatePauseState = (tapestop: boolean) => {
@@ -25,7 +47,6 @@ const PlayQueue: React.FC = () => {
                 playQueue.currentTrack.event.setPaused(true);
                 return;
             }
-
             fmod.events.paused.start();
 
             // Tape stop effect jankery
@@ -103,7 +124,7 @@ const PlayQueue: React.FC = () => {
 
     return (
         <>
-            <button>prev</button>
+            <button onClick={prevTrack}>prev</button>
             <button onClick={handlePause}>play/pause</button>
             <button onClick={nextTrack}>next</button>
             <div>
