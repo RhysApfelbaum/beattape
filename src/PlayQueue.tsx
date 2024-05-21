@@ -22,12 +22,12 @@ const PlayQueue: React.FC = () => {
             clearInterval(amountPoll);
         }
 
+        // Poll the effectiveness of each slider and update the CSS variables.
         const interval = setInterval(() => {
             const grit = playQueue.currentTrack.event.getParameter('GritAmount');
             const brightness = playQueue.currentTrack.event.getParameter('BrightnessAmount');
             const chops = playQueue.currentTrack.event.getParameter('ChopsAmount');
             const vocals = playQueue.currentTrack.event.getParameter('VocalsAmount');
-            console.log(grit, brightness, chops, vocals);
             
             if (fmod.ref?.current) {
                 const style = fmod.ref.current.style;
