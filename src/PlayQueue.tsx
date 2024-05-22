@@ -91,7 +91,6 @@ const PlayQueue: React.FC = () => {
                 break;
         }
         playQueue.currentTrack.event.start();
-        playQueue.currentTrack.event.start();
         updatePauseState(false)
     };
 
@@ -100,8 +99,8 @@ const PlayQueue: React.FC = () => {
         playQueue.currentTrack.event.stop(0);
         setPlayQueue({
             ...playQueue,
-            history: [playQueue.currentTrack, ...playQueue.history], // Add currentTrack to history
-            currentTrack: playQueue.nextTracks[0], // Set currentTrack to the next track
+            history: [playQueue.currentTrack, ...playQueue.history],
+            currentTrack: playQueue.nextTracks[0],
             nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
         });
     };
@@ -109,11 +108,16 @@ const PlayQueue: React.FC = () => {
     const prevTrack = () => {
         fmod.events.tapeStop.oneShot();
         playQueue.currentTrack.event.stop(0);
+
+        if (playQueue.history.length === 0) {
+            playQueue.currentTrack.event.start();
+            return;
+        }
         setPlayQueue({
             ...playQueue,
-            history: [playQueue.currentTrack, ...playQueue.history], // Add currentTrack to history
-            currentTrack: playQueue.nextTracks[0], // Set currentTrack to the next track
-            nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
+            nextTracks: playQueue.nextTracks.slice(1), // Add current track to the next tracks
+            currentTrack: playQueue.history[0], // Set the current track to the most recently played track if it exists
+            history: playQueue.history.slice(1), // Remove the most recently played track, because it's now being played again
         });
     };
 
@@ -124,11 +128,12 @@ const PlayQueue: React.FC = () => {
 
     return (
         <>
+            <>
+            </>
             <button onClick={prevTrack}>prev</button>
             <button onClick={handlePause}>play/pause</button>
             <button onClick={nextTrack}>next</button>
             <div>
-                <p>Now playing...</p>
                 <p>{playQueue.currentTrack.displayName}</p>
             </div>
             <br />
