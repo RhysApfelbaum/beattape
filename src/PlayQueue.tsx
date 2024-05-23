@@ -113,11 +113,14 @@ const PlayQueue: React.FC = () => {
             playQueue.currentTrack.event.start();
             return;
         }
+
         setPlayQueue({
             ...playQueue,
-            nextTracks: playQueue.nextTracks.slice(1), // Add current track to the next tracks
-            currentTrack: playQueue.history[0], // Set the current track to the most recently played track if it exists
-            history: playQueue.history.slice(1), // Remove the most recently played track, because it's now being played again
+            nextTracks: playQueue.history.length > 0
+                ? [playQueue.currentTrack , ...playQueue.nextTracks]
+                : playQueue.nextTracks,
+            currentTrack: playQueue.history[0],
+            history: playQueue.history.slice(1)
         });
     };
 
