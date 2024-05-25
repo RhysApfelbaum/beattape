@@ -79,7 +79,7 @@ const Slider: React.FC<{
     };
 
     return (
-        <div>
+        <div style={{ width: 100, display: 'grid', gridTemplateRows: '100px 50px' }}>
             <SliderShadow style={{ '--activation': activation } as React.CSSProperties}>
                 <SliderTrack />
                 <SliderInput
@@ -89,7 +89,6 @@ const Slider: React.FC<{
                     onChange={handleChange}
                 />
             </SliderShadow>
-            <br />
             <p style={{ textAlign: 'center' }}>{label}</p>
         </div>
     );
