@@ -3,7 +3,9 @@ import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
 import { Track } from './fmod/track';
 import PlayQueueProvider from './PlayQueueProvider';
-import PlayQueue from './PlayQueue';
+import TrackControls from './TrackControls';
+import TrackSliders from './TrackSliders';
+import AmbienceSliders from './AmbienceSliders';
 
 
 const App: React.FC = () => {
@@ -34,11 +36,9 @@ const App: React.FC = () => {
 
     return (
         <PlayQueueProvider>
-            <PlayQueue />
-            <br />
-            <br />
-            <br />
-            <Slider update={updateVinyl}/>
+            <TrackSliders />
+            <TrackControls />
+            <AmbienceSliders />
         </PlayQueueProvider>
     );
 };
