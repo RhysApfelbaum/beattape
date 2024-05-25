@@ -8,7 +8,6 @@ const SliderInput = styled.input`
     width: 100px;
     height: 50px;
     margin: 0 0 0 0 !important;
-    --slider-thumb-background: 'gray';
     transform: translateY(17px) rotate(270deg);
     transform-origin: center;
     background: transparent;
@@ -22,7 +21,7 @@ const SliderInput = styled.input`
         -webkit-appearance: none;
         width: 5px;
         /* background: var(--slider-thumb-background); */
-        background: hsl(120, 100%, var(--grit));
+        background: hsl(120, 100%, var(--activation));
         height: 20px;
         transform: translateX(-8px);
         border-radius: 2px;
@@ -41,7 +40,7 @@ const SliderInput = styled.input`
         -moz-transform: none;
         width: 5px;
 
-        background: hsl(120, 100%, var(--grit));
+        background: hsl(120, 100%, );
         height: 20px;
         border-radius: 2px;
         position: relative;
@@ -69,23 +68,30 @@ const SliderShadow = styled.div`
     filter: drop-shadow(0 0 10px rgb(255, 238, 222));
 `;
 
-const Slider: React.FC<{ update: (value: number) => any }> = ({ update }) => {
+const Slider: React.FC<{
+    update: (value: number) => any,
+    label: string,
+    activation: string
+}> = ({ update, label, activation }) => {
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         update(parseInt(event.target.value) / 100);
     };
 
-
     return (
-        <SliderShadow>
-            <SliderTrack />
-            <SliderInput
-                type="range"
-                id="brightness"
-                className="slider"
-                onChange={handleChange}
-            />
-        </SliderShadow>
+        <div>
+            <SliderShadow style={{ '--activation': activation } as React.CSSProperties}>
+                <SliderTrack />
+                <SliderInput
+                    type="range"
+                    id="brightness"
+                    className="slider"
+                    onChange={handleChange}
+                />
+            </SliderShadow>
+            <br />
+            <p style={{ textAlign: 'center' }}>{label}</p>
+        </div>
     );
 };
 
