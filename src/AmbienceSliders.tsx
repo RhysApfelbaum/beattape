@@ -2,10 +2,21 @@ import React from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
+import Toggle from './Toggle';
+import styled from 'styled-components';
+
+const AmbienceContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 100px);
+    grid-template-rows: 150px 50px;
+    justify-content: center;
+    justify-items: center;
+    width: 300px;
+    height: 400px;
+    margin-top: 10px;
+`;
 
 const AmbienceSliders: React.FC = () => {
-
-    const [ playQueue, _ ] = usePlayQueue();
     const fmod = useFMOD();
 
     const updateRain = (value: number) => {
@@ -18,24 +29,45 @@ const AmbienceSliders: React.FC = () => {
     };
     const updateBirds = (value: number) => {
         if (fmod.events.birds.playbackState !== 'playing') return;
-        fmod.events.birds.setParameter('BirdsAmount', value, false);
+        fmod.events.birds.setParameter('BirdAmount', value, false);
+    };
+
+    const toggleRain = (pressed: boolean) => {
+        fmod.events.tapeStop.oneShot();
+        if (pressed) {
+            fmod.events.rain.start();
+        } else {
+            fmod.events.rain.stop(0);
+        }
+    };
+
+    const toggleBirds = (pressed: boolean) => {
+        fmod.events.tapeStop.oneShot();
+        if (pressed) {
+            fmod.events.birds.start();
+        } else {
+            fmod.events.birds.stop(0);
+        }
+    };
+
+    const toggleVinyl = (pressed: boolean) => {
+        fmod.events.tapeStop.oneShot();
+        if (pressed) {
+            fmod.events.vinyl.start();
+        } else {
+            fmod.events.vinyl.stop(0);
+        }
     };
 
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, 100px)',
-            gridTemplateRows: '100px',
-            justifyContent: 'center',
-            justifyItems: 'center',
-            width: '450px',
-            height: '150px', 
-            marginTop: '10px',
-        }}>
+        <AmbienceContainer>
             <Slider update={updateRain} label="rain" activation="0%"/>
-            <Slider update={updateVinyl} label="vinyl"  activation="0%"/>
+            <Slider update={updateVinyl} label="vinyl crackle"  activation="0%"/>
             <Slider update={updateBirds} label="birds chirping"  activation="0%"/>
-        </div>
+            <Toggle action={toggleRain}/>
+            <Toggle action={toggleVinyl}/>
+            <Toggle action={toggleBirds}/>
+        </AmbienceContainer>
     );
 };
 
