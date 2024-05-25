@@ -41,10 +41,22 @@ export class EventInstance {
         this.instance = outval.deref();
     }
 
-    get playbackState(): number {
+    get playbackState(): 'playing' | 'sustaining' | 'stopped' | 'starting' | 'stopping' {
         const outval = new Pointer<number>();
         this.instance.getPlaybackState(outval);
-        return outval.deref();
+        switch (outval.deref()) {
+            case FMOD.STUDIO_PLAYBACK_PLAYING:
+                return 'playing';
+            case FMOD.STUDIO_PLAYBACK_SUSTAINING:
+                return 'sustaining';
+            case FMOD.STUDIO_PLAYBACK_STOPPED:
+                return 'stopped';
+            case FMOD.STUDIO_PLAYBACK_STARTING:
+                return 'starting';
+            case FMOD.STUDIO_PLAYBACK_STOPPING:
+                return 'stopped';
+        }
+        return 'stopped';
     }
 
     start() {
