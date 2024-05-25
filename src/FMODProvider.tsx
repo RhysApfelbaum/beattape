@@ -33,9 +33,6 @@ const mainLoop = () => {
     FMOD.Result = FMOD.Studio.update();
 };
 
-let x: React.RefObject<HTMLDivElement>;
-
-
 const FMODContext = createContext<typeof fmodInitialState>(fmodInitialState);
 
 // Create a provider component to wrap the top-level of your application

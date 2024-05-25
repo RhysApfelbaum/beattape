@@ -1,3 +1,0 @@
-Bun.build({
-    entrypoints: [ '']
-});
