@@ -4,6 +4,8 @@ import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
 import Button from './Button';
 
+const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
+
 const TrackControls: React.FC = () => {
 
     const [ paused, setPaused ] = useState(true);
@@ -25,6 +27,7 @@ const TrackControls: React.FC = () => {
 
         // Poll the effectiveness of each slider and update the CSS variables.
         const interval = setInterval(() => {
+            if (!playQueue.currentTrack.event.isLoaded) return;
             const grit = playQueue.currentTrack.event.getParameter('GritAmount');
             const brightness = playQueue.currentTrack.event.getParameter('BrightnessAmount');
             const chops = playQueue.currentTrack.event.getParameter('ChopsAmount');
@@ -32,10 +35,10 @@ const TrackControls: React.FC = () => {
             
             if (fmod.ref?.current) {
                 const style = fmod.ref.current.style;
-                style.setProperty('--grit', `${grit * 100}%`); 
-                style.setProperty('--brightness', `${brightness * 100}%`); 
-                style.setProperty('--chops', `${chops * 100}%`); 
-                style.setProperty('--vocals', `${vocals * 100}%`); 
+                style.setProperty('--grit', mix(grit)); 
+                style.setProperty('--brightness', mix(brightness)); 
+                style.setProperty('--chops', mix(chops)); 
+                style.setProperty('--vocals', mix(vocals)); 
             }
         }, 100);
 

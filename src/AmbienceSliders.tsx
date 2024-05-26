@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
@@ -18,6 +18,14 @@ const AmbienceContainer = styled.div`
 
 const AmbienceSliders: React.FC = () => {
     const fmod = useFMOD();
+
+    const [ ambience, setAmbience ] = useState({
+        rain: false,
+        vinyl: false,
+        birds: false
+    });
+
+    console.log(ambience);
 
     const updateRain = (value: number) => {
         if (fmod.events.rain.playbackState !== 'playing') return;
@@ -39,6 +47,7 @@ const AmbienceSliders: React.FC = () => {
         } else {
             fmod.events.rain.stop(0);
         }
+        setAmbience({ ...ambience, rain: pressed });
     };
 
     const toggleBirds = (pressed: boolean) => {
@@ -48,6 +57,7 @@ const AmbienceSliders: React.FC = () => {
         } else {
             fmod.events.birds.stop(0);
         }
+        setAmbience({ ...ambience, birds: pressed });
     };
 
     const toggleVinyl = (pressed: boolean) => {
@@ -57,13 +67,14 @@ const AmbienceSliders: React.FC = () => {
         } else {
             fmod.events.vinyl.stop(0);
         }
+        setAmbience({ ...ambience, vinyl: pressed });
     };
 
     return (
         <AmbienceContainer>
-            <Slider update={updateRain} label="rain" activation="0%"/>
-            <Slider update={updateVinyl} label="vinyl crackle"  activation="0%"/>
-            <Slider update={updateBirds} label="birds chirping"  activation="0%"/>
+            <Slider update={updateRain} label="rain" activation={ ambience.rain ? '100%' : '0%'}/>
+            <Slider update={updateVinyl} label="vinyl crackle"  activation={ ambience.vinyl ? '100%' : '0%'}/>
+            <Slider update={updateBirds} label="birds chirping"  activation={ ambience.birds ? '100%' : '0%'}/>
             <Toggle action={toggleRain}/>
             <Toggle action={toggleVinyl}/>
             <Toggle action={toggleBirds}/>
