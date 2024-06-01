@@ -11,12 +11,19 @@ const TrackControls: React.FC = () => {
     const [ paused, setPaused ] = useState(true);
     const [ playQueue, setPlayQueue ] = usePlayQueue();
     const [ amountPoll, setAmountPoll ] = useState<Timer | null>(null);
+    const [ currentTrack, setCurrentTrack ] = useState(playQueue.currentTrack);
     
     const fmod = useFMOD();
 
     useEffect(() => {
         updatePauseState(true);
     }, [paused]);
+
+    useEffect(() => {
+        if (playQueue.currentTrack !== currentTrack) {
+            setCurrentTrack(playQueue.currentTrack);
+        }
+    }, [playQueue]);
 
     useEffect(() => {
         updatePlayQueueLoading();
@@ -27,11 +34,11 @@ const TrackControls: React.FC = () => {
 
         // Poll the effectiveness of each slider and update the CSS variables.
         const interval = setInterval(() => {
-            if (!playQueue.currentTrack.event.isLoaded) return;
-            const grit = playQueue.currentTrack.event.getParameter('GritAmount');
-            const brightness = playQueue.currentTrack.event.getParameter('BrightnessAmount');
-            const chops = playQueue.currentTrack.event.getParameter('ChopsAmount');
-            const vocals = playQueue.currentTrack.event.getParameter('VocalsAmount');
+            if (!currentTrack.event.isLoaded) return;
+            const grit = currentTrack.event.getParameter('GritAmount');
+            const brightness = currentTrack.event.getParameter('BrightnessAmount');
+            const chops = currentTrack.event.getParameter('ChopsAmount');
+            const vocals = currentTrack.event.getParameter('VocalsAmount');
             
             if (fmod.ref?.current) {
                 const style = fmod.ref.current.style;
@@ -43,12 +50,12 @@ const TrackControls: React.FC = () => {
         }, 100);
 
         setAmountPoll(interval);
-    }, [playQueue]);
+    }, [currentTrack]);
 
     const updatePauseState = (tapestop: boolean) => {
         if (paused) {
             if (!tapestop) {
-                playQueue.currentTrack.event.setPaused(true);
+                currentTrack.event.setPaused(true);
                 return;
             }
             fmod.events.paused.start();
@@ -58,19 +65,19 @@ const TrackControls: React.FC = () => {
             const intervalID = setInterval(() => {
                 const intensity = fmod.events.paused.getParameter('Intensity');
                 if (intensity >= 100) {
-                    playQueue.currentTrack.event.setPaused(true);
+                    currentTrack.event.setPaused(true);
                     clearInterval(intervalID);
                 }
             }, 50);
         } else {
-            playQueue.currentTrack.event.setPaused(false);
+            currentTrack.event.setPaused(false);
             if (tapestop) fmod.events.paused.stop(0);
         }
     };
 
     const updatePlayQueueLoading = async () => {
-        if (playQueue.currentTrack.bank.loadingState === LoadingState.UNLOADED) {
-            playQueue.currentTrack.fetch();
+        if (currentTrack.bank.loadingState === LoadingState.UNLOADED) {
+            currentTrack.fetch();
         }
 
         if (playQueue.nextTracks[0].bank.loadingState === LoadingState.UNLOADED) {
@@ -83,27 +90,31 @@ const TrackControls: React.FC = () => {
             }
         }
 
-        switch (playQueue.currentTrack.bank.loadingState) {
+        switch (currentTrack.bank.loadingState) {
             case LoadingState.UNLOADED:
             case LoadingState.FETCHED:
-                await playQueue.currentTrack.load()
+                await currentTrack.load()
+                currentTrack.event.start();
+                currentTrack.event.setParameter('Grit', playQueue.sliderState.grit, false);
+                currentTrack.event.setParameter('Brightness', playQueue.sliderState.brightness, false);
+                currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
+                currentTrack.event.setParameter('Vocals', playQueue.sliderState.vocals, false);
                 break;
             case LoadingState.ERROR:
-                console.error(`Error loading ${playQueue.currentTrack.name}`);
+                console.error(`Error loading ${currentTrack.name}`);
                 break;
             case LoadingState.LOADED:
                 break;
         }
-        playQueue.currentTrack.event.start();
         updatePauseState(false)
     };
 
     const nextTrack = () => {
         fmod.events.tapeStop.oneShot();
-        playQueue.currentTrack.event.stop(0);
+        currentTrack.event.stop(0);
         setPlayQueue({
             ...playQueue,
-            history: [playQueue.currentTrack, ...playQueue.history],
+            history: [currentTrack, ...playQueue.history],
             currentTrack: playQueue.nextTracks[0],
             nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
         });
@@ -111,17 +122,17 @@ const TrackControls: React.FC = () => {
 
     const prevTrack = () => {
         fmod.events.tapeStop.oneShot();
-        playQueue.currentTrack.event.stop(0);
+        currentTrack.event.stop(0);
 
         if (playQueue.history.length === 0) {
-            playQueue.currentTrack.event.start();
+            currentTrack.event.start();
             return;
         }
 
         setPlayQueue({
             ...playQueue,
             nextTracks: playQueue.history.length > 0
-                ? [playQueue.currentTrack , ...playQueue.nextTracks]
+                ? [currentTrack , ...playQueue.nextTracks]
                 : playQueue.nextTracks,
             currentTrack: playQueue.history[0],
             history: playQueue.history.slice(1)
@@ -150,18 +161,11 @@ const TrackControls: React.FC = () => {
                     </img>
                 </Button>
                 <Button onClick={nextTrack}>next</Button>
-                <p>{playQueue.currentTrack.displayName}</p>
+                <p>now playing:<br />{currentTrack.displayName}</p>
             </div>
             <br />
         </>
     );
 };
-            // <Slider update={updateGrit} activation="var(--grit)"/>
-            // <br />
-            // <Slider update={updateBrightness} activation="var(--brightness)"/>
-            // <br />
-            // <Slider update={updateChops} activation="var(--chops)"/>
-            // <br />
-            // <Slider update={updateVocals} activation="var(--vocals)"/>
 
 export default TrackControls;

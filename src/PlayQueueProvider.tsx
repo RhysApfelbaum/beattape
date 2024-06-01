@@ -22,6 +22,7 @@ interface PlayQueue {
     nextTracks: Track[];
     currentTrack: Track;
     history: Track[];
+    tracklist: Track[];
 }
 
 
@@ -34,14 +35,15 @@ const PlayQueueContext = createContext<[
 export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const playQueueState = useState<PlayQueue>({
         sliderState: {
-            grit: 0,
-            brightness: 0,
-            chops: 0,
-            vocals: 0
+            grit: 0.5,
+            brightness: 0.5,
+            chops: 0.5,
+            vocals: 0.5
         },
         history: [],
         currentTrack: currentTrack,
-        nextTracks: tracklist
+        nextTracks: tracklist,
+        tracklist: tracklist
     });
     return (
         <PlayQueueContext.Provider value={playQueueState}>
