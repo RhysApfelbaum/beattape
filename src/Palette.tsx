@@ -3,7 +3,6 @@ import theme from './theme';
 
 const Palette: React.FC = () => {
     const colors: any = theme.colors;
-    console.log(colors);
     return (
         <div style={{
 
