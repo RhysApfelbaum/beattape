@@ -6,11 +6,18 @@ import TrackSliders from './TrackSliders';
 import AmbienceSliders from './AmbienceSliders';
 import styled from 'styled-components';
 import Effects from './Effects';
+import PlayQueue from './PlayQueue';
 
 const TrackControlContainer = styled.div`
     display: flex;
     flex-direction: row;
     margin-top: 20px;
+    justify-content: center;
+`;
+
+const Art = styled.img`
+    width: 440px;
+    height: auto;
     outline: 1px solid ${props => props.theme.colors.lightTint} 
 `;
 
@@ -22,10 +29,13 @@ const App: React.FC = () => {
 
     return (
         <PlayQueueProvider>
-            <img src="computer.png" style={{ width: 440, height: 'auto' }}/>
+            <Art src="computer.png" />
             <TrackControlContainer>
                 <TrackSliders />
-                <TrackControls />
+                <div style={{ width: 200 }}>
+                    <TrackControls />
+                    <PlayQueue />
+                </div>
                 <AmbienceSliders />
                 <Effects />
             </TrackControlContainer>
