@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, MouseEvent } from 'react';
 import styled from 'styled-components';
 
 // This is the worst thing in the world;
@@ -100,12 +100,19 @@ const SliderText = styled.p`
 
 const Slider: React.FC<{
     update: (value: number) => any,
+    onMouseUp?: (value: number) => any,
     label: string,
     activation: string
-}> = ({ update, label, activation }) => {
+}> = ({ update, onMouseUp = (value: number) => {}, label, activation }) => {
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         update(parseInt(event.target.value) / 100);
+    };
+
+    const handleMouseUp = (event: MouseEvent) => {
+        const target = event.target as HTMLInputElement;
+        if (!target) return;
+        onMouseUp(parseInt(target.value) / 100);
     };
 
     return (
@@ -117,7 +124,7 @@ const Slider: React.FC<{
         } as React.CSSProperties}>
             <SliderShadow>
                 <SliderTrack />
-                <SliderInput type="range" onChange={handleChange} />
+                <SliderInput type="range" onChange={handleChange} onMouseUp={handleMouseUp}/>
             </SliderShadow>
             <SliderText>{label}</SliderText>
         </div>

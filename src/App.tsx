@@ -11,6 +11,7 @@ const TrackControlContainer = styled.div`
     display: flex;
     flex-direction: row;
     margin-top: 20px;
+    outline: 1px solid ${props => props.theme.colors.lightTint} 
 `;
 
 const App: React.FC = () => {
