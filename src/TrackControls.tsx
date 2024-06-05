@@ -4,6 +4,10 @@ import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
 import Button from './Button';
 import { FMOD } from './fmod/system';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
+import { faBackwardFast, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
+import theme from './theme';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -180,16 +184,21 @@ const TrackControls: React.FC = () => {
             <div style={{
                 display: 'block'
             }}>
-                <Button onClick={prevTrack}>prev</Button>
+                <Button onClick={prevTrack} style={{ width: 40, height: 30, marginBottom: 20 }}>
+                    <FontAwesomeIcon icon={faBackwardFast} />
+                </Button>
                 <Button onClick={handlePause}>
-                    <img src="pause.png" style={{
+                    <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
                         width: '2em',
                         height: '2em',
                         margin: '1em 1em 1em 1em',
                         boxShadow: 'none',
+                        color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
                     }} />
                 </Button>
-                <Button onClick={nextTrack}>next</Button>
+                <Button onClick={nextTrack} style={{ width: 40, height: 30, marginBottom: 20 }}>
+                    <FontAwesomeIcon icon={faFastForward} />
+                </Button>
                 <p>now playing:<br />{currentTrack.displayName}</p>
             </div>
             <br />
@@ -198,3 +207,9 @@ const TrackControls: React.FC = () => {
 };
 
 export default TrackControls;
+                    // <img src="pause.png" style={{
+                    //     width: '2em',
+                    //     height: '2em',
+                    //     margin: '1em 1em 1em 1em',
+                    //     boxShadow: 'none',
+                    // }} />
