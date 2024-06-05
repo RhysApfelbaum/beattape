@@ -9,8 +9,10 @@ const rootElement = document.getElementById('root');
 
 const GlobalStyles = createGlobalStyle`
     body {
-        font-family: monospace;
+        font-family: "DM Mono", monospace;
+        font-weight: 400;
         font-size: 15px;
+        font-style: normal;
         text-align: center;
         color: white;
         background-color: ${props => props.theme.colors.background};
