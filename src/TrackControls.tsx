@@ -171,8 +171,8 @@ const TrackControls: React.FC = () => {
     });
 
     const beatPulse = async () => {
-        await beatPulseInterpolate(0, 100, 400);
-        await beatPulseInterpolate(100, 0, 400);
+        await beatPulseInterpolate(0, 100, 200);
+        await beatPulseInterpolate(100, 0, 600);
     };
 
     return (
