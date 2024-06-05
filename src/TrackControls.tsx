@@ -3,8 +3,13 @@ import { usePlayQueue } from './PlayQueueProvider';
 import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
 import Button from './Button';
+import { FMOD } from './fmod/system';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
+
+const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+let beatPulseID: number;
 
 const TrackControls: React.FC = () => {
 
@@ -95,6 +100,10 @@ const TrackControls: React.FC = () => {
             case LoadingState.FETCHED:
                 await currentTrack.load()
                 currentTrack.event.start();
+                currentTrack.event.setCallback(FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT, parameters => {
+                    beatPulse();
+                    return FMOD.OK;
+                });
                 currentTrack.event.setParameter('Grit', playQueue.sliderState.grit, false);
                 currentTrack.event.setParameter('Brightness', playQueue.sliderState.brightness, false);
                 currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
@@ -144,6 +153,28 @@ const TrackControls: React.FC = () => {
         setPaused(!paused);
     };
 
+    const beatPulseInterpolate = (start: number, end: number, duration: number) => new Promise<void>(resolve => {
+        const startTime = performance.now();
+
+        const callUpdate = (currentTime: number): void => {
+            const elapsed = currentTime - startTime;
+            const progress = easeInOutQuad(Math.min(elapsed / duration, 1));
+            const value = (start + (end - start) * progress) + '%';
+            fmod.ref?.current?.style.setProperty('--beat-pulse', value);
+            if (progress < 1) {
+                beatPulseID = requestAnimationFrame(callUpdate);
+            } else {
+                resolve();
+            }
+        };
+        beatPulseID = requestAnimationFrame(callUpdate);
+    });
+
+    const beatPulse = async () => {
+        await beatPulseInterpolate(0, 100, 400);
+        await beatPulseInterpolate(100, 0, 400);
+    };
+
     return (
         <>
             <div style={{
@@ -155,10 +186,8 @@ const TrackControls: React.FC = () => {
                         width: '2em',
                         height: '2em',
                         margin: '1em 1em 1em 1em',
-                        boxShadow: 'none'
-                    }}>
-                        play/pause
-                    </img>
+                        boxShadow: 'none',
+                    }} />
                 </Button>
                 <Button onClick={nextTrack}>next</Button>
                 <p>now playing:<br />{currentTrack.displayName}</p>

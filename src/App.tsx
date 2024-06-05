@@ -18,7 +18,8 @@ const TrackControlContainer = styled.div`
 const Art = styled.img`
     width: 440px;
     height: auto;
-    outline: 1px solid ${props => props.theme.colors.lightTint} 
+    outline: 1px solid ${props => props.theme.colors.lightTint};
+    filter: drop-shadow(2px 4px 6px color-mix(in srgb, ${props => props.theme.colors.dark}, ${props => props.theme.colors.warmLight} var(--beat-pulse)));
 `;
 
 const App: React.FC = () => {

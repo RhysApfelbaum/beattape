@@ -82,6 +82,13 @@ export class EventInstance {
         FMOD.Result = this.instance.setParameterByName(name, value, immediate);
     }
 
+    setCallback(callbackMask: number, callback: (parameters: any) => number) {
+        FMOD.Result = this.instance.setCallback(
+            (callbackMask: number, event: any, parameters: any): number => callback(parameters),
+            callbackMask
+        );
+    }
+
     // Unloads the instance once playing has stopped
     unload() {
         FMOD.Result = this.instance.release() ;
