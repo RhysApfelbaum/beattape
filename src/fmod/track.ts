@@ -39,7 +39,6 @@ export class Track {
         // Load the track event which is now available because of the newly loaded bank.
         this.event.init();
         this.event.load();
-        FMOD.Result = this.event.instance.setCallback(beatAnimation, FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT);
     }
 
     unload() {
