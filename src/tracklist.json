@@ -40,14 +40,6 @@
         "vocals": 0.6
     },
     {
-        "name": "aquarium",
-        "displayName": "aquarium",
-        "grit": 0.7,
-        "brightness": 0.4,
-        "chops": 0,
-        "vocals": 0
-    },
-    {
         "name": "echo",
         "displayName": "echo",
         "grit": 0.6,
