@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from "./Button";
+import theme from './theme';
 
 const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) => {
     const [ pressed, setPressed ] = useState(false);
@@ -22,7 +23,7 @@ const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) =>
                 width: '8px',
                 height: '8px',
                 margin: '2px 3px 3px 3px',
-                backgroundColor: pressed ? toggleLight : 'black',
+                backgroundColor: pressed ? toggleLight : theme.colors.dark,
                 borderRadius: '2px',
                 boxShadow: 'none'
             }}></div>
