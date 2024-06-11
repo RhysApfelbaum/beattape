@@ -25,8 +25,6 @@ const AmbienceSliders: React.FC = () => {
         birds: false
     });
 
-    console.log(ambience);
-
     const updateRain = (value: number) => {
         if (fmod.events.rain.playbackState !== 'playing') return;
         fmod.events.rain.setParameter('RainAmount', value, false);

@@ -99,7 +99,6 @@ class PlayQueue {
         let unorderedListElement = document.querySelector('#play-queue');
         unorderedListElement.replaceChildren();
         this.nextTracks.forEach(track => {
-            //console.log(track);
             let li = document.createElement('li');
             li.innerText = track.displayName;
             
