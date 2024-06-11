@@ -104,10 +104,23 @@ const TrackControls: React.FC = () => {
             case LoadingState.FETCHED:
                 await currentTrack.load()
                 currentTrack.event.start();
-                currentTrack.event.setCallback(FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT, parameters => {
-                    beatPulse();
-                    return FMOD.OK;
-                });
+                currentTrack.event.setCallback(
+                    FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
+                    FMOD.STUDIO_EVENT_CALLBACK_STOPPED,
+                    parameters => {
+                        if (currentTrack.event.playbackState === 'stopped') {
+                            setPlayQueue({
+                                ...playQueue,
+                                history: [currentTrack, ...playQueue.history],
+                                currentTrack: playQueue.nextTracks[0],
+                                nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
+                            });
+                        } else {
+                            beatPulse();
+                        }
+                        return FMOD.OK;
+                    }
+                );
                 currentTrack.event.setParameter('Grit', playQueue.sliderState.grit, false);
                 currentTrack.event.setParameter('Brightness', playQueue.sliderState.brightness, false);
                 currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
@@ -184,8 +197,12 @@ const TrackControls: React.FC = () => {
             <div style={{
                 display: 'block'
             }}>
-                <Button onClick={prevTrack} style={{ width: 40, height: 30, marginBottom: 20 }}>
-                    <FontAwesomeIcon icon={faBackwardFast} />
+                <Button onClick={prevTrack}>
+                    <FontAwesomeIcon icon={faBackwardFast} style={{
+                        height: 15,
+                        width: 30,
+                        margin: '5px 5px 5px 5px'
+                    }}/>
                 </Button>
                 <Button onClick={handlePause}>
                     <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
@@ -196,8 +213,12 @@ const TrackControls: React.FC = () => {
                         color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
                     }} />
                 </Button>
-                <Button onClick={nextTrack} style={{ width: 40, height: 30, marginBottom: 20 }}>
-                    <FontAwesomeIcon icon={faFastForward} />
+                <Button onClick={nextTrack}>
+                    <FontAwesomeIcon icon={faFastForward} style={{
+                        height: 15,
+                        width: 30,
+                        margin: '5px 5px 5px 5px'
+                    }}/>
                 </Button>
                 <p>now playing:<br />{currentTrack.displayName}</p>
             </div>
@@ -207,9 +228,3 @@ const TrackControls: React.FC = () => {
 };
 
 export default TrackControls;
-                    // <img src="pause.png" style={{
-                    //     width: '2em',
-                    //     height: '2em',
-                    //     margin: '1em 1em 1em 1em',
-                    //     boxShadow: 'none',
-                    // }} />
