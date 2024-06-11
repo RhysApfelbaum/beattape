@@ -1,5 +1,13 @@
 [
     {
+        "name": "heavyFog",
+        "displayName": "heavy fog",
+        "grit": 0.5,
+        "brightness": 0.4,
+        "chops": 0.4,
+        "vocals": 0
+    },
+    {
         "name": "court",
         "displayName": "court",
         "grit": 0.6,
@@ -38,6 +46,14 @@
         "brightness": 0.8,
         "chops": 0.4,
         "vocals": 0.6
+    },
+    {
+        "name": "aquarium",
+        "displayName": "aquarium",
+        "grit": 0.7,
+        "brightness": 0.4,
+        "chops": 0,
+        "vocals": 0
     },
     {
         "name": "echo",
