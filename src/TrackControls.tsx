@@ -170,7 +170,7 @@ const TrackControls: React.FC = () => {
 
     const handlePause = () => {
         fmod.events.tapeStop.oneShot();
-        setPaused(!paused);
+        if (currentTrackLoaded) setPaused(!paused);
     };
 
     const beatPulseInterpolate = (start: number, end: number, duration: number) => new Promise<void>(resolve => {
