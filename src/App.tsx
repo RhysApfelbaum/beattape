@@ -7,6 +7,7 @@ import AmbienceSliders from './AmbienceSliders';
 import styled from 'styled-components';
 import Effects from './Effects';
 import PlayQueue from './PlayQueue';
+import Credits from './Credits';
 
 const TrackControlContainer = styled.div`
     display: flex;
@@ -40,6 +41,7 @@ const App: React.FC = () => {
                 <AmbienceSliders />
                 <Effects />
             </TrackControlContainer>
+            <Credits />
         </PlayQueueProvider>
     );
 };
