@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 
