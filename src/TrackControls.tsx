@@ -6,7 +6,7 @@ import Button from './Button';
 import { FMOD } from './fmod/system';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
-import { faBackwardFast, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardFast, faEllipsis, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
 import theme from './theme';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
@@ -21,6 +21,7 @@ const TrackControls: React.FC = () => {
     const [ playQueue, setPlayQueue ] = usePlayQueue();
     const [ amountPoll, setAmountPoll ] = useState<Timer | null>(null);
     const [ currentTrack, setCurrentTrack ] = useState(playQueue.currentTrack);
+    const [ currentTrackLoaded, setCurrentTrackLoaded ] = useState(false);
     
     const fmod = useFMOD();
 
@@ -101,8 +102,10 @@ const TrackControls: React.FC = () => {
 
         switch (currentTrack.bank.loadingState) {
             case LoadingState.UNLOADED:
+                if (currentTrackLoaded) setCurrentTrackLoaded(false);
             case LoadingState.FETCHED:
                 await currentTrack.load()
+                setCurrentTrackLoaded(true);
                 currentTrack.event.start();
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
@@ -220,7 +223,11 @@ const TrackControls: React.FC = () => {
                         margin: '5px 5px 5px 5px'
                     }}/>
                 </Button>
-                <p>now playing:<br />{currentTrack.displayName}</p>
+                <p>now playing:<br />{
+                    currentTrackLoaded
+                        ? currentTrack.displayName
+                        : <FontAwesomeIcon icon={faEllipsis} beatFade />
+                }</p>
             </div>
             <br />
         </>
