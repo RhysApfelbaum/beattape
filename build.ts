@@ -21,9 +21,6 @@ const build = async () => {
     }
 };
 
-console.log(`Removing the contents of ${outputDirectory}`);
-await $`rm -rf ${outputDirectory}/*`;
-
 build();
 
 if (argv.includes('--watch')) {
