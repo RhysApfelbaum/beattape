@@ -1,0 +1,35 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set Bun Up
+      uses: oven-sh/setup-bun@v1.2.2
+      with:
+        bun-version: latest
+
+    - name: Cache Bun Dependencies
+      id: cache-bun
+      uses: actions/cache@v3
+      with:
+        path: ~/.bun
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+        restore-keys: ${{ runner.os }}-bun-
+
+    - name: Install Dependencies
+      run: bun install
+
+    - name: Build
+      run: bun run build
+
+    - name: Verify build
+      run: ls -la dist
