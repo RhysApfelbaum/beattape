@@ -31,5 +31,15 @@ jobs:
     - name: Build
       run: bun run build
 
+    - name: copy file via ssh key
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: ./dist/
+        target: ${{ secrets.WEBSITE_DIRECTORY }}
+
     - name: Verify build
       run: ls -la dist
