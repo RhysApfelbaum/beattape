@@ -29,6 +29,6 @@
     "clean": "rm -rf ./dist/*",
     "build": "bun build.ts",
     "watch": "bun build.ts --watch",
-    "dev": "bunx http-server -p 3000 -S -C cert.pem -K key.pem ./dist"
+    "dev": "bunx http-server -p 3000 -S -C ./test_certificates/cert.pem -K ./test_certificates/key.pem ./dist"
   }
 }
