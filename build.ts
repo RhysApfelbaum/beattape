@@ -1,7 +1,5 @@
 import { argv, $ } from 'bun';
-import styleLoader from 'bun-style-loader';
 import { watch } from 'fs';
-
 
 const staticDirectory = './static';
 const outputDirectory = './dist';
