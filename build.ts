@@ -1,5 +1,5 @@
 import { argv, $ } from 'bun';
-import { watch } from 'fs';
+import { watch, mkdirSync, existsSync } from 'fs';
 
 const staticDirectory = './static';
 const outputDirectory = './dist';
@@ -21,10 +21,15 @@ const build = async () => {
     }
 };
 
-console.log(`Removing the contents of ${outputDirectory}`);
-await $`rm -rf ${outputDirectory}/*`;
+if (existsSync(outputDirectory)) {
+    console.log(`Removing the contents of ${outputDirectory}`);
+    await $`rm -rf ${outputDirectory}/*`;
+} else {
+    console.log(`Creating ${outputDirectory}`);
+    mkdirSync(outputDirectory, { recursive: true });
+}
 
-build();
+await build();
 
 if (argv.includes('--watch')) {
     watch('./src', { recursive: true }, async (event, filename) => {
