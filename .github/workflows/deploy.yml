@@ -31,7 +31,16 @@ jobs:
     - name: Build
       run: bun run build
 
-    - name: copy file via ssh key
+    - name: Clean the remote directory
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        script: rm -rf ${{ secrets.WEBSITE_DIRECTORY }}/*
+
+    - name: Copy over the build files
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -41,6 +50,3 @@ jobs:
         source: ./dist/*
         target: ${{ secrets.WEBSITE_DIRECTORY }}
         strip_components: 1
-
-    - name: Verify build
-      run: ls -la dist
