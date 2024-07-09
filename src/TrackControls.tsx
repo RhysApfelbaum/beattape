@@ -200,7 +200,12 @@ const TrackControls: React.FC = () => {
             <div style={{
                 display: 'block'
             }}>
-                <Button onClick={prevTrack}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                }}>
+
+                <Button onClick={prevTrack} style={{ height: '50%', marginTop: 20 }}>
                     <FontAwesomeIcon icon={faBackwardFast} style={{
                         height: 15,
                         width: 30,
@@ -216,13 +221,14 @@ const TrackControls: React.FC = () => {
                         color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
                     }} />
                 </Button>
-                <Button onClick={nextTrack}>
+                <Button onClick={nextTrack} style={{ height: '50%', marginTop: 20}}>
                     <FontAwesomeIcon icon={faFastForward} style={{
                         height: 15,
                         width: 30,
                         margin: '5px 5px 5px 5px'
                     }}/>
                 </Button>
+                </div>
                 <p>now playing:<br />{
                     currentTrackLoaded
                         ? currentTrack.displayName

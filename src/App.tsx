@@ -20,7 +20,15 @@ const Art = styled.img`
     width: 440px;
     height: auto;
     outline: 1px solid ${props => props.theme.colors.warmTint};
-    filter: drop-shadow(2px 4px 6px color-mix(in srgb, ${props => props.theme.colors.dark}, ${props => props.theme.colors.warmLight} var(--beat-pulse)));
+    filter: drop-shadow(
+        2px 4px 6px 
+        color-mix(
+            in srgb,
+            ${props => props.theme.colors.dark},
+            ${props => props.theme.colors.warmLight}
+            var(--beat-pulse)
+        )
+    );
 `;
 
 const OpenCredits = styled.button`
