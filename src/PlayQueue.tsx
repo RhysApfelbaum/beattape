@@ -34,7 +34,6 @@ const PlayQueue: React.FC = () => {
 
     const fillNextTracks = () => {
         const nextTracks = getNextTracks(playQueue);
-        console.log(nextTracks);
         const newTrackItems: TrackItem[] = [];
         if (trackItems.length === 0) {
             // If there are no track items to display, it's the first time loading the page.

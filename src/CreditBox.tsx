@@ -1,9 +1,7 @@
-import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
-import theme from './theme';
 import { usePlayQueue } from './PlayQueueProvider';
+import contributors from './contributors.json';
 
 const Credit = styled.li`
     list-style-type: none;
@@ -25,37 +23,33 @@ const Credit = styled.li`
 
 const CreditsBox = styled.ul`
     border: 1px solid ${props => props.theme.colors.brightLight};
-    border-radius: 5px;;
+    border-radius: 5px;
     width: 40%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: ${props => props.theme.colors.background};
     padding: 10px;
-    z-index: 100;
 `;
 
+type Contributor = typeof contributors.soundtomb;
 
-const Credits: React.FC<{ showing: boolean, handleClose: () => void }> = ({ showing, handleClose }) => {
+const CreditBox: React.FC<{ artist: string }> = ({ artist }) => {
     const [ playQueue, _ ] = usePlayQueue();
 
+    const artistInfo = contributors[artist as keyof typeof contributors];
     return (
         <CreditsBox>
             <Credit>
-                <strong>Website and Music: </strong>
+                <strong>Music by </strong>
                 <a href="https://soundtomb.bandcamp.com/" target="_blank" rel="noreferrer noopener">
                     Soundtomb
                 </a>
             </Credit>
             <Credit>
-                <strong>Art: </strong>
-                <a href="https://www.midjourney.com/app/" target="_blank" rel="noreferrer noopener">
-                    Midjourney
+                <strong>Artwork by </strong>
+                <a href={artistInfo.link} target="_blank" rel="noreferrer noopener">
+                    {artistInfo.name}
                 </a>
             </Credit>
         </CreditsBox>
     );
 };
 
-export default Credits;
+export default CreditBox;

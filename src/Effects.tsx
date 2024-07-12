@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useFMOD } from './FMODProvider';
 import Toggle from './Toggle';
-import styled from 'styled-components';
-import theme from './theme';
+import styled, { useTheme } from 'styled-components';
 
 const EffectsContainer = styled.div`
     p {
@@ -12,6 +11,8 @@ const EffectsContainer = styled.div`
 
 const Effects: React.FC = () => {
     const fmod = useFMOD();
+
+    const theme = useTheme();
 
     const [ effects, setEffects ] = useState({
         radio: false,

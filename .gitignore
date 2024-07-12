@@ -4,3 +4,4 @@ node_modules/
 dist/
 fmodstudio_download/
 test_certificates/
+bun.lockb
