@@ -37,14 +37,14 @@
         "thumbnailUrl": "/art/thumbnails/purple_cityscape.webp",
         "artist": "midjourney",
         "theme": {
-            "brightLight": "#ffe79c",
-            "lightTint": "#ffce84",
-            "warmLight": "#fb9b57",
-            "warmTint": "#8e522d",
-            "grey": "#8f6e77",
-            "background": "#1f1e33",
-            "darkTint": "#613c3b",
-            "dark": "#221d2f"
+            "brightLight": "#fff08e",
+            "lightTint": "#f85953",
+            "warmLight": "#de3b64",
+            "warmTint": "#e44066",
+            "grey": "#75405e",
+            "background": "#351437",
+            "darkTint": "#9d3d75",
+            "dark": "#09071e"
         }
     }
 ]
