@@ -22,7 +22,7 @@ const TrackControlContainer = styled.div`
 const Art = styled.img`
     width: 440px;
     height: auto;
-    outline: 1px solid ${props => props.theme.colors.warmTint};
+    border: 1px solid ${props => props.theme.colors.warmTint};
     filter: drop-shadow(
         2px 4px 6px 
         color-mix(
@@ -48,6 +48,16 @@ const OpenCredits = styled.button`
     }
 `;
 
+const SelectArtButton = styled.button`
+    background: none;
+    border: none;
+    font: inherit;
+    color: ${props => props.theme.colors.brightLight};
+    border: 1px solid ${props => props.theme.colors.brightLight};
+    border-radius: 5px;
+
+`;
+
 const GlobalStyles = createGlobalStyle`
     body {
         font-family: "DM Mono", monospace;
@@ -63,8 +73,10 @@ const GlobalStyles = createGlobalStyle`
 const App: React.FC = () => {
     const fmod = useFMOD();
 
-    const [ showingCredits, setShowingCredits ] = useState(false);
-    const [ art, setArt ] = useState(artData[0]);
+    const [ showingArt, setShowingArt ] = useState(false);
+    const [ artIndex, setArtIndex ] = useState(1);
+
+    const art = artData[artIndex];
 
     // App is unable to load if FMOD isn't loaded
     if (!fmod.ready) return;
@@ -77,8 +89,20 @@ const App: React.FC = () => {
                 gridTemplateColumns: '30% 40% 30%'
             }}>
                 <div>
-
-                    <ArtPicker />
+                    { showingArt ? 
+                        <ArtPicker
+                            artist={art.artist}
+                            setArtIndex={setArtIndex}
+                            handleClose={() => {setShowingArt(false)}}
+                        />
+                        :
+                        <SelectArtButton
+                            onClick={() => setShowingArt(true)}
+                        >
+                            Select Artwork
+                        </SelectArtButton>
+                    }
+                    
                 </div>
                 <Art src={art.url} style={{ justifySelf: 'center' }}/>
                 <div>
@@ -94,7 +118,6 @@ const App: React.FC = () => {
                 <AmbienceSliders />
                 <Effects />
             </TrackControlContainer>
-            <Credits showing={showingCredits} handleClose={() => {setShowingCredits(false)}}/>
         </PlayQueueProvider></ThemeProvider>
     );
 };

@@ -1,7 +1,8 @@
 [
     {
         "title": "Driving",
-        "url": "/art/human/hfincar_001_lofi.webp",
+        "url": "/art/images/hfincar_001_lofi.webp",
+        "thumbnailUrl": "/art/thumbnails/pythagon.webp",
         "artist": "pythagon",
         "theme": {
             "brightLight": "#cb6fb5",
@@ -16,7 +17,8 @@
     },
     {
         "title": "Monitor Sunset",
-        "url": "/art/ai/computer.png",
+        "url": "/art/images/computer.webp",
+        "thumbnailUrl": "/art/thumbnails/computer.webp",
         "artist": "midjourney",
         "theme": {
             "brightLight": "#FDE89D",
@@ -27,6 +29,22 @@
             "background": "#1d2232",
             "darkTint": "#5d4438",
             "dark": "#20222C"
+        }
+    },
+    {
+        "title": "Monitor Sunset",
+        "url": "/art/images/purple_cityscape.webp",
+        "thumbnailUrl": "/art/thumbnails/purple_cityscape.webp",
+        "artist": "midjourney",
+        "theme": {
+            "brightLight": "#ffe79c",
+            "lightTint": "#ffce84",
+            "warmLight": "#fb9b57",
+            "warmTint": "#8e522d",
+            "grey": "#8f6e77",
+            "background": "#1f1e33",
+            "darkTint": "#613c3b",
+            "dark": "#221d2f"
         }
     }
 ]
