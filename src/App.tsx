@@ -55,7 +55,14 @@ const SelectArtButton = styled.button`
     color: ${props => props.theme.colors.brightLight};
     border: 1px solid ${props => props.theme.colors.brightLight};
     border-radius: 5px;
+    padding: 10px;
+    transition: background 0.3s ease;
 
+    &:hover {
+        background-color: ${props => props.theme.colors.brightLight};
+        color: ${props => props.theme.colors.darkTint};
+        font-weight: bolder;
+    }
 `;
 
 const GlobalStyles = createGlobalStyle`
@@ -99,7 +106,7 @@ const App: React.FC = () => {
                         <SelectArtButton
                             onClick={() => setShowingArt(true)}
                         >
-                            Select Artwork
+                            <strong>Select Artwork</strong>
                         </SelectArtButton>
                     }
                     

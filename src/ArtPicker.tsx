@@ -50,6 +50,9 @@ const ArtSelector = styled.button`
     padding: 10px;
     border-radius: 10px;
     transition: background 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
 
     &:hover {
         background-color: ${props => props.theme.colors.brightLight};
@@ -88,12 +91,14 @@ const ArtPicker: React.FC<{
                             <SwiperSlide key={index} style={{
                                 marginBottom: 10
                             }}>
-                                <ArtSelector onClick={() => handleSelect(index)}>
-                                    <ArtThumbnail src={art.thumbnailUrl}/>
-                                    {
-                                        art.title
-                                    }
-                                </ArtSelector>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}>
+                                    <ArtSelector onClick={() => handleSelect(index)}>
+                                        <ArtThumbnail src={art.thumbnailUrl}/>
+                                    </ArtSelector>
+                                </div>
                             </SwiperSlide>
                         ))
                     }
