@@ -87,7 +87,7 @@ const App: React.FC = () => {
     const fmod = useFMOD();
 
     const [ showingArt, setShowingArt ] = useState(false);
-    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * Object.keys(artData).length));
+    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
     const art = artData[artIndex];
 
