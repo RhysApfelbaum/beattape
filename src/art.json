@@ -1,12 +1,44 @@
 [
     {
+        "title": "Balcony",
+        "url": "/art/images/balcony.webp",
+        "thumbnailUrl": "/art/thumbnails/balcony.webp",
+        "artist": "alex_krokus",
+        "theme": {
+            "brightLight": "#ffffde",
+            "lightTint": "#f0beb8",
+            "warmLight": "#e67c94",
+            "warmTint": "#9f4546",
+            "grey": "#7d796a",
+            "background": "#29213a",
+            "darkTint": "#523f3e",
+            "dark": "#29213a"
+        }
+    },
+    {
+        "title": "Wintertime Chillin",
+        "url": "/art/images/wintertime_chillin.webp",
+        "thumbnailUrl": "/art/thumbnails/wintertime_chillin.webp",
+        "artist": "alex_krokus",
+        "theme": {
+            "brightLight": "#f9de9c",
+            "lightTint": "#ffd971",
+            "warmLight": "#ff955a",
+            "warmTint": "#ac4c34",
+            "grey": "#6a6389",
+            "background": "#46315a",
+            "darkTint": "#51453b",
+            "dark": "#182131"
+        }
+    },
+    {
         "title": "Driving",
         "url": "/art/images/hfincar_001_lofi.webp",
         "thumbnailUrl": "/art/thumbnails/pythagon.webp",
         "artist": "pythagon",
         "theme": {
-            "brightLight": "#cb6fb5",
-            "lightTint": "#cb6fb5",
+            "brightLight": "#e0d4ee",
+            "lightTint": "#b385e8",
             "warmLight": "#cb6fb5",
             "warmTint": "#8a214b",
             "grey": "#854879",
@@ -32,7 +64,7 @@
         }
     },
     {
-        "title": "Monitor Sunset",
+        "title": "Purple Cityscape",
         "url": "/art/images/purple_cityscape.webp",
         "thumbnailUrl": "/art/thumbnails/purple_cityscape.webp",
         "artist": "midjourney",

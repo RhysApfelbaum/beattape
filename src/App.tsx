@@ -7,7 +7,6 @@ import AmbienceSliders from './AmbienceSliders';
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
 import Effects from './Effects';
 import PlayQueue from './PlayQueue';
-import Credits from './Credits';
 import CreditBox from './CreditBox';
 import artData from './art.json';
 import ArtPicker from './ArtPicker';
@@ -20,8 +19,9 @@ const TrackControlContainer = styled.div`
 `;
 
 const Art = styled.img`
-    width: 440px;
+    width: auto;
     height: auto;
+    max-height: 440px;
     border: 2px solid color-mix(
         in srgb,
         ${props => props.theme.colors.darkTint},
@@ -33,7 +33,7 @@ const Art = styled.img`
         2px 4px 6px 
         color-mix(
             in srgb,
-            ${props => props.theme.colors.dark},
+            transparent,
             ${props => props.theme.colors.warmLight}
             var(--beat-pulse)
         )
@@ -78,7 +78,7 @@ const GlobalStyles = createGlobalStyle`
         font-size: 15px;
         font-style: normal;
         text-align: center;
-        color: white;
+        color: ${props => props.theme.colors.brightLight};
         background-color: ${props => props.theme.colors.background};
     }
 `;
@@ -87,7 +87,7 @@ const App: React.FC = () => {
     const fmod = useFMOD();
 
     const [ showingArt, setShowingArt ] = useState(false);
-    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * artData.length));
+    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * Object.keys(artData).length));
 
     const art = artData[artIndex];
 

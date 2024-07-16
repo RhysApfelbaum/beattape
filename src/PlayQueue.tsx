@@ -2,31 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { getNextTracks, usePlayQueue } from './PlayQueueProvider';
 import { Track } from './fmod/track';
 import { SliderState } from './fmod/sliderState';
-import styled, { keyframes } from 'styled-components';
-import theme from './theme';
+import styled, { keyframes, useTheme } from 'styled-components';
 
-const TrackChangedAnimation = keyframes`
-    from {
-        color: ${theme.colors.lightTint};
-    } to {
-        color: white;
-    }
-`;
 
-const ChangedItem = styled.li`
-    animation: ${TrackChangedAnimation} 1s;
-`;
 
 const ItemList = styled.ul`
     list-style-type: none;
     border-radius: 5px;
     padding: 5px 5px 5px 5px;
-    outline: 1px solid ${props => props.theme.colors.warmLight};
+    outline: 1px solid ${props => props.theme.colors.brightLight};
 `;
 
 const PlayQueue: React.FC = () => {
 
     const [ playQueue, setPlayQueue ] = usePlayQueue();
+
+    const theme = useTheme();
+
+    const TrackChangedAnimation = keyframes`
+        from {
+            color: ${theme.colors.lightTint};
+        } to {
+            color: ${theme.colors.brightLight};
+        }
+    `;
+
+    const ChangedItem = styled.li`
+        animation: ${TrackChangedAnimation} 1s;
+    `;
 
     type TrackItem = { track: Track, changed: boolean };
     const [ trackItems, setTrackItems] = useState<TrackItem[]>([]);

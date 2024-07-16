@@ -22,7 +22,7 @@ const colorDistance = (color1: RGB, color2: RGB) => {
     return (r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2;
 };
 
-const { data: imageBuffer, info } = await sharp('./static/art/images/purple_cityscape.webp')
+const { data: imageBuffer, info } = await sharp('./static/art/images/wintertime_chillin.webp')
       .raw()
       .toBuffer({ resolveWithObject: true });
 
@@ -137,9 +137,9 @@ const generateTheme = (imageBuffer: Buffer) => {
 
     // hexToRgb(result[key as keyof typeof result])
     Object.keys(result).forEach(key => {
-        result[key as keyof typeof result] = rgbToHex(nearestDistance(
+        result[key as keyof typeof result] = rgbToHex(nearestColor(
             imageBuffer,
-            referenceDistances[key as keyof typeof referenceDistances]
+            hexToRgb(result[key as keyof typeof result])
         ));
     });
     return result;

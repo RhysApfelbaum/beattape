@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import Button from "./Button";
 import theme from './theme';
+import { useTheme } from 'styled-components';
 
 const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) => {
     const [ pressed, setPressed ] = useState(false);
 
     const toggleLight = '#e87356';
+
+    const theme = useTheme();
 
     return (
         <Button
@@ -23,7 +26,7 @@ const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) =>
                 width: '8px',
                 height: '8px',
                 margin: '2px 3px 3px 3px',
-                backgroundColor: pressed ? toggleLight : theme.colors.dark,
+                backgroundColor: pressed ? theme.colors.warmLight : theme.colors.dark,
                 borderRadius: '2px',
                 boxShadow: 'none'
             }}></div>

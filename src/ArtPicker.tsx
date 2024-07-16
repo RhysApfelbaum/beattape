@@ -100,7 +100,6 @@ const ArtPicker: React.FC<{
                     modules={[Scrollbar, Navigation]}
                     slidesPerView={3}
                     spaceBetween={20}
-                    scrollbar={{draggable: true}}
                     navigation
                 >
                     {
