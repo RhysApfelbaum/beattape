@@ -22,7 +22,13 @@ const TrackControlContainer = styled.div`
 const Art = styled.img`
     width: 440px;
     height: auto;
-    border: 1px solid ${props => props.theme.colors.warmTint};
+    border: 2px solid color-mix(
+        in srgb,
+        ${props => props.theme.colors.darkTint},
+        ${props => props.theme.colors.lightTint}
+        var(--beat-pulse)
+    );
+    border-radius: 5px;
     filter: drop-shadow(
         2px 4px 6px 
         color-mix(
@@ -81,7 +87,7 @@ const App: React.FC = () => {
     const fmod = useFMOD();
 
     const [ showingArt, setShowingArt ] = useState(false);
-    const [ artIndex, setArtIndex ] = useState(1);
+    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * artData.length));
 
     const art = artData[artIndex];
 
@@ -95,7 +101,10 @@ const App: React.FC = () => {
                 display: 'grid',
                 gridTemplateColumns: '30% 40% 30%'
             }}>
-                <div>
+                <div style={{
+                    justifySelf: 'end',
+                    alignSelf: 'end'
+                }}>
                     { showingArt ? 
                         <ArtPicker
                             artist={art.artist}
@@ -106,13 +115,19 @@ const App: React.FC = () => {
                         <SelectArtButton
                             onClick={() => setShowingArt(true)}
                         >
-                            <strong>Select Artwork</strong>
+                            <strong>Change Artwork</strong>
                         </SelectArtButton>
                     }
-                    
+
                 </div>
-                <Art src={art.url} style={{ justifySelf: 'center' }}/>
-                <div>
+                <div style={{ height: 440, alignSelf: 'center', display: 'flex', alignContent: 'end' }}>
+                    <Art src={art.url} style={{ margin: 'auto auto 0 auto'}}/>
+                </div>
+                <div style={{
+                    justifySelf: 'start',
+                    alignSelf: 'end',
+                    width: '100%'
+                }}>
                     <CreditBox artist={art.artist}/>
                 </div>
             </div>

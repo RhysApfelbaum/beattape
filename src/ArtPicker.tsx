@@ -1,4 +1,4 @@
-import React, { SetStateAction } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 import contributors from './contributors.json';
 import artData from './art.json';
@@ -69,6 +69,23 @@ const ArtPicker: React.FC<{
     const theme = useTheme();
 
     const artistInfo = contributors[artist as keyof typeof contributors];
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+
+    const preloadImages = async () => {
+        const promises = artData.map((art) => {
+            return new Promise<void>((resolve) => {
+                const img = new Image();
+                img.src = art.thumbnailUrl;
+                img.onload = () => resolve();
+            });
+        });
+        await Promise.all(promises);
+        setImagesLoaded(true);
+    };
+
+    useEffect(() => {
+        preloadImages();
+    }, []);
 
     const handleSelect = (index: number) => {
         setArtIndex(index);

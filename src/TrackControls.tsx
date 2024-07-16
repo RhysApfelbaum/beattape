@@ -7,7 +7,7 @@ import { FMOD } from './fmod/system';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faBackwardFast, faEllipsis, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
-import theme from './theme';
+import { useTheme } from 'styled-components';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -24,6 +24,8 @@ const TrackControls: React.FC = () => {
     const [ currentTrackLoaded, setCurrentTrackLoaded ] = useState(false);
     
     const fmod = useFMOD();
+
+    const theme = useTheme();
 
     useEffect(() => {
         updatePauseState(true);
