@@ -24,7 +24,6 @@ export class EventInstance {
         return true;
     }
 
-
     init() {
         const outval = new Pointer<any>();
         FMOD.Result = FMOD.Studio.getEvent(this.path, outval);
@@ -87,6 +86,13 @@ export class EventInstance {
             (callbackMask: number, event: any, parameters: any): number => callback(parameters),
             callbackMask
         );
+    }
+
+    setPan(pan: number): number {
+        const outval = new Pointer<any>();
+        FMOD.Result = this.instance.getChannelGroup(outval);
+        const group = outval.deref();
+        return group.setPan(pan);
     }
 
     // Unloads the instance once playing has stopped

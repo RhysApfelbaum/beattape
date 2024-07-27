@@ -10,6 +10,7 @@ import PlayQueue from './PlayQueue';
 import CreditBox from './CreditBox';
 import artData from './art.json';
 import ArtPicker from './ArtPicker';
+import RadioSpeaker from './Drag';
 
 const TrackControlContainer = styled.div`
     display: flex;
