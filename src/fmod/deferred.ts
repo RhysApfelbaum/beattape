@@ -2,11 +2,19 @@ export class Deferred<T> {
     public promise: Promise<T>;
     public resolve!: (value: T | PromiseLike<T>) => void;
     public reject!: (reason?: any) => void;
+    public settled: boolean;
 
     constructor() {
+        this.settled = false;
         this.promise = new Promise<T>((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
+            this.resolve = value => {
+                this.settled = true;
+                resolve(value);
+            };
+            this.reject = (reason?) => {
+                this.settled = true;
+                reject(reason);
+            };
         });
     }
 
