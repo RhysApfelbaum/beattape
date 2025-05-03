@@ -112,7 +112,7 @@ const TrackControls: React.FC = () => {
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
                     FMOD.STUDIO_EVENT_CALLBACK_STOPPED,
-                    parameters => {
+                    (type, event, parameters) => {
                         if (currentTrack.event.playbackState === 'stopped') {
                             setPlayQueue({
                                 ...playQueue,

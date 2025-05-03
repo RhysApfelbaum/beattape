@@ -81,11 +81,8 @@ export class EventInstance {
         FMOD.Result = this.instance.setParameterByName(name, value, immediate);
     }
 
-    setCallback(callbackMask: number, callback: (parameters: any) => number) {
-        FMOD.Result = this.instance.setCallback(
-            (callbackMask: number, event: any, parameters: any): number => callback(parameters),
-            callbackMask
-        );
+    setCallback(callbackMask: number, callback: (type: number, event: any, parameters: any) => number) {
+        FMOD.Result = this.instance.setCallback(callback, callbackMask);
     }
 
     setPan(pan: number): number {

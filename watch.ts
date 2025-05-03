@@ -1,6 +1,4 @@
-import styleLoader from 'bun-style-loader';
 import chokidar from 'chokidar';
-import { unlink, readdir } from 'node:fs/promises';
 
 chokidar.watch('./src', {
     usePolling: false

@@ -10,7 +10,9 @@ import PlayQueue from './PlayQueue';
 import CreditBox from './CreditBox';
 import artData from './art.json';
 import ArtPicker from './ArtPicker';
-import RadioSpeaker from './Drag';
+import { EventInstance } from './fmod/event';
+import { FMOD } from './fmod/system';
+import { Pointer } from './fmod/pointer';
 
 const TrackControlContainer = styled.div`
     display: flex;
@@ -84,6 +86,49 @@ const GlobalStyles = createGlobalStyle`
     }
 `;
 
+const getWav = async () => {
+    const response = await fetch('/piano_sample.wav')
+    const buffer = await response.arrayBuffer();
+    return new Uint8Array(buffer);
+}
+
+let wavData: Uint8Array;
+
+// getWav().then(data => { wavData = data; });
+
+const programmerSoundCallback = async (type: number, _event: any, parameters: any) => {
+    if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+        if (!wavData) return FMOD.OK;
+        console.log(parameters);
+        const canRead = true;
+        const canWrite = false;
+        const canOwn = false;
+        FMOD.FS_createDataFile('/', 'piano_sample.wav', wavData, canRead, canWrite, canOwn);
+
+        const sound = new Pointer<any>();
+        const info = FMOD.CREATESOUNDEXINFO();
+        console.log(info);
+
+        info.length = wavData.byteLength;
+        info.numchannels = 2;
+        info.defaultfrequency = 48000;
+        info.decodebuffersize = 48000;
+        info.format = FMOD.SOUND_FORMAT_PCM16;
+        info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
+        const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
+
+        FMOD.Result = FMOD.Core.createSound('/piano_sample.wav', mode, info, sound);
+        console.log('sound', sound.deref());
+        parameters.sound = sound.deref();
+        parameters.subsoundIndex = -1;
+        // FMOD.Core.playSound(parameters.sound, null, null, {})
+    } else if (type === FMOD.STUDIO_EVENT_CALLBACK_DESTROY_PROGRAMMER_SOUND) {
+        parameters.sound.release();
+    }
+
+    return FMOD.OK;
+};
+
 const App: React.FC = () => {
     const fmod = useFMOD();
 
@@ -93,7 +138,22 @@ const App: React.FC = () => {
     const art = artData[artIndex];
 
     // App is unable to load if FMOD isn't loaded
-    if (!fmod.ready) return;
+    if (!fmod.ready) return (
+        <p>loading...</p>
+    );
+
+    // const test = new EventInstance('event:/Tracks/banktest');
+    // test.init();
+    // test.load();
+    // test.setCallback(
+    //     FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
+    //     (type: number, event: any, parameters: any)  => {
+    //         programmerSoundCallback(type, event, parameters);
+    //         return FMOD.OK as number;
+    //     }
+    // );
+    // test.start();
+
 
     return (
         <ThemeProvider theme={{ colors: art.theme }}><PlayQueueProvider>
@@ -119,6 +179,7 @@ const App: React.FC = () => {
                             <strong>Change Artwork</strong>
                         </SelectArtButton>
                     }
+
 
                 </div>
                 <div style={{ height: 440, alignSelf: 'center', display: 'flex', alignContent: 'end' }}>

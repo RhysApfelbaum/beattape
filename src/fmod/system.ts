@@ -17,8 +17,6 @@ export const FMOD: any = {
         // Processing is currently done in the main thread so anything lower than 2048 samples can cause stuttering on some devices.
         FMOD.Result = FMOD.Core.setDSPBufferSize(2048, 2);
         
-        // await waitForFocus();
-
         // Optional. Set sample rate of mixer to be the same as the OS output rate.
         // This can save CPU time and latency by avoiding the automatic insertion of a resampler at the output stage.
         FMOD.Result = FMOD.Core.getDriverInfo(0, null, null, sampleRate, null, null);
