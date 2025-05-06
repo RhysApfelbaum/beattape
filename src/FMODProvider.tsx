@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { FMOD } from './fmod/system';
 import { Bank } from './fmod/bank';
 import { EventInstance } from './fmod/event';
+import { Sound } from './fmod/sound';
 
 declare const FMODModule: any;
 const preloadBanks: Bank[] = [];
@@ -18,6 +19,7 @@ const fmodInitialState = {
         vinyl:       new EventInstance('event:/Ambiences/Vinyl'),
         birds:       new EventInstance('event:/Ambiences/Birds'),
     },
+    trackSounds: new Map<string, Sound>(),
     ref: null as React.RefObject<HTMLElement> | null,
     ready: false
 };

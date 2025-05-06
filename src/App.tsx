@@ -13,6 +13,7 @@ import ArtPicker from './ArtPicker';
 import { EventInstance } from './fmod/event';
 import { FMOD } from './fmod/system';
 import { Pointer } from './fmod/pointer';
+import { Sound } from './fmod/sound';
 
 const TrackControlContainer = styled.div`
     display: flex;
@@ -96,38 +97,10 @@ let wavData: Uint8Array;
 
 // getWav().then(data => { wavData = data; });
 
-const programmerSoundCallback = async (type: number, _event: any, parameters: any) => {
-    if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
-        if (!wavData) return FMOD.OK;
-        console.log(parameters);
-        const canRead = true;
-        const canWrite = false;
-        const canOwn = false;
-        FMOD.FS_createDataFile('/', 'piano_sample.wav', wavData, canRead, canWrite, canOwn);
+// const sounds = new Map<string, Sound>();
+// sounds.set('/piano_sample.wav', new Sound('/piano_sample.wav', '/piano_sample.wav');
+const piano = new Sound('/piano_sample.wav', '/piano_sample.wav');
 
-        const sound = new Pointer<any>();
-        const info = FMOD.CREATESOUNDEXINFO();
-        console.log(info);
-
-        info.length = wavData.byteLength;
-        info.numchannels = 2;
-        info.defaultfrequency = 48000;
-        info.decodebuffersize = 48000;
-        info.format = FMOD.SOUND_FORMAT_PCM16;
-        info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
-        const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
-
-        FMOD.Result = FMOD.Core.createSound('/piano_sample.wav', mode, info, sound);
-        console.log('sound', sound.deref());
-        parameters.sound = sound.deref();
-        parameters.subsoundIndex = -1;
-        // FMOD.Core.playSound(parameters.sound, null, null, {})
-    } else if (type === FMOD.STUDIO_EVENT_CALLBACK_DESTROY_PROGRAMMER_SOUND) {
-        parameters.sound.release();
-    }
-
-    return FMOD.OK;
-};
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -136,23 +109,38 @@ const App: React.FC = () => {
     const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
     const art = artData[artIndex];
+    piano.fetch().then(() => {
+        console.log(piano);
+    });
 
     // App is unable to load if FMOD isn't loaded
     if (!fmod.ready) return (
         <p>loading...</p>
     );
 
-    // const test = new EventInstance('event:/Tracks/banktest');
-    // test.init();
-    // test.load();
-    // test.setCallback(
-    //     FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
-    //     (type: number, event: any, parameters: any)  => {
-    //         programmerSoundCallback(type, event, parameters);
-    //         return FMOD.OK as number;
-    //     }
-    // );
-    // test.start();
+    const test = new EventInstance('event:/Tracks/banktest');
+    test.init();
+    test.load();
+    test.setCallback(
+        FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
+        (type: number, _event: any, parameters: any)  => {
+            if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+                if (!piano.file.fetchStatus.isResolved) {
+                    // TODO: Stop playback here, as the buffer has run out
+                    console.error('still fetching sound');
+                    return FMOD.OK;
+                }
+                piano.load();
+                parameters.sound = piano.handle;
+                parameters.subsoundIndex = -1;
+            } else if (type === FMOD.STUDIO_EVENT_CALLBACK_DESTROY_PROGRAMMER_SOUND) {
+                FMOD.Result = parameters.sound.release();
+            }
+
+            return FMOD.OK;
+        }
+    );
+    test.start();
 
 
     return (

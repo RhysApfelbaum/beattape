@@ -1,6 +1,7 @@
 import { Pointer } from './pointer';
 
 // This way madness lies.
+// This whole thing is a giant HACK
 export const FMOD: any = {
     preRun: () => {},
     onSystemInitialized: () => {},

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
-import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
 import Button from './Button';
 import { FMOD } from './fmod/system';
@@ -88,24 +87,28 @@ const TrackControls: React.FC = () => {
     };
 
     const updatePlayQueueLoading = async () => {
-        if (currentTrack.bank.loadingState === LoadingState.UNLOADED) {
+
+        const { status: currentTrackStatus, error: currentTrackError } = currentTrack.bank.getStatus();
+        const { status: nextTrackStatus } = playQueue.nextTracks[0].bank.getStatus();
+
+        if (currentTrackStatus === 'unloaded') {
             currentTrack.fetch();
         }
 
-        if (playQueue.nextTracks[0].bank.loadingState === LoadingState.UNLOADED) {
+        if (nextTrackStatus === 'unloaded') {
             playQueue.nextTracks[0].fetch();
         }
 
         for (let i = 1; i < playQueue.nextTracks.length; i++) {
-            if (playQueue.nextTracks[i].bank.loadingState == LoadingState.LOADED) {
+            if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
                 playQueue.nextTracks[i].unload();
             }
         }
 
-        switch (currentTrack.bank.loadingState) {
-            case LoadingState.UNLOADED:
+        switch (currentTrackStatus) {
+            case 'unloaded':
                 if (currentTrackLoaded) setCurrentTrackLoaded(false);
-            case LoadingState.FETCHED:
+            case 'fetched':
                 await currentTrack.load()
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
@@ -131,10 +134,10 @@ const TrackControls: React.FC = () => {
                 currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
                 currentTrack.event.setParameter('Vocals', playQueue.sliderState.vocals, false);
                 break;
-            case LoadingState.ERROR:
-                console.error(`Error loading ${currentTrack.name}`);
+            case 'error':
+                console.error(`Error loading ${currentTrack.name}: ${currentTrackError}`);
                 break;
-            case LoadingState.LOADED:
+            case 'loaded':
                 break;
         }
         updatePauseState(false)
