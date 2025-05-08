@@ -1,6 +1,8 @@
 import { SliderState } from './sliderState';
 import { Bank } from './bank';
 import { EventInstance } from './event';
+import { SoundInfo, SoundLoader } from './soundLoader';
+import soundSchema from '../soundSchema.json';
 
 export class Track {
 
@@ -10,14 +12,16 @@ export class Track {
     public event: EventInstance;
     public bank: Bank;
     public changed = false;
+    public sounds: SoundLoader;
 
     constructor(name: string, displayName: string, averageSliderState: SliderState) {
         this.name = name;
         this.displayName = displayName;
-        // this.bankURL = `./fmod/build/desktop/${this.name}.bank`;
         this.bank = new Bank(this.name, `./fmod_banks/${this.name}.bank`);
         this.averageSliderState = averageSliderState;
         this.event = new EventInstance(`event:/Tracks/${this.name}`);
+        this.sounds = new SoundLoader();
+        this.sounds.addSoundInfo((soundSchema as any)[this.name] || []);
     }
 
     // A simple check to see whether the bank and the event have been loaded
@@ -26,8 +30,9 @@ export class Track {
     }
 
     // Requires no FMOD functions
-    fetch() {
-        this.bank.fetch();
+    async fetch() {
+        await this.bank.fetch();
+        this.sounds.fetch();
     }
 
     async load() {

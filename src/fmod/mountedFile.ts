@@ -25,18 +25,21 @@ export class FMODMountedFile {
         }
 
         try {
+            console.log('fetching', this.url);
             const response = await fetch(this.url)
             const buffer = await response.arrayBuffer();
+            const responseData = new Uint8Array(buffer);
             this.length = buffer.byteLength;
+
+            console.log(this.filename);
+
             // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', this.filename, new Uint8Array(buffer), canRead, canWrite, canOwn);
+            FMOD.FS_createDataFile('/', this.filename, responseData, canRead, canWrite, canOwn);
             this.fetchStatus.resolve();
         } catch (error) {
+            console.error(error);
             this.fetchStatus.reject(error);
         }
-
-
-        // this.loadingState = LoadingState.FETCHED;
     }
 
     unmount() {

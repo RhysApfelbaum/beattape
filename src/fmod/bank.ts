@@ -11,7 +11,7 @@ export class Bank {
     private error: Error | null;
 
     constructor(name: string, url: string) {
-        this.file = new FMODMountedFile(url, name + '.bank');
+        this.file = new FMODMountedFile(url, name);
         this.handle = null;
         this.error = null;
     }

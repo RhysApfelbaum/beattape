@@ -7,8 +7,9 @@ const TrackSliders: React.FC = () => {
     const [ playQueue, setPlayQueue ] = usePlayQueue();
 
     const updateGrit = (value: number) => {
-        if (!playQueue.currentTrack.isLoaded) return;
+        // if (!playQueue.currentTrack.isLoaded) return;
         playQueue.currentTrack.event.setParameter('Grit', value, false);
+        console.log('success');
     };
     const updateBrightness = (value: number) => {
         if (!playQueue.currentTrack.isLoaded) return;

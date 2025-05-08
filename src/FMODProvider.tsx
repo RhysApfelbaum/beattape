@@ -19,7 +19,6 @@ const fmodInitialState = {
         vinyl:       new EventInstance('event:/Ambiences/Vinyl'),
         birds:       new EventInstance('event:/Ambiences/Birds'),
     },
-    trackSounds: new Map<string, Sound>(),
     ref: null as React.RefObject<HTMLElement> | null,
     ready: false
 };

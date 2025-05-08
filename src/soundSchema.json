@@ -1,0 +1,49 @@
+{
+  "heavyFog": [
+    {
+      "path": "heavyFog/heavy_drums.wav",
+      "start": 0,
+      "end": 102.56756756756758
+    },
+    {
+      "path": "heavyFog/light_drums.wav",
+      "start": 0,
+      "end": 102.16216216216216
+    },
+    {
+      "path": "heavyFog/click.wav",
+      "start": 0,
+      "end": 100.54075
+    },
+    {
+      "path": "heavyFog/hats.wav",
+      "start": 0,
+      "end": 100.54075
+    },
+    {
+      "path": "heavyFog/bass.wav",
+      "start": 0,
+      "end": 103.78375
+    },
+    {
+      "path": "heavyFog/rhodes.wav",
+      "start": 0,
+      "end": 103.78377083333334
+    },
+    {
+      "path": "heavyFog/organ_fill.wav",
+      "start": 9.729750000000001,
+      "end": 90.8107972972973
+    },
+    {
+      "path": "heavyFog/chops.wav",
+      "start": 24.196043683674162,
+      "end": 103.78378209459461
+    },
+    {
+      "path": "heavyFog/piano.wav",
+      "start": 25.945958333333333,
+      "end": 100.54075
+    }
+  ]
+}

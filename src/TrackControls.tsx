@@ -16,15 +16,29 @@ let beatPulseID: number;
 
 const TrackControls: React.FC = () => {
 
-    const [ paused, setPaused ] = useState(true);
-    const [ playQueue, setPlayQueue ] = usePlayQueue();
-    const [ amountPoll, setAmountPoll ] = useState<Timer | null>(null);
-    const [ currentTrack, setCurrentTrack ] = useState(playQueue.currentTrack);
-    const [ currentTrackLoaded, setCurrentTrackLoaded ] = useState(false);
-    
+    const [paused, setPaused] = useState(true);
+    const [playQueue, setPlayQueue] = usePlayQueue();
+    const [amountPoll, setAmountPoll] = useState<Timer | null>(null);
+    const [currentTrack, setCurrentTrack] = useState(playQueue.currentTrack);
+    const [currentTrackLoaded, setCurrentTrackLoaded] = useState(false);
+
     const fmod = useFMOD();
 
     const theme = useTheme();
+
+    // const trackCallback = (type: number, _event: any, parameters: any) => {
+    //     if (currentTrack.event.playbackState === 'stopped') {
+    //         setPlayQueue({
+    //             ...playQueue,
+    //             history: [currentTrack, ...playQueue.history],
+    //             currentTrack: playQueue.nextTracks[0],
+    //             nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
+    //         });
+    //     } else {
+    //         beatPulse();
+    //     }
+    //     return FMOD.OK;
+    // };
 
     useEffect(() => {
         updatePauseState(true);
@@ -50,13 +64,13 @@ const TrackControls: React.FC = () => {
             const brightness = currentTrack.event.getParameter('BrightnessAmount');
             const chops = currentTrack.event.getParameter('ChopsAmount');
             const vocals = currentTrack.event.getParameter('VocalsAmount');
-            
+
             if (fmod.ref?.current) {
                 const style = fmod.ref.current.style;
-                style.setProperty('--grit', mix(grit)); 
-                style.setProperty('--brightness', mix(brightness)); 
-                style.setProperty('--chops', mix(chops)); 
-                style.setProperty('--vocals', mix(vocals)); 
+                style.setProperty('--grit', mix(grit));
+                style.setProperty('--brightness', mix(brightness));
+                style.setProperty('--chops', mix(chops));
+                style.setProperty('--vocals', mix(vocals));
             }
         }, 100);
 
@@ -95,9 +109,9 @@ const TrackControls: React.FC = () => {
             currentTrack.fetch();
         }
 
-        if (nextTrackStatus === 'unloaded') {
-            playQueue.nextTracks[0].fetch();
-        }
+        // if (nextTrackStatus === 'unloaded') {
+        //     playQueue.nextTracks[0].fetch();
+        // }
 
         for (let i = 1; i < playQueue.nextTracks.length; i++) {
             if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
@@ -114,8 +128,9 @@ const TrackControls: React.FC = () => {
                 currentTrack.event.start();
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
-                    FMOD.STUDIO_EVENT_CALLBACK_STOPPED,
-                    (type, event, parameters) => {
+                    FMOD.STUDIO_EVENT_CALLBACK_STOPPED |
+                    FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
+                    (type, _event, parameters) => {
                         if (currentTrack.event.playbackState === 'stopped') {
                             setPlayQueue({
                                 ...playQueue,
@@ -123,9 +138,32 @@ const TrackControls: React.FC = () => {
                                 currentTrack: playQueue.nextTracks[0],
                                 nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
                             });
-                        } else {
-                            beatPulse();
                         }
+
+                        if (type === FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
+                            beatPulse();
+
+                            const time = parameters.position / 1000;
+
+
+                            console.log(time, currentTrack.sounds.bufferLength());
+                        }
+
+                        if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+                            const sound = currentTrack.sounds.getSound(parameters.name);
+                            if (!sound.isLoaded) {
+                                // if (currentTrack.event.playbackState !== 'stopped') {
+                                //     currentTrack.event.setPaused(true);
+                                // }
+                                return;
+                            }
+
+                            parameters.sound = sound.handle;
+                            parameters.subsoundIndex = -1;
+                            // updatePauseState(false);
+                        }
+
+
                         return FMOD.OK;
                     }
                 );
@@ -166,7 +204,7 @@ const TrackControls: React.FC = () => {
         setPlayQueue({
             ...playQueue,
             nextTracks: playQueue.history.length > 0
-                ? [currentTrack , ...playQueue.nextTracks]
+                ? [currentTrack, ...playQueue.nextTracks]
                 : playQueue.nextTracks,
             currentTrack: playQueue.history[0],
             history: playQueue.history.slice(1)
@@ -210,29 +248,29 @@ const TrackControls: React.FC = () => {
                     flexDirection: 'row',
                 }}>
 
-                <Button onClick={prevTrack} style={{ height: '50%', marginTop: 20 }}>
-                    <FontAwesomeIcon icon={faBackwardFast} style={{
-                        height: 15,
-                        width: 30,
-                        margin: '5px 5px 5px 5px'
-                    }}/>
-                </Button>
-                <Button onClick={handlePause}>
-                    <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
-                        width: '2em',
-                        height: '2em',
-                        margin: '1em 1em 1em 1em',
-                        boxShadow: 'none',
-                        color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
-                    }} />
-                </Button>
-                <Button onClick={nextTrack} style={{ height: '50%', marginTop: 20}}>
-                    <FontAwesomeIcon icon={faFastForward} style={{
-                        height: 15,
-                        width: 30,
-                        margin: '5px 5px 5px 5px'
-                    }}/>
-                </Button>
+                    <Button onClick={prevTrack} style={{ height: '50%', marginTop: 20 }}>
+                        <FontAwesomeIcon icon={faBackwardFast} style={{
+                            height: 15,
+                            width: 30,
+                            margin: '5px 5px 5px 5px'
+                        }} />
+                    </Button>
+                    <Button onClick={handlePause}>
+                        <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
+                            width: '2em',
+                            height: '2em',
+                            margin: '1em 1em 1em 1em',
+                            boxShadow: 'none',
+                            color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
+                        }} />
+                    </Button>
+                    <Button onClick={nextTrack} style={{ height: '50%', marginTop: 20 }}>
+                        <FontAwesomeIcon icon={faFastForward} style={{
+                            height: 15,
+                            width: 30,
+                            margin: '5px 5px 5px 5px'
+                        }} />
+                    </Button>
                 </div>
                 <p>now playing:<br />{
                     currentTrackLoaded

@@ -5,21 +5,26 @@ import { FMOD } from "./system";
 
 export class Sound {
     public file: FMODMountedFile;
-    private error: Error | null;
+    public error: Error | null;
     public handle: any;
+    public start: number;
+    public end: number;
 
-    constructor(remotePath: string, filename: string) {
+    constructor(remotePath: string, filename: string, start: number, end: number) {
         this.file  = new FMODMountedFile(remotePath, filename);
         this.error = null;
         this.handle = null;
+        this.start = start;
+        this.end = end;
+        console.log('sound', remotePath, filename);
     }
 
     async fetch() {
-        try {
-            await this.file.fetch();
-        } catch (error) {
-            this.error = error as Error;
-        }
+        await this.file.fetch();
+    }
+
+    get isLoaded() {
+        return this.handle !== null;
     }
 
 
@@ -30,7 +35,6 @@ export class Sound {
 
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
-        console.log(info);
 
         info.length = this.file.length;
         info.numchannels = 2;
@@ -43,6 +47,14 @@ export class Sound {
         FMOD.Result = FMOD.Core.createSound('/' + this.file.filename, mode, info, sound);
         this.handle = sound.deref();
         return true;
+    }
+
+    unload() {
+        if (!this.isLoaded) {
+            throw new Error('Tried to unload a sound that is not loaded.');
+        }
+        this.handle.release();
+        this.handle = null;
     }
 
 }
