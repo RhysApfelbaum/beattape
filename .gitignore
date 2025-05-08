@@ -5,3 +5,5 @@ dist/
 fmodstudio_download/
 test_certificates/
 bun.lockb
+*.wav
+*.flp
