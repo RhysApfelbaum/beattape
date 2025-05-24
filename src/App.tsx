@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFMOD } from './FMODProvider';
 import PlayQueueProvider from './PlayQueueProvider';
 import TrackControls from './TrackControls';
@@ -14,6 +14,11 @@ import { EventInstance } from './fmod/event';
 import { FMOD } from './fmod/system';
 import { Pointer } from './fmod/pointer';
 import { Sound } from './fmod/sound';
+
+import { MPEGDecoderWebWorker } from 'mpg123-decoder';
+import { ChunkedQueue } from './fmod/ringBuffer';
+const decoder = new MPEGDecoderWebWorker();
+
 
 const TrackControlContainer = styled.div`
     display: flex;
@@ -99,14 +104,151 @@ let wavData: Uint8Array;
 
 // const sounds = new Map<string, Sound>();
 // sounds.set('/piano_sample.wav', new Sound('/piano_sample.wav', '/piano_sample.wav');
-const piano = new Sound('/piano_sample.wav', '/piano_sample.wav');
+// const piano = new Sound('/piano_sample.wav', '/piano_sample.wav');
 
 
 const App: React.FC = () => {
     const fmod = useFMOD();
 
-    const [ showingArt, setShowingArt ] = useState(false);
-    const [ artIndex, setArtIndex ] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
+    useEffect(() => {
+        if (!fmod.ready) return;
+        loadPCM();
+    }, [fmod]);
+
+    const loadPCM = async () => {
+        await decoder.ready;
+        const response = await fetch('https://play.streamafrica.net/radiojazz');
+
+        if (response.body === null) {
+            throw new Error('No response body');
+        }
+
+        const reader = response.body.getReader();
+
+
+        // const leftBuffer = new ChunkedQueue(441000);
+        // const rightBuffer = new ChunkedQueue(441000);
+
+        let sampleRate = 44100;
+        // let samplesDecoded = 0;
+
+        // const pusher = async () => {
+        //     while (true) {
+        //         const { done, value } = await reader.read();
+        //         if (done) break;
+        //         const { channelData } = await decoder.decode(value);
+        //         const [ left, right ] = channelData;
+        //         // console.log(sampleRate, samplesDecoded);
+        //         // leftBuffer.feed(left);
+        //         // rightBuffer.feed(right);
+        //         await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
+        //         // break;
+        //     }
+        // }
+
+        // pusher();
+
+        // if (done) return;
+
+        // const {channelData, samplesDecoded, sampleRate} = await decoder.decode(value);
+        //
+
+        const sound = new Pointer<any>();
+        const info = FMOD.CREATESOUNDEXINFO();
+        info.defaultfrequency = sampleRate;
+        info.decodebuffersize = 44100;
+        info.numchannels = 2;
+        info.length = info.defaultfrequency * info.numchannels * 2 * 5;
+        info.format = FMOD.SOUND_FORMAT_PCM16;
+        info.pcmsetposcallback = (
+            sound: any,
+            subsound: any,
+            position: any,
+            postype: any
+        ) => {
+            alert('hi');
+            console.log('pcmcallback', sound, subsound, position, postype);
+            return FMOD.OK;
+        };
+        const mode = FMOD.OPENUSER | FMOD.LOOP_NORMAL;
+
+        // console.log('channel data', channelData);
+        // info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
+        //     console.log('datalen', datalen);
+        //     console.log('sound', sound);
+        //     const openstate = new Pointer<any>();
+        //     const percentbuffered = new Pointer<any>();
+        //     const starving = new Pointer<any>();
+        //     const diskbusy = new Pointer<any>();
+        //
+        //     const leftRead = leftBuffer.retrieve(datalen);
+        //     const rightRead = rightBuffer.retrieve(datalen);
+        //
+        //
+        //     const nullRead = leftRead === null || rightRead === null;
+        //
+        //     if (nullRead) {
+        //         console.log('nullread');
+        //         for (let i = 0; i < (datalen >> 2); i++) {
+        //             FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
+        //             FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
+        //         }
+        //     } else {
+        //         console.log('nonnullread');
+        //         for (let i = 0; i < (datalen >> 2); i++) {
+        //             FMOD.setValue(data + (i << 2) + 0, leftRead[i], 'i16');    // left channel
+        //             FMOD.setValue(data + (i << 2) + 2, rightRead[i], 'i16');    // right channel
+        //         }
+        //     }
+        //
+        //     sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
+        //     console.log(openstate, percentbuffered, starving, diskbusy);
+        //
+        //     return FMOD.OK;
+        // };
+
+        // info.pcmsetposcallback = (sound: any, subsound: any, position: any, postype: any) => FMOD.OK;
+        const ptr1 = new Pointer<any>();
+        const ptr2 = new Pointer<any>();
+        const len1 = new Pointer<any>();
+        const len2 = new Pointer<any>();
+        FMOD.Result = FMOD.Core.createSound('', mode, info, sound);
+        FMOD.Result = sound.deref().lock(0, info.length, ptr1, ptr2, len1, len2);
+        let offset = 0;
+        while (offset < len1.deref()) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const { channelData, samplesDecoded, errors } = await decoder.decode(value);
+            console.log(samplesDecoded, offset, len1.deref());
+
+            const [left, right] = channelData;
+            for (let i = offset; i < (samplesDecoded >> 2); i++) {
+                const leftIndex = ptr1.deref() + i << 2;
+                const rightIndex = leftIndex + 2;
+                FMOD.setValue(leftIndex, left[i], 'i16');    // left channel
+                FMOD.setValue(rightIndex, right[i], 'i16');    // right channel
+            }
+            offset += samplesDecoded;
+            // break;
+        }
+        const openstate = new Pointer<any>();
+        const percentbuffered = new Pointer<any>();
+        const starving = new Pointer<any>();
+        const diskbusy = new Pointer<any>();
+        sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
+        console.log(openstate, percentbuffered, starving, diskbusy);
+        FMOD.Result = FMOD.Core.playSound(sound.deref(), null, null, {});
+        sound.deref().unlock(ptr1.deref(), ptr2.deref(), len1.deref(), len2.deref());
+        setInterval(() => {
+            sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
+            console.log(openstate, percentbuffered, starving, diskbusy);
+        }, 2000);
+
+    };
+
+
+    const [showingArt, setShowingArt] = useState(false);
+    const [artIndex, setArtIndex] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
     const art = artData[artIndex];
     // piano.fetch().then(() => {
@@ -117,6 +259,7 @@ const App: React.FC = () => {
     if (!fmod.ready) return (
         <p>loading...</p>
     );
+
 
     // const test = new EventInstance('event:/Tracks/banktest');
     // test.init();
@@ -143,6 +286,9 @@ const App: React.FC = () => {
     // test.start();
 
 
+
+
+
     return (
         <ThemeProvider theme={{ colors: art.theme }}><PlayQueueProvider>
             <GlobalStyles />
@@ -154,11 +300,11 @@ const App: React.FC = () => {
                     justifySelf: 'end',
                     alignSelf: 'end'
                 }}>
-                    { showingArt ? 
+                    {showingArt ?
                         <ArtPicker
                             artist={art.artist}
                             setArtIndex={setArtIndex}
-                            handleClose={() => {setShowingArt(false)}}
+                            handleClose={() => { setShowingArt(false) }}
                         />
                         :
                         <SelectArtButton
@@ -171,14 +317,14 @@ const App: React.FC = () => {
 
                 </div>
                 <div style={{ height: 440, alignSelf: 'center', display: 'flex', alignContent: 'end' }}>
-                    <Art src={art.url} style={{ margin: 'auto auto 0 auto'}}/>
+                    <Art src={art.url} style={{ margin: 'auto auto 0 auto' }} />
                 </div>
                 <div style={{
                     justifySelf: 'start',
                     alignSelf: 'end',
                     width: '100%'
                 }}>
-                    <CreditBox artist={art.artist}/>
+                    <CreditBox artist={art.artist} />
                 </div>
             </div>
             <TrackControlContainer>

@@ -6,7 +6,11 @@ export class PromiseStatus {
 
     constructor() {
         this.status = 'unsettled';
-        this.promise = new Promise((resolve, reject) => {
+        this.promise = this.createNewPromise();
+    }
+
+    private createNewPromise() {
+        return new Promise<void>((resolve, reject) => {
             this.resolve = value => {
                 this.status = 'resolved';
                 resolve(value);
@@ -28,6 +32,10 @@ export class PromiseStatus {
 
     get isRejected() {
         return this.status === 'rejected';
+    }
+
+    reset() {
+        this.promise = this.createNewPromise();
     }
 
     then<TResult1 = void, TResult2 = never>(

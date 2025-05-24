@@ -12,15 +12,15 @@ const TrackSliders: React.FC = () => {
         console.log('success');
     };
     const updateBrightness = (value: number) => {
-        if (!playQueue.currentTrack.isLoaded) return;
+        // if (!playQueue.currentTrack.isLoaded) return;
         playQueue.currentTrack.event.setParameter('Brightness', value, false);
     };
     const updateChops = (value: number) => {
-        if (!playQueue.currentTrack.isLoaded) return;
+        // if (!playQueue.currentTrack.isLoaded) return;
         playQueue.currentTrack.event.setParameter('Chops', value, false);
     };
     const updateVocals = (value: number) => {
-        if (!playQueue.currentTrack.isLoaded) return;
+        // if (!playQueue.currentTrack.isLoaded) return;
         playQueue.currentTrack.event.setParameter('Vocals', value, false);
     };
 
