@@ -173,64 +173,69 @@ const App: React.FC = () => {
         const mode = FMOD.OPENUSER | FMOD.LOOP_NORMAL;
 
         // console.log('channel data', channelData);
-        // info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
-        //     console.log('datalen', datalen);
-        //     console.log('sound', sound);
-        //     const openstate = new Pointer<any>();
-        //     const percentbuffered = new Pointer<any>();
-        //     const starving = new Pointer<any>();
-        //     const diskbusy = new Pointer<any>();
-        //
-        //     const leftRead = leftBuffer.retrieve(datalen);
-        //     const rightRead = rightBuffer.retrieve(datalen);
-        //
-        //
-        //     const nullRead = leftRead === null || rightRead === null;
-        //
-        //     if (nullRead) {
-        //         console.log('nullread');
-        //         for (let i = 0; i < (datalen >> 2); i++) {
-        //             FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
-        //             FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
-        //         }
-        //     } else {
-        //         console.log('nonnullread');
-        //         for (let i = 0; i < (datalen >> 2); i++) {
-        //             FMOD.setValue(data + (i << 2) + 0, leftRead[i], 'i16');    // left channel
-        //             FMOD.setValue(data + (i << 2) + 2, rightRead[i], 'i16');    // right channel
-        //         }
-        //     }
-        //
-        //     sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
-        //     console.log(openstate, percentbuffered, starving, diskbusy);
-        //
-        //     return FMOD.OK;
-        // };
+        info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
+            console.log('datalen', datalen);
+            console.log('sound', sound);
+            const openstate = new Pointer<any>();
+            const percentbuffered = new Pointer<any>();
+            const starving = new Pointer<any>();
+            const diskbusy = new Pointer<any>();
+
+            // const leftRead = leftBuffer.retrieve(datalen);
+            // const rightRead = rightBuffer.retrieve(datalen);
+            //
+            //
+            // const nullRead = leftRead === null || rightRead === null;
+            //
+            // if (nullRead) {
+            //     console.log('nullread');
+            //     for (let i = 0; i < (datalen >> 2); i++) {
+            //         FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
+            //         FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
+            //     }
+            // } else {
+            //     console.log('nonnullread');
+            //     for (let i = 0; i < (datalen >> 2); i++) {
+            //         FMOD.setValue(data + (i << 2) + 0, leftRead[i], 'i16');    // left channel
+            //         FMOD.setValue(data + (i << 2) + 2, rightRead[i], 'i16');    // right channel
+            //     }
+            // }
+            for (let i = 0; i < (datalen >> 2); i++) {
+                FMOD.setValue(data + (i << 2) + 0, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // left channel
+                FMOD.setValue(data + (i << 2) + 2, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // right channel
+
+            }
+
+            sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
+            console.log(openstate, percentbuffered, starving, diskbusy);
+
+            return FMOD.OK;
+        };
 
         // info.pcmsetposcallback = (sound: any, subsound: any, position: any, postype: any) => FMOD.OK;
-        const ptr1 = new Pointer<any>();
-        const ptr2 = new Pointer<any>();
-        const len1 = new Pointer<any>();
-        const len2 = new Pointer<any>();
+        // const ptr1 = new Pointer<any>();
+        // const ptr2 = new Pointer<any>();
+        // const len1 = new Pointer<any>();
+        // const len2 = new Pointer<any>();
         FMOD.Result = FMOD.Core.createSound('', mode, info, sound);
-        FMOD.Result = sound.deref().lock(0, info.length, ptr1, ptr2, len1, len2);
-        let offset = 0;
-        while (offset < len1.deref()) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const { channelData, samplesDecoded, errors } = await decoder.decode(value);
-            console.log(samplesDecoded, offset, len1.deref());
-
-            const [left, right] = channelData;
-            for (let i = offset; i < (samplesDecoded >> 2); i++) {
-                const leftIndex = ptr1.deref() + i << 2;
-                const rightIndex = leftIndex + 2;
-                FMOD.setValue(leftIndex, left[i], 'i16');    // left channel
-                FMOD.setValue(rightIndex, right[i], 'i16');    // right channel
-            }
-            offset += samplesDecoded;
-            // break;
-        }
+        // FMOD.Result = sound.deref().lock(0, info.length, ptr1, ptr2, len1, len2);
+        // let offset = 0;
+        // while (offset < len1.deref()) {
+        //     const { done, value } = await reader.read();
+        //     if (done) break;
+        //     const { channelData, samplesDecoded, errors } = await decoder.decode(value);
+        //     console.log(samplesDecoded, offset, len1.deref());
+        //
+        //     const [left, right] = channelData;
+        //     for (let i = offset; i < (samplesDecoded >> 2); i++) {
+        //         const leftIndex = ptr1.deref() + i << 2;
+        //         const rightIndex = leftIndex + 2;
+        //         FMOD.setValue(leftIndex, left[i], 'i16');    // left channel
+        //         FMOD.setValue(rightIndex, right[i], 'i16');    // right channel
+        //     }
+        //     offset += samplesDecoded;
+        //     // break;
+        // }
         const openstate = new Pointer<any>();
         const percentbuffered = new Pointer<any>();
         const starving = new Pointer<any>();
@@ -238,7 +243,7 @@ const App: React.FC = () => {
         sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
         console.log(openstate, percentbuffered, starving, diskbusy);
         FMOD.Result = FMOD.Core.playSound(sound.deref(), null, null, {});
-        sound.deref().unlock(ptr1.deref(), ptr2.deref(), len1.deref(), len2.deref());
+        // sound.deref().unlock(ptr1.deref(), ptr2.deref(), len1.deref(), len2.deref());
         setInterval(() => {
             sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
             console.log(openstate, percentbuffered, starving, diskbusy);
