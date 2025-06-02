@@ -8,7 +8,8 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.2.19",
     "sharp": "^0.33.4",
-    "bun-style-loader": "^0.4.0"
+    "bun-style-loader": "^0.4.0",
+    "concurrently": "^9.1.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -33,6 +34,7 @@
     "clean": "rm -rf ./dist/*",
     "build": "bun build.ts",
     "watch": "bun build.ts --watch",
-    "dev": "bunx http-server -p 3000 -S -C ./test_certificates/cert.pem -K ./test_certificates/key.pem ./dist"
+    "up": "bunx http-server -p 3000 -S -C ./test_certificates/cert.pem -K ./test_certificates/key.pem ./dist",
+    "dev": "concurrently -p name -n \"server,builder\" \"bun up\" \"bun watch\""
   }
 }
