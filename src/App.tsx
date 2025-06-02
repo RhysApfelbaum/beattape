@@ -126,8 +126,8 @@ const App: React.FC = () => {
         const reader = response.body.getReader();
 
 
-        // const leftBuffer = new ChunkedQueue(441000);
-        // const rightBuffer = new ChunkedQueue(441000);
+        const leftBuffer = new ChunkedQueue(441000);
+        const rightBuffer = new ChunkedQueue(441000);
 
         let sampleRate = 44100;
         // let samplesDecoded = 0;
@@ -142,11 +142,17 @@ const App: React.FC = () => {
         //         // leftBuffer.feed(left);
         //         // rightBuffer.feed(right);
         //         await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
-        //         // break;
+        //         break;
         //     }
         // }
-
+        //
         // pusher();
+        const { done, value } = await reader.read();
+        if (done) return;
+        const { channelData } = await decoder.decode(value);
+        const [ left, right ] = channelData;
+        // console.log(left[10000], right);
+        // await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
 
         // if (done) return;
 
@@ -166,7 +172,7 @@ const App: React.FC = () => {
             position: any,
             postype: any
         ) => {
-            alert('hi');
+            // alert('hi');
             console.log('pcmcallback', sound, subsound, position, postype);
             return FMOD.OK;
         };
@@ -181,12 +187,25 @@ const App: React.FC = () => {
             const starving = new Pointer<any>();
             const diskbusy = new Pointer<any>();
 
-            // const leftRead = leftBuffer.retrieve(datalen);
-            // const rightRead = rightBuffer.retrieve(datalen);
-            //
-            //
+            const leftRead = leftBuffer.retrieve(datalen);
+            const rightRead = rightBuffer.retrieve(datalen);
+
+
             // const nullRead = leftRead === null || rightRead === null;
-            //
+
+            console.log('left', left);
+            for (let i = 0; i < (datalen >> 2); i++) {
+                if (i <= left.length) {
+                    console.log('left val', left[i]);
+                    FMOD.setValue(data + (i << 2) + 0, left[i] * 32767, 'i16');    // left channel
+                    FMOD.setValue(data + (i << 2) + 2, right[i] * 32767, 'i16');    // right channel
+                } else {
+                    // Run out of samples
+                    FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
+                    FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
+                }
+            }
+
             // if (nullRead) {
             //     console.log('nullread');
             //     for (let i = 0; i < (datalen >> 2); i++) {
@@ -196,15 +215,15 @@ const App: React.FC = () => {
             // } else {
             //     console.log('nonnullread');
             //     for (let i = 0; i < (datalen >> 2); i++) {
-            //         FMOD.setValue(data + (i << 2) + 0, leftRead[i], 'i16');    // left channel
-            //         FMOD.setValue(data + (i << 2) + 2, rightRead[i], 'i16');    // right channel
+            //         FMOD.setValue(data + (i << 2) + 0, leftRead[i] * 32767, 'i16');    // left channel
+            //         FMOD.setValue(data + (i << 2) + 2, rightRead[i] * 32767, 'i16');    // right channel
             //     }
             // }
-            for (let i = 0; i < (datalen >> 2); i++) {
-                FMOD.setValue(data + (i << 2) + 0, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // left channel
-                FMOD.setValue(data + (i << 2) + 2, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // right channel
-
-            }
+            // for (let i = 0; i < (datalen >> 2); i++) {
+            //     FMOD.setValue(data + (i << 2) + 0, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // left channel
+            //     FMOD.setValue(data + (i << 2) + 2, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // right channel
+            //
+            // }
 
             sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
             console.log(openstate, percentbuffered, starving, diskbusy);
@@ -240,14 +259,14 @@ const App: React.FC = () => {
         const percentbuffered = new Pointer<any>();
         const starving = new Pointer<any>();
         const diskbusy = new Pointer<any>();
-        sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
-        console.log(openstate, percentbuffered, starving, diskbusy);
+        // sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
+        // console.log(openstate, percentbuffered, starving, diskbusy);
         FMOD.Result = FMOD.Core.playSound(sound.deref(), null, null, {});
         // sound.deref().unlock(ptr1.deref(), ptr2.deref(), len1.deref(), len2.deref());
-        setInterval(() => {
-            sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
-            console.log(openstate, percentbuffered, starving, diskbusy);
-        }, 2000);
+        // setInterval(() => {
+        //     sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
+        //     console.log(openstate, percentbuffered, starving, diskbusy);
+        // }, 2000);
 
     };
 
