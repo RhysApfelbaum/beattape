@@ -26,13 +26,14 @@ export class ChunkedQueue {
 
         this.queue.unshift(chunk);
         this.size += chunk.length;
-        console.log('size', this.size);
+        // console.log('size', this.size);
     }
 
     retrieve(requestedSize: number) {
         console.log('buffer size', this.size, requestedSize);
-        if (requestedSize > this.size) return null;
+        // if (requestedSize > this.size) return null;
 
+        const underRead = requestedSize > this.size;
         let retrievedSize = 0;
         const retrievedChunks: Float32Array[] = [];
 
@@ -55,12 +56,19 @@ export class ChunkedQueue {
             }
         }
 
+        // if (underRead) {
+        //     retrievedChunks.push(new Float32Array(requestedSize - retrievedSize).fill(0));
+        // }
+
 
         if (this.intendedWriteSize <= this.capacity - this.size) {
             this.canWrite.resolve();
         }
 
-        return this.concatChunks(retrievedChunks, retrievedSize);
+        return {
+            values: this.concatChunks(retrievedChunks, retrievedSize),
+            underRead: underRead
+        };
     }
 
     private concatChunks(chunks: Float32Array[], totalLength: number): Float32Array {

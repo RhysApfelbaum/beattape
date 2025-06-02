@@ -132,25 +132,25 @@ const App: React.FC = () => {
         let sampleRate = 44100;
         // let samplesDecoded = 0;
 
-        // const pusher = async () => {
-        //     while (true) {
-        //         const { done, value } = await reader.read();
-        //         if (done) break;
-        //         const { channelData } = await decoder.decode(value);
-        //         const [ left, right ] = channelData;
-        //         // console.log(sampleRate, samplesDecoded);
-        //         // leftBuffer.feed(left);
-        //         // rightBuffer.feed(right);
-        //         await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
-        //         break;
-        //     }
-        // }
-        //
-        // pusher();
-        const { done, value } = await reader.read();
-        if (done) return;
-        const { channelData } = await decoder.decode(value);
-        const [ left, right ] = channelData;
+        const pusher = async () => {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const { channelData } = await decoder.decode(value);
+                const [ left, right ] = channelData;
+                // console.log(sampleRate, samplesDecoded);
+                // leftBuffer.feed(left);
+                // rightBuffer.feed(right);
+                await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
+                // break;
+            }
+        }
+
+        pusher();
+        // const { done, value } = await reader.read();
+        // if (done) return;
+        // const { channelData } = await decoder.decode(value);
+        // const [ left, right ] = channelData;
         // console.log(left[10000], right);
         // await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
 
@@ -164,7 +164,7 @@ const App: React.FC = () => {
         info.defaultfrequency = sampleRate;
         info.decodebuffersize = 44100;
         info.numchannels = 2;
-        info.length = info.defaultfrequency * info.numchannels * 2 * 5;
+        info.length = info.defaultfrequency * info.numchannels * 2 * 20;
         info.format = FMOD.SOUND_FORMAT_PCM16;
         info.pcmsetposcallback = (
             sound: any,
@@ -176,7 +176,7 @@ const App: React.FC = () => {
             console.log('pcmcallback', sound, subsound, position, postype);
             return FMOD.OK;
         };
-        const mode = FMOD.OPENUSER | FMOD.LOOP_NORMAL;
+        const mode = FMOD.OPENUSER | FMOD.CREATESTREAM;
 
         // console.log('channel data', channelData);
         info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
@@ -187,18 +187,19 @@ const App: React.FC = () => {
             const starving = new Pointer<any>();
             const diskbusy = new Pointer<any>();
 
-            const leftRead = leftBuffer.retrieve(datalen);
-            const rightRead = rightBuffer.retrieve(datalen);
+            const { values: leftRead, underRead: leftUnderRead } = leftBuffer.retrieve(datalen);
+            const { values: rightRead, underRead: rightUnderRead } = rightBuffer.retrieve(datalen);
 
 
             // const nullRead = leftRead === null || rightRead === null;
 
-            console.log('left', left);
+
+
+
             for (let i = 0; i < (datalen >> 2); i++) {
-                if (i <= left.length) {
-                    console.log('left val', left[i]);
-                    FMOD.setValue(data + (i << 2) + 0, left[i] * 32767, 'i16');    // left channel
-                    FMOD.setValue(data + (i << 2) + 2, right[i] * 32767, 'i16');    // right channel
+                if (i <= leftRead.length) {
+                    FMOD.setValue(data + (i << 2) + 0, leftRead[i] * 32767, 'i16');    // left channel
+                    FMOD.setValue(data + (i << 2) + 2, rightRead[i] * 32767, 'i16');    // right channel
                 } else {
                     // Run out of samples
                     FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
@@ -231,7 +232,7 @@ const App: React.FC = () => {
             return FMOD.OK;
         };
 
-        // info.pcmsetposcallback = (sound: any, subsound: any, position: any, postype: any) => FMOD.OK;
+        info.pcmsetposcallback = (sound: any, subsound: any, position: any, postype: any) => FMOD.OK;
         // const ptr1 = new Pointer<any>();
         // const ptr2 = new Pointer<any>();
         // const len1 = new Pointer<any>();
