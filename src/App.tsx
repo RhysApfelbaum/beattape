@@ -13,10 +13,10 @@ import ArtPicker from './ArtPicker';
 import { EventInstance } from './fmod/event';
 import { FMOD } from './fmod/system';
 import { Pointer } from './fmod/pointer';
-import { Sound } from './fmod/sound';
+import { Sound, StreamedSound } from './fmod/sound';
 
 import { MPEGDecoderWebWorker } from 'mpg123-decoder';
-import { ChunkedQueue } from './fmod/ringBuffer';
+import { ChunkedQueue } from './fmod/buffering';
 const decoder = new MPEGDecoderWebWorker();
 
 
@@ -92,21 +92,6 @@ const GlobalStyles = createGlobalStyle`
     }
 `;
 
-const getWav = async () => {
-    const response = await fetch('/piano_sample.wav')
-    const buffer = await response.arrayBuffer();
-    return new Uint8Array(buffer);
-}
-
-let wavData: Uint8Array;
-
-// getWav().then(data => { wavData = data; });
-
-// const sounds = new Map<string, Sound>();
-// sounds.set('/piano_sample.wav', new Sound('/piano_sample.wav', '/piano_sample.wav');
-// const piano = new Sound('/piano_sample.wav', '/piano_sample.wav');
-
-
 const App: React.FC = () => {
     const fmod = useFMOD();
 
@@ -116,159 +101,12 @@ const App: React.FC = () => {
     }, [fmod]);
 
     const loadPCM = async () => {
-        await decoder.ready;
-        const response = await fetch('https://play.streamafrica.net/radiojazz');
-
-        if (response.body === null) {
-            throw new Error('No response body');
-        }
-
-        const reader = response.body.getReader();
-
-
-        const leftBuffer = new ChunkedQueue(441000);
-        const rightBuffer = new ChunkedQueue(441000);
-
-        let sampleRate = 44100;
-        // let samplesDecoded = 0;
-
-        const pusher = async () => {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                const { channelData } = await decoder.decode(value);
-                const [ left, right ] = channelData;
-                // console.log(sampleRate, samplesDecoded);
-                // leftBuffer.feed(left);
-                // rightBuffer.feed(right);
-                await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
-                // break;
-            }
-        }
-
-        pusher();
-        // const { done, value } = await reader.read();
-        // if (done) return;
-        // const { channelData } = await decoder.decode(value);
-        // const [ left, right ] = channelData;
-        // console.log(left[10000], right);
-        // await Promise.all([ leftBuffer.add(left), rightBuffer.add(right) ]);
-
-        // if (done) return;
-
-        // const {channelData, samplesDecoded, sampleRate} = await decoder.decode(value);
-        //
-
-        const sound = new Pointer<any>();
-        const info = FMOD.CREATESOUNDEXINFO();
-        info.defaultfrequency = sampleRate;
-        info.decodebuffersize = 44100;
-        info.numchannels = 2;
-        info.length = info.defaultfrequency * info.numchannels * 2 * 20;
-        info.format = FMOD.SOUND_FORMAT_PCM16;
-        info.pcmsetposcallback = (
-            sound: any,
-            subsound: any,
-            position: any,
-            postype: any
-        ) => {
-            // alert('hi');
-            console.log('pcmcallback', sound, subsound, position, postype);
-            return FMOD.OK;
-        };
-        const mode = FMOD.OPENUSER | FMOD.CREATESTREAM;
-
-        // console.log('channel data', channelData);
-        info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
-            console.log('datalen', datalen);
-            console.log('sound', sound);
-            const openstate = new Pointer<any>();
-            const percentbuffered = new Pointer<any>();
-            const starving = new Pointer<any>();
-            const diskbusy = new Pointer<any>();
-
-            const { values: leftRead, underRead: leftUnderRead } = leftBuffer.retrieve(datalen);
-            const { values: rightRead, underRead: rightUnderRead } = rightBuffer.retrieve(datalen);
-
-
-            // const nullRead = leftRead === null || rightRead === null;
-
-
-
-
-            for (let i = 0; i < (datalen >> 2); i++) {
-                if (i <= leftRead.length) {
-                    FMOD.setValue(data + (i << 2) + 0, leftRead[i] * 32767, 'i16');    // left channel
-                    FMOD.setValue(data + (i << 2) + 2, rightRead[i] * 32767, 'i16');    // right channel
-                } else {
-                    // Run out of samples
-                    FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
-                    FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
-                }
-            }
-
-            // if (nullRead) {
-            //     console.log('nullread');
-            //     for (let i = 0; i < (datalen >> 2); i++) {
-            //         FMOD.setValue(data + (i << 2) + 0, 0, 'i16');    // left channel
-            //         FMOD.setValue(data + (i << 2) + 2, 0, 'i16');    // right channel
-            //     }
-            // } else {
-            //     console.log('nonnullread');
-            //     for (let i = 0; i < (datalen >> 2); i++) {
-            //         FMOD.setValue(data + (i << 2) + 0, leftRead[i] * 32767, 'i16');    // left channel
-            //         FMOD.setValue(data + (i << 2) + 2, rightRead[i] * 32767, 'i16');    // right channel
-            //     }
-            // }
-            // for (let i = 0; i < (datalen >> 2); i++) {
-            //     FMOD.setValue(data + (i << 2) + 0, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // left channel
-            //     FMOD.setValue(data + (i << 2) + 2, Math.sin(2* Math.PI * i * 440 / 44100) * 32767, 'i16');    // right channel
-            //
-            // }
-
-            sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
-            console.log(openstate, percentbuffered, starving, diskbusy);
-
-            return FMOD.OK;
-        };
-
-        info.pcmsetposcallback = (sound: any, subsound: any, position: any, postype: any) => FMOD.OK;
-        // const ptr1 = new Pointer<any>();
-        // const ptr2 = new Pointer<any>();
-        // const len1 = new Pointer<any>();
-        // const len2 = new Pointer<any>();
-        FMOD.Result = FMOD.Core.createSound('', mode, info, sound);
-        // FMOD.Result = sound.deref().lock(0, info.length, ptr1, ptr2, len1, len2);
-        // let offset = 0;
-        // while (offset < len1.deref()) {
-        //     const { done, value } = await reader.read();
-        //     if (done) break;
-        //     const { channelData, samplesDecoded, errors } = await decoder.decode(value);
-        //     console.log(samplesDecoded, offset, len1.deref());
-        //
-        //     const [left, right] = channelData;
-        //     for (let i = offset; i < (samplesDecoded >> 2); i++) {
-        //         const leftIndex = ptr1.deref() + i << 2;
-        //         const rightIndex = leftIndex + 2;
-        //         FMOD.setValue(leftIndex, left[i], 'i16');    // left channel
-        //         FMOD.setValue(rightIndex, right[i], 'i16');    // right channel
-        //     }
-        //     offset += samplesDecoded;
-        //     // break;
-        // }
-        const openstate = new Pointer<any>();
-        const percentbuffered = new Pointer<any>();
-        const starving = new Pointer<any>();
-        const diskbusy = new Pointer<any>();
-        // sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
-        // console.log(openstate, percentbuffered, starving, diskbusy);
-        FMOD.Result = FMOD.Core.playSound(sound.deref(), null, null, {});
-        // sound.deref().unlock(ptr1.deref(), ptr2.deref(), len1.deref(), len2.deref());
-        // setInterval(() => {
-        //     sound.deref().getOpenState(openstate, percentbuffered, starving, diskbusy);
-        //     console.log(openstate, percentbuffered, starving, diskbusy);
-        // }, 2000);
-
+        // const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 20)
+        const sound = new StreamedSound('https://s1-bos.liveatc.net/klax4?nocache=2025060303161596489', 0, 10)
+        sound.fetch();https://s1-bos.liveatc.net/kjfk_del3?nocache=2025060303120916204
+        await sound.source.fetchStatus.promise;
+        sound.load();
+        FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, {});
     };
 
 

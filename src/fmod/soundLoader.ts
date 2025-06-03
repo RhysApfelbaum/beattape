@@ -1,4 +1,4 @@
-import { Sound } from "./sound";
+import { StaticSound } from "./sound";
 
 export interface SoundInfo {
     path: string;
@@ -9,7 +9,7 @@ export interface SoundInfo {
 const pathToTrackURL = (path: string) => `./track_audio/${path}`;
 
 export class SoundLoader {
-    private sounds: Sound[];
+    private sounds: StaticSound[];
 
     constructor() {
         this.sounds = [];
@@ -21,7 +21,7 @@ export class SoundLoader {
         soundInfo.forEach((item: any) => {
             const path = pathToTrackURL(item.path);
             const localPath = item.path.split('/').pop();
-            const sound = new Sound(path, localPath, item.start, item.end);
+            const sound = new StaticSound(path, localPath, item.start, item.end);
             this.sounds.push(sound);
         });
         console.log(this.sounds);
@@ -32,7 +32,9 @@ export class SoundLoader {
             await sound.fetch();
             if (sound.file.fetchStatus.isRejected) {
                 console.error('something went wrong');
-                throw sound.error;
+                // throw sound.error;
+                // TODO: Figure this out
+                throw new Error();
             }
             sound.load();
         })
