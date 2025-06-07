@@ -1,6 +1,7 @@
 import { StereoSampleQueue } from "./buffering";
 import { FMODMountedFile, RemoteSampleBuffer, RemoteSoundData } from "./mountedFile";
 import { Pointer } from "./pointer";
+import { PromiseStatus } from "./promiseStatus";
 import { FMOD } from "./system";
 
 const MAX_SIGNED_INT_16 = 32767;
@@ -14,20 +15,38 @@ export interface RemoteSound {
     fetch: () => Promise<void>;
     load: () => boolean;
     unload: () => Promise<void>;
+    release: () => void;
 }
+
 
 export class StreamedSound implements RemoteSound {
     source: RemoteSampleBuffer;
     handle: any;
     start: number;
     end: number;
-    sampleRate: number;
+    onUnderRead: () => Promise<void>;
+    stop: () => void;
+    restart: () => void;
+    
 
-    constructor(url: string, start: number, end: number) {
-        this.source = new RemoteSampleBuffer(url, 44100 * 10);
+    constructor(
+        url: string,
+        start: number,
+        end: number,
+        onStop: () => void,
+        onRestart: () => void
+    ) {
         this.start = start;
         this.end = end;
-        this.sampleRate = 44100;
+        this.stop = onStop;
+        this.restart = onRestart;
+        this.source = new RemoteSampleBuffer(url, 44100 * 40);
+        this.onUnderRead = async () => {
+            this.stop();
+            this.source.canRestart = new PromiseStatus();
+            await this.source.canRestart.promise;
+            this.restart();
+        };
     }
 
     async fetch() {
@@ -47,7 +66,7 @@ export class StreamedSound implements RemoteSound {
         const info = FMOD.CREATESOUNDEXINFO();
         const { sampleRate, numChannels, bytesPerSample } = this.source.soundInfo;
 
-        info.length = (this.end - this.start) * sampleRate * bytesPerSample * numChannels;
+        info.length = (this.end - this.start) * sampleRate * bytesPerSample;
         info.numchannels = numChannels;
         info.defaultfrequency = sampleRate;
         info.decodebuffersize = sampleRate;
@@ -64,14 +83,8 @@ export class StreamedSound implements RemoteSound {
         };
 
         info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
-            console.log('datalen', datalen);
-            console.log('sound', sound);
-            const openstate = new Pointer<any>();
-            const percentbuffered = new Pointer<any>();
-            const starving = new Pointer<any>();
-            const diskbusy = new Pointer<any>();
-
-            const { left, right, retrievedSize } = this.source.retrieve(datalen);
+            console.log('requesting', datalen);
+            const { left, right, retrievedSize, underRead } = this.source.retrieve(datalen / 2);
 
             for (let i = 0; i < (datalen >> 2); i++) {
                 const offset = data + (i << 2);
@@ -84,12 +97,11 @@ export class StreamedSound implements RemoteSound {
                     FMOD.setValue(offset + 2, 0, 'i16');    // right channel
                 }
             }
-            sound.getOpenState(openstate, percentbuffered, starving, diskbusy);
-            console.log(openstate, percentbuffered, starving, diskbusy);
 
+            if (underRead) this.onUnderRead();
             return FMOD.OK;
         };
-        FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL, info, sound);
+        FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER, info, sound);
         this.handle = sound.deref();
         return true;
     };
@@ -101,23 +113,27 @@ export class StreamedSound implements RemoteSound {
         this.handle.release();
         this.handle = null;
     };
+
+    release() {
+        this.source.release();
+    };
 }
 
-export class StaticSound {
-    public file: FMODMountedFile;
+export class StaticSound implements RemoteSound {
+    public source: FMODMountedFile;
     public handle: any;
     public start: number;
     public end: number;
 
     constructor(remotePath: string, filename: string, start: number, end: number, stream = false) {
-        this.file = new FMODMountedFile(remotePath, filename);
+        this.source = new FMODMountedFile(remotePath, filename);
         this.handle = null;
         this.start = start;
         this.end = end;
     }
 
     async fetch() {
-        await this.file.fetch();
+        await this.source.fetch();
     }
 
     get isLoaded() {
@@ -126,14 +142,14 @@ export class StaticSound {
 
 
     load() {
-        if (!this.file.fetchStatus.isResolved) {
+        if (!this.source.fetchStatus.isResolved) {
             return false;
         }
 
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
 
-        info.length = this.file.length;
+        info.length = this.source.length;
         info.numchannels = 2;
         info.defaultfrequency = 48000;
         info.decodebuffersize = 48000;
@@ -141,17 +157,21 @@ export class StaticSound {
         // info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
         const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
 
-        FMOD.Result = FMOD.Core.createSound('/' + this.file.filename, mode, info, sound);
+        FMOD.Result = FMOD.Core.createSound('/' + this.source.filename, mode, info, sound);
         this.handle = sound.deref();
         return true;
     }
 
-    unload() {
+    async unload() {
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
         this.handle.release();
         this.handle = null;
+    }
+
+    release() {
+        this.source.release();
     }
 
 }

@@ -101,12 +101,21 @@ const App: React.FC = () => {
     }, [fmod]);
 
     const loadPCM = async () => {
-        // const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 20)
-        const sound = new StreamedSound('https://s1-bos.liveatc.net/klax4?nocache=2025060303161596489', 0, 10)
-        sound.fetch();https://s1-bos.liveatc.net/kjfk_del3?nocache=2025060303120916204
+        const channel = new Pointer<any>();
+        const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
+            () => {
+                console.log('pausing');
+                channel.deref().setPaused(true);
+            },
+            () => {
+                console.log('unpausing');
+                channel.deref().setPaused(false);
+            }
+        );
+        sound.fetch();
         await sound.source.fetchStatus.promise;
         sound.load();
-        FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, {});
+        FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, channel);
     };
 
 

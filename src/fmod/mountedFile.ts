@@ -1,13 +1,14 @@
 import { FMOD } from './system';
 import { PromiseStatus } from './promiseStatus';
-import { StereoSampleQueue } from './buffering';
-import { MPEGDecoderWebWorker } from 'mpg123-decoder';
+import { StereoSampleQueue, chunkBatcher } from './buffering';
+import { MPEGDecodedAudio, MPEGDecoderWebWorker } from 'mpg123-decoder';
 
 
 const DEFAULT_SOUND_INFO = {
     sampleRate: 44100,
     numChannels: 2,
-    bytesPerSample: 2
+    bytesPerSample: 2,
+    bufferThreshold: 20
 }
 
 export interface RemoteSoundData {
@@ -19,20 +20,33 @@ export interface RemoteSoundData {
 }
 
 
+
 export class RemoteSampleBuffer implements RemoteSoundData {
     url: string;
     fetchStatus: PromiseStatus;
+    canRestart: PromiseStatus;
     soundInfo: typeof DEFAULT_SOUND_INFO;
     private buffer: StereoSampleQueue;
     private decoder: MPEGDecoderWebWorker;
     private fetching: boolean;
-    constructor(url: string, bufferSize: number) {
+    constructor(
+        url: string,
+        bufferSize: number,
+        soundInfo = DEFAULT_SOUND_INFO
+    ) {
         this.url = url;
-        this.buffer = new StereoSampleQueue(bufferSize);
+        const buffer = new StereoSampleQueue(bufferSize);
+        this.buffer = buffer;
         this.decoder = new MPEGDecoderWebWorker();
         this.fetching = false;
-        this.soundInfo = DEFAULT_SOUND_INFO;
+        this.soundInfo = soundInfo;
         this.fetchStatus = new PromiseStatus();
+        this.canRestart = new PromiseStatus();
+    }
+
+    private get threshold() {
+        const { sampleRate, bytesPerSample, numChannels, bufferThreshold } = this.soundInfo;
+        return sampleRate * bytesPerSample * numChannels * bufferThreshold;
     }
 
     async fetch() {
@@ -40,29 +54,69 @@ export class RemoteSampleBuffer implements RemoteSoundData {
             fetch(this.url),
             this.decoder.ready
         ]);
-        console.log('response', response);
         this.fetchStatus.resolve();
 
         if (response.body === null) {
             throw new Error('No response body');
         }
 
-        const reader = response.body.getReader();
+        // const reader = response.body.getReader();
 
-        await this.decoder.ready;
-        this.fetching = true;
-        while (this.fetching) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const { channelData, sampleRate } = await this.decoder.decode(value);
-            this.soundInfo.sampleRate = sampleRate;
-            const [ left, right ] = channelData;
-            await this.buffer.add(left, right);
-        }
+        const decoder = new MPEGDecoderWebWorker();
+
+
+        const decodeStream = new TransformStream<Uint8Array, MPEGDecodedAudio>({
+            start: async () => {
+                await decoder.ready;
+            },
+            transform: async (chunk, controller) => {
+                const start = performance.now();
+                const decoded = await decoder.decode(chunk);
+                controller.enqueue(decoded);
+                const end = performance.now();
+                console.log(`Decoded ${decoded.samplesDecoded} samples in ${(end - start).toFixed(2)} ms`);
+            }
+        });
+        response.body
+            .pipeThrough(chunkBatcher())
+            .pipeThrough(decodeStream)
+            .pipeTo(new WritableStream<MPEGDecodedAudio>({
+                write: async (chunk) => {
+                    const { channelData } = chunk;
+                    const [ left, right ] = channelData;
+                    // const size = await this.buffer.add(left, right);
+                    // console.log('size', size);
+                    // console.log(size, this.threshold, this.canRestart.status);
+                    // if (size > this.threshold && !this.canRestart.isResolved) {
+                    //     console.log('restarting');
+                    //     this.canRestart.resolve();
+                    // }
+                }
+            }));
+        // this.fetching = true;
+        // while (this.fetching) {
+        //     const { done, value } = await reader.read();
+        //     if (done) break;
+        //     const { channelData, sampleRate } = await this.decoder.decode(value);
+        //     this.soundInfo.sampleRate = sampleRate;
+        //     const [ left, right ] = channelData;
+        //     const size = await this.buffer.add(left, right);
+        //     console.log(size, this.canRestart.status);
+        //     if (size > this.threshold && !this.canRestart.isResolved) {
+        //         console.log('restarting');
+        //         this.canRestart.resolve();
+        //     }
+        // }
+        await this.decoder.reset();
     }
 
     retrieve(requestedSize: number) {
         return this.buffer.retrieve(requestedSize);
+    }
+
+    async unload() {
+        this.fetching = false;
+        await this.decoder.reset();
     }
 
     release() {

@@ -30,7 +30,7 @@ export class SoundLoader {
     fetch() {
         this.sounds.forEach(async (sound) => {
             await sound.fetch();
-            if (sound.file.fetchStatus.isRejected) {
+            if (sound.source.fetchStatus.isRejected) {
                 console.error('something went wrong');
                 // throw sound.error;
                 // TODO: Figure this out
@@ -42,7 +42,7 @@ export class SoundLoader {
 
     getSound(path: string) {
         for (const sound of this.sounds) {
-            if (sound.file.url === pathToTrackURL(path)) {
+            if (sound.source.url === pathToTrackURL(path)) {
                 return sound;
             }
         }

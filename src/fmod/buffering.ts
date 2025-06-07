@@ -1,5 +1,59 @@
 import { PromiseStatus } from "./promiseStatus";
 
+
+class ChunkBatcher {
+    private buffer: Uint8Array;
+    private size: number;
+    private offset: number;
+
+    constructor(size: number) {
+        this.buffer = new Uint8Array(size);
+        this.size = size;
+        this.offset = 0;
+    }
+
+    enqueue(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
+        if (chunk.length > this.size) {
+            // If incoming chunk is already large, flush buffer first then pass chunk through
+            this.flush(controller);
+            controller.enqueue(chunk);
+            return;
+        }
+
+        if (this.offset + chunk.length > this.size) {
+            // Buffer full, flush it
+            this.flush(controller);
+        }
+
+        // Copy chunk into buffer
+        this.buffer.set(chunk, this.offset);
+        this.offset += chunk.length;
+
+        // If buffer reached threshold, flush it
+        if (this.offset === this.size) {
+            this.flush(controller);
+        }
+    }
+
+    flush(controller: TransformStreamDefaultController<Uint8Array>) {
+        if (this.offset === 0) return
+        controller.enqueue(this.buffer.subarray(0, this.offset));
+        this.offset = 0;
+    }
+}
+
+export const chunkBatcher = () => {
+    const batcher = new ChunkBatcher(16384);
+    return new TransformStream<Uint8Array, Uint8Array>({
+        transform: (chunk, controller) => {
+            batcher.enqueue(chunk, controller);
+        },
+        flush: (controller) => {
+            batcher.flush(controller);
+        }
+    });
+};
+
 export class StereoSampleQueue {
     private left: ChunkedQueue;
     private right: ChunkedQueue;
@@ -9,10 +63,12 @@ export class StereoSampleQueue {
     }
 
     async add(left: Float32Array, right: Float32Array) {
-        await Promise.all([
+        const [ leftSize, rightSize ] = await Promise.all([
             this.left.add(left),
             this.right.add(right)
         ]);
+
+        return leftSize + rightSize;
     }
 
     retrieve(requestedSize: number) {
@@ -32,6 +88,7 @@ export class ChunkedQueue {
     private size: number;
     private capacity: number;
     private canWrite: PromiseStatus;
+    private canRead: PromiseStatus;
     private intendedWriteSize: number;
 
     constructor(capacity: number) {
@@ -39,6 +96,7 @@ export class ChunkedQueue {
         this.size = 0;
         this.capacity = capacity;
         this.canWrite = new PromiseStatus();
+        this.canRead = new PromiseStatus();
         this.intendedWriteSize = 0;
         this.canWrite.resolve();
     }
@@ -52,7 +110,12 @@ export class ChunkedQueue {
 
         this.queue.unshift(chunk);
         this.size += chunk.length;
-        // console.log('size', this.size);
+
+        if (this.size > this.capacity / 3) {
+            this.canRead.resolve();
+        }
+        
+        return this.size;
     }
 
     retrieve(requestedSize: number) {
@@ -81,6 +144,10 @@ export class ChunkedQueue {
 
         if (this.intendedWriteSize <= this.capacity - this.size) {
             this.canWrite.resolve();
+        }
+
+        if (underRead) {
+            this.canRead.reset();
         }
 
         return {
