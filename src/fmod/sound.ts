@@ -1,4 +1,5 @@
 import { RingBuffer, StereoSampleQueue } from "./buffering";
+import { gesture } from "./gesture";
 import { FMODMountedFile, RemoteSampleBuffer, RemoteSoundData } from "./mountedFile";
 import { Pointer } from "./pointer";
 import { PromiseStatus } from "./promiseStatus";
@@ -54,25 +55,23 @@ export class StreamedSound implements RemoteSound {
     }
 
     async fetch() {
-        document.addEventListener('click', async () => {
-            const context = new AudioContext();
-            const element = new Audio(this.url);
-            element.crossOrigin = 'anonymous';
-            const source = context.createMediaElementSource(element);
-            await context.audioWorklet.addModule('/pcmProcessor.js');
-            const node = new AudioWorkletNode(context, 'pcm-processor');
-            node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
-                const { full } = this.buffer.write(event.data);
-                // console.log(this.buffer.getStatus());
-                if (full) {
-                    element.pause();
-                    await this.buffer.ready;
-                    element.play();
-                }
-            };
-            source.connect(node);
-            element.play();
-        });
+        await gesture.promise;
+        const context = new AudioContext();
+        const element = new Audio(this.url);
+        element.crossOrigin = 'anonymous';
+        const source = context.createMediaElementSource(element);
+        await context.audioWorklet.addModule('/pcmProcessor.js');
+        const node = new AudioWorkletNode(context, 'pcm-processor');
+        node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
+            const { full } = this.buffer.write(event.data);
+            if (full) {
+                element.pause();
+                await this.buffer.ready;
+                element.play();
+            }
+        };
+        source.connect(node);
+        element.play();
     }
 
     get isLoaded() {
@@ -114,6 +113,7 @@ export class StreamedSound implements RemoteSound {
                 // this.onUnderRead();
                 console.log('underflow');
                 FMOD.HEAPU8.set(new Uint8Array(datalen).fill(0), data);
+                return FMOD.OK;
             }
 
             FMOD.HEAPU8.set(view, data);
