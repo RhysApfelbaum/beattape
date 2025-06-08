@@ -1,4 +1,4 @@
-import { StereoSampleQueue } from "./buffering";
+import { RingBuffer, StereoSampleQueue } from "./buffering";
 import { FMODMountedFile, RemoteSampleBuffer, RemoteSoundData } from "./mountedFile";
 import { Pointer } from "./pointer";
 import { PromiseStatus } from "./promiseStatus";
@@ -21,6 +21,8 @@ export interface RemoteSound {
 
 export class StreamedSound implements RemoteSound {
     source: RemoteSampleBuffer;
+    private buffer: RingBuffer;
+    private url: string;
     handle: any;
     start: number;
     end: number;
@@ -40,7 +42,9 @@ export class StreamedSound implements RemoteSound {
         this.end = end;
         this.stop = onStop;
         this.restart = onRestart;
-        this.source = new RemoteSampleBuffer(url, 44100 * 40);
+        this.url = url;
+        this.source = new RemoteSampleBuffer(url, 40);
+        this.buffer = new RingBuffer(44100 * 20);
         this.onUnderRead = async () => {
             this.stop();
             this.source.canRestart = new PromiseStatus();
@@ -50,7 +54,25 @@ export class StreamedSound implements RemoteSound {
     }
 
     async fetch() {
-        await this.source.fetch();
+        document.addEventListener('click', async () => {
+            const context = new AudioContext();
+            const element = new Audio(this.url);
+            element.crossOrigin = 'anonymous';
+            const source = context.createMediaElementSource(element);
+            await context.audioWorklet.addModule('/pcmProcessor.js');
+            const node = new AudioWorkletNode(context, 'pcm-processor');
+            node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
+                const { full } = this.buffer.write(event.data);
+                // console.log(this.buffer.getStatus());
+                if (full) {
+                    element.pause();
+                    await this.buffer.ready;
+                    element.play();
+                }
+            };
+            source.connect(node);
+            element.play();
+        });
     }
 
     get isLoaded() {
@@ -58,9 +80,9 @@ export class StreamedSound implements RemoteSound {
     }
 
     load() {
-        if (!this.source.fetchStatus.isResolved) {
-            return false;
-        }
+        // if (!this.source.fetchStatus.isResolved) {
+        //     return false;
+        // }
 
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
@@ -84,24 +106,27 @@ export class StreamedSound implements RemoteSound {
 
         info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
             console.log('requesting', datalen);
-            const { left, right, retrievedSize, underRead } = this.source.retrieve(datalen / 2);
+            // const { left, right, retrievedSize, underRead } = this.source.retrieve(datalen / 2);
+            const { view, wrappedView, wrap, underflow } = this.buffer.read(datalen);
 
-            for (let i = 0; i < (datalen >> 2); i++) {
-                const offset = data + (i << 2);
-                if (i <= retrievedSize) {
-                    FMOD.setValue(offset + 0, left[i] * MAX_SIGNED_INT_16, 'i16');    // left channel
-                    FMOD.setValue(offset + 2, right[i] * MAX_SIGNED_INT_16, 'i16');    // right channel
-                } else {
-                    // Panic! Run out of samples!
-                    FMOD.setValue(offset + 0, 0, 'i16');    // left channel
-                    FMOD.setValue(offset + 2, 0, 'i16');    // right channel
-                }
+
+            if (underflow) {
+                // this.onUnderRead();
+                console.log('underflow');
+                FMOD.HEAPU8.set(new Uint8Array(datalen).fill(0), data);
             }
 
-            if (underRead) this.onUnderRead();
+            FMOD.HEAPU8.set(view, data);
+            if (wrap) {
+                FMOD.HEAPU8.set(wrappedView, data + view.length);
+            }
+
+
+
+            // if (underflow) this.onUnderRead();
             return FMOD.OK;
         };
-        FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER, info, sound);
+        FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL, info, sound);
         this.handle = sound.deref();
         return true;
     };

@@ -1,6 +1,138 @@
 import { PromiseStatus } from "./promiseStatus";
 
 
+type RingBufferReadResult = {
+    view: Uint8Array,
+    wrappedView: null,
+    underflow: false,
+    wrap: false
+} | {
+    view: null,
+    wrappedView: null,
+    underflow: true,
+    wrap: false
+} | {
+    view: Uint8Array,
+    wrappedView: Uint8Array,
+    underflow: false,
+    wrap: true
+};
+
+export class RingBuffer {
+    private buffer: ArrayBuffer; 
+    private size: number;
+    private readIndex: number;
+    private writeIndex: number;
+    private fullThreshold: number;
+    private hotThreshold: number;
+
+    capacity: number;
+    ready: PromiseStatus;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.size = 0;
+        this.readIndex = 0;
+        this.writeIndex = 0;
+        this.fullThreshold = capacity * 0.8;
+        this.hotThreshold = capacity * 0.5;
+        this.buffer = new ArrayBuffer(capacity);
+        this.ready = new PromiseStatus();
+        this.ready.resolve();
+    }
+
+    getStatus() {
+        return {
+            size: this.size,
+            percent: this.size / this.capacity
+        }
+    }
+
+    isFull() {
+        return this.size >= this.capacity;
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    write(chunk: ArrayBuffer): {
+        full: boolean,
+        loss: boolean
+    } {
+        const writeView = new Uint8Array(this.buffer);
+        const chunkView = new Uint8Array(chunk);
+
+
+        if (this.size + chunkView.length >= this.capacity) return {
+            // Chunk loss
+            full: true,
+            loss: true
+        }
+
+        const firstPartSize = Math.min(chunkView.length, this.capacity - this.writeIndex);
+        const secondPartSize = chunkView.length - firstPartSize;
+
+        writeView.set(chunkView.subarray(0, firstPartSize), this.writeIndex);
+
+        if (secondPartSize > 0) {
+            writeView.set(chunkView.subarray(firstPartSize), 0);
+        }
+
+        this.writeIndex = (this.writeIndex + chunkView.length) % this.capacity;
+        this.size += chunkView.length;
+
+        const full = this.size >= this.fullThreshold;
+
+        if (full) {
+            this.ready.reset();
+        }
+
+        return {
+            full: full,
+            loss: false
+        };
+    }
+
+    read(bytes: number): RingBufferReadResult {
+
+
+        if (this.size < bytes) return {
+            view: null,
+            wrappedView: null,
+            wrap: false,
+            underflow: true
+        };
+
+        
+        const viewSize = Math.min(bytes, this.capacity - this.readIndex);
+        const wrapSize = bytes - viewSize;
+
+        const result: RingBufferReadResult = (wrapSize > 0)
+            ? {
+                view: new Uint8Array(this.buffer, this.readIndex, viewSize),
+                wrappedView: new Uint8Array(this.buffer, 0, wrapSize),
+                underflow: false,
+                wrap: true
+            }
+            : {
+                view: new Uint8Array(this.buffer, this.readIndex, viewSize),
+                wrappedView: null,
+                underflow: false,
+                wrap: false
+            }
+
+        this.readIndex = (this.readIndex + bytes) % this.capacity;
+        this.size -= bytes;
+
+        if (this.size <= this.hotThreshold) {
+            this.ready.resolve();
+        }
+
+        return result;
+    }
+}
+
 class ChunkBatcher {
     private buffer: Uint8Array;
     private size: number;
@@ -42,10 +174,12 @@ class ChunkBatcher {
     }
 }
 
+
 export const chunkBatcher = () => {
     const batcher = new ChunkBatcher(16384);
     return new TransformStream<Uint8Array, Uint8Array>({
         transform: (chunk, controller) => {
+            console.log('fetched chunk with size', chunk.length);
             batcher.enqueue(chunk, controller);
         },
         flush: (controller) => {
@@ -84,7 +218,7 @@ export class StereoSampleQueue {
 }
 
 export class ChunkedQueue {
-    private queue: Float32Array[];
+    private queue: Int16Array[];
     private size: number;
     private capacity: number;
     private canWrite: PromiseStatus;
@@ -101,7 +235,7 @@ export class ChunkedQueue {
         this.canWrite.resolve();
     }
 
-    async add(chunk: Float32Array) {
+    async add(chunk: Int16Array) {
         this.intendedWriteSize = chunk.length;
         if (this.intendedWriteSize > this.capacity - this.size) {
             this.canWrite.reset();

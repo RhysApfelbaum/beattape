@@ -1,6 +1,6 @@
 import { FMOD } from './system';
 import { PromiseStatus } from './promiseStatus';
-import { StereoSampleQueue, chunkBatcher } from './buffering';
+import { ChunkedQueue, StereoSampleQueue, chunkBatcher } from './buffering';
 import { MPEGDecodedAudio, MPEGDecoderWebWorker } from 'mpg123-decoder';
 
 
@@ -26,7 +26,7 @@ export class RemoteSampleBuffer implements RemoteSoundData {
     fetchStatus: PromiseStatus;
     canRestart: PromiseStatus;
     soundInfo: typeof DEFAULT_SOUND_INFO;
-    private buffer: StereoSampleQueue;
+    private buffer: ChunkedQueue;
     private decoder: MPEGDecoderWebWorker;
     private fetching: boolean;
     constructor(
@@ -35,7 +35,7 @@ export class RemoteSampleBuffer implements RemoteSoundData {
         soundInfo = DEFAULT_SOUND_INFO
     ) {
         this.url = url;
-        const buffer = new StereoSampleQueue(bufferSize);
+        const buffer = new ChunkedQueue(bufferSize);
         this.buffer = buffer;
         this.decoder = new MPEGDecoderWebWorker();
         this.fetching = false;
@@ -50,49 +50,67 @@ export class RemoteSampleBuffer implements RemoteSoundData {
     }
 
     async fetch() {
-        const [ response ] = await Promise.all([
-            fetch(this.url),
-            this.decoder.ready
-        ]);
-        this.fetchStatus.resolve();
 
-        if (response.body === null) {
-            throw new Error('No response body');
-        }
-
-        // const reader = response.body.getReader();
-
-        const decoder = new MPEGDecoderWebWorker();
-
-
-        const decodeStream = new TransformStream<Uint8Array, MPEGDecodedAudio>({
-            start: async () => {
-                await decoder.ready;
-            },
-            transform: async (chunk, controller) => {
-                const start = performance.now();
-                const decoded = await decoder.decode(chunk);
-                controller.enqueue(decoded);
-                const end = performance.now();
-                console.log(`Decoded ${decoded.samplesDecoded} samples in ${(end - start).toFixed(2)} ms`);
-            }
+        document.addEventListener('click', async () => {
+            // console.log('clicked', context);
+            // if (context.state === 'suspended') {
+            //     context.resume();
+            // }
+            const context = new AudioContext();
+            const element = new Audio(this.url);
+            element.crossOrigin = 'anonymous';
+            const source = context.createMediaElementSource(element);
+            await context.audioWorklet.addModule('/pcmProcessor.js');
+            const node = new AudioWorkletNode(context, 'pcm-processor');
+            node.port.onmessage = async (event) => {
+                console.log(event.data);
+                // check buffer is not nearly full
+                // element.pause() or however you do it if the buffer is nearly full
+                this.buffer.add(event.data);
+            };
+            source.connect(node);
+            element.play();
         });
-        response.body
-            .pipeThrough(chunkBatcher())
-            .pipeThrough(decodeStream)
-            .pipeTo(new WritableStream<MPEGDecodedAudio>({
-                write: async (chunk) => {
-                    const { channelData } = chunk;
-                    const [ left, right ] = channelData;
-                    // const size = await this.buffer.add(left, right);
-                    // console.log('size', size);
-                    // console.log(size, this.threshold, this.canRestart.status);
-                    // if (size > this.threshold && !this.canRestart.isResolved) {
-                    //     console.log('restarting');
-                    //     this.canRestart.resolve();
-                    // }
-                }
-            }));
+
+
+        // const response = await fetch(this.url);
+        // this.fetchStatus.resolve();
+        //
+        // if (response.body === null) {
+        //     throw new Error('No response body');
+        // }
+        //
+        // // const reader = response.body.getReader();
+        //
+        //
+        // const decodeStream = new TransformStream<Uint8Array, MPEGDecodedAudio>({
+        //     start: async () => {
+        //         await this.decoder.ready;
+        //     },
+        //     transform: async (chunk, controller) => {
+        //         const start = performance.now();
+        //         const decoded = await this.decoder.decode(chunk);
+        //         controller.enqueue(decoded);
+        //         const end = performance.now();
+        //         console.log(`Decoded ${decoded.samplesDecoded} samples in ${(end - start).toFixed(2)} ms`);
+        //     }
+        // });
+        // response.body
+        //     .pipeThrough(chunkBatcher())
+        //     .pipeThrough(decodeStream)
+        //     .pipeTo(new WritableStream<MPEGDecodedAudio>({
+        //         write: async (chunk) => {
+        //             const { channelData } = chunk;
+        //             const [ left, right ] = channelData;
+        //             // const size = await this.buffer.add(left, right);
+        //             // console.log('size', size);
+        //             // console.log(size, this.threshold, this.canRestart.status);
+        //             // if (size > this.threshold && !this.canRestart.isResolved) {
+        //             //     console.log('restarting');
+        //             //     this.canRestart.resolve();
+        //             // }
+        //         }
+        //     }));
         // this.fetching = true;
         // while (this.fetching) {
         //     const { done, value } = await reader.read();

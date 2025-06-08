@@ -19,6 +19,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@styled/typescript-styled-plugin": "^1.0.1",
     "@types/styled-components": "^5.1.34",
+    "@types/webaudioapi": "^0.0.27",
     "bun-html-live-reload": "^1.0.4",
     "bun-plugin-html": "^2.0.0",
     "chokidar": "^3.6.0",

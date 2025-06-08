@@ -105,21 +105,21 @@ const App: React.FC = () => {
         const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
             () => {
                 console.log('pausing');
-                channel.deref().setPaused(true);
+                //channel.deref().setPaused(true);
             },
             () => {
                 console.log('unpausing');
-                channel.deref().setPaused(false);
+                //channel.deref().setPaused(false);
             }
         );
         sound.fetch();
-        await sound.source.fetchStatus.promise;
-        sound.load();
-        FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, channel);
+        // await sound.source.fetchStatus.promise;
+        setTimeout(() => {
+            sound.load();
+            FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, channel);
+        }, 5000);
     };
-
-
-    const [showingArt, setShowingArt] = useState(false);
+const [showingArt, setShowingArt] = useState(false);
     const [artIndex, setArtIndex] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
     const art = artData[artIndex];
