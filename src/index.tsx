@@ -2,8 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { FMODProvider } from './FMODProvider';
 import App from './App';
-import { ThemeProvider, createGlobalStyle  } from 'styled-components';
-import theme from './theme';
 
 const rootElement = document.getElementById('root');
 

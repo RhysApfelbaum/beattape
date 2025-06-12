@@ -1,0 +1,30 @@
+
+@import "tailwindcss";
+
+@theme static {
+    --color-base00: #031A16;
+    --color-base01: #0B342D;
+    --color-base02: #184E45;
+    --color-base03: #2B685E;
+    --color-base04: #5F9C92;
+    --color-base05: #81B5AC;
+    --color-base06: #A7CEC8;
+    --color-base07: #D2E7E4;
+    --color-base08: #3E9688;
+    --color-base09: #3E7996;
+    --color-base0A: #3E4C96;
+    --color-base0B: #883E96;
+    --color-base0C: #963E4C;
+    --color-base0D: #96883E;
+    --color-base0E: #4C963E;
+    --color-base0F: #3E965B;
+}
+
+body {
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 15px;
+    font-style: normal;
+    text-align: center;
+    @apply bg-base00 text-base05;
+}

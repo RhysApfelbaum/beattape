@@ -27,7 +27,6 @@ export class StreamedSound implements RemoteSound {
     handle: any;
     start: number;
     end: number;
-    onUnderRead: () => Promise<void>;
     stop: () => void;
     restart: () => void;
     
@@ -36,8 +35,8 @@ export class StreamedSound implements RemoteSound {
         url: string,
         start: number,
         end: number,
-        onStop: () => void,
-        onRestart: () => void
+        onStop = () => {},
+        onRestart = () => {}
     ) {
         this.start = start;
         this.end = end;
@@ -46,12 +45,12 @@ export class StreamedSound implements RemoteSound {
         this.url = url;
         this.source = new RemoteSampleBuffer(url, 40);
         this.buffer = new RingBuffer(44100 * 20);
-        this.onUnderRead = async () => {
-            this.stop();
-            this.source.canRestart = new PromiseStatus();
-            await this.source.canRestart.promise;
-            this.restart();
-        };
+        // this.onUnderRead = async () => {
+        //     this.stop();
+        //     this.source.canRestart = new PromiseStatus();
+        //     await this.buffer.ready;
+        //     this.restart();
+        // };
     }
 
     async fetch() {
@@ -104,26 +103,18 @@ export class StreamedSound implements RemoteSound {
         };
 
         info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
-            console.log('requesting', datalen);
-            // const { left, right, retrievedSize, underRead } = this.source.retrieve(datalen / 2);
             const { view, wrappedView, wrap, underflow } = this.buffer.read(datalen);
-
-
             if (underflow) {
                 // this.onUnderRead();
+                this.stop();
+                this.buffer.ready.then(() => this.restart());
                 console.log('underflow');
-                FMOD.HEAPU8.set(new Uint8Array(datalen).fill(0), data);
                 return FMOD.OK;
             }
-
             FMOD.HEAPU8.set(view, data);
             if (wrap) {
                 FMOD.HEAPU8.set(wrappedView, data + view.length);
             }
-
-
-
-            // if (underflow) this.onUnderRead();
             return FMOD.OK;
         };
         FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL, info, sound);

@@ -3,18 +3,7 @@ import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
 import Toggle from './Toggle';
-import styled from 'styled-components';
 
-const AmbienceContainer = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 100px);
-    grid-template-rows: 150px 50px;
-    justify-content: center;
-    justify-items: center;
-    width: 300px;
-    height: 400px;
-    margin-top: 10px;
-`;
 
 const AmbienceSliders: React.FC = () => {
     const fmod = useFMOD();
@@ -69,14 +58,14 @@ const AmbienceSliders: React.FC = () => {
     };
 
     return (
-        <AmbienceContainer>
+        <div className='ambience'>
             <Slider update={updateRain} label="rain" activation={ ambience.rain ? '100%' : '0%'}/>
             <Slider update={updateVinyl} label="vinyl crackle"  activation={ ambience.vinyl ? '100%' : '0%'}/>
             <Slider update={updateBirds} label="birds chirping"  activation={ ambience.birds ? '100%' : '0%'}/>
             <Toggle action={toggleRain}/>
             <Toggle action={toggleVinyl}/>
             <Toggle action={toggleBirds}/>
-        </AmbienceContainer>
+        </div>
     );
 };
 

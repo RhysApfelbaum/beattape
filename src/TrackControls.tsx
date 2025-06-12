@@ -6,7 +6,12 @@ import { FMOD } from './fmod/system';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faBackwardFast, faEllipsis, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
-import { useTheme } from 'styled-components';
+import { Pointer } from './fmod/pointer';
+import { StreamedSound } from './fmod/sound';
+import { gesture } from './fmod/gesture';
+
+import styles from './styles/button.module.css';
+import { theme } from './styles/theme';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -24,8 +29,35 @@ const TrackControls: React.FC = () => {
 
     const fmod = useFMOD();
 
-    const theme = useTheme();
 
+    useEffect(() => {
+        if (!fmod.ready) return;
+        loadPCM();
+    }, [fmod]);
+
+    const loadPCM = async () => {
+        await gesture;
+        const channel = new Pointer<any>();
+        const channelGroup = new Pointer<any>();
+        FMOD.Result = playQueue.currentTrack.event.instance.getChannelGroup(channelGroup);
+        const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
+            onStop = () => {
+                console.log('pausing');
+                // channel.deref().setPaused(true);
+            },
+            onRestart =() => {
+                console.log('unpausing');
+                // channel.deref().setPaused(false);
+            }
+        );
+        sound.fetch();
+        // await sound.source.fetchStatus.promise;
+        sound.load();
+        // setTimeout(() => {
+        //     console.log('playing');
+            FMOD.Result = FMOD.Core.playSound(sound.handle, channelGroup.deref(), null, channel);
+        // }, 5000);
+    };
     // const trackCallback = (type: number, _event: any, parameters: any) => {
     //     if (currentTrack.event.playbackState === 'stopped') {
     //         setPlayQueue({
@@ -239,47 +271,42 @@ const TrackControls: React.FC = () => {
     };
 
     return (
-        <>
-            <div style={{
-                display: 'block'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                }}>
-
-                    <Button onClick={prevTrack} style={{ height: '50%', marginTop: 20 }}>
-                        <FontAwesomeIcon icon={faBackwardFast} style={{
-                            height: 15,
-                            width: 30,
-                            margin: '5px 5px 5px 5px'
-                        }} />
-                    </Button>
-                    <Button onClick={handlePause}>
-                        <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
-                            width: '2em',
-                            height: '2em',
-                            margin: '1em 1em 1em 1em',
-                            boxShadow: 'none',
-                            color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
-                        }} />
-                    </Button>
-                    <Button onClick={nextTrack} style={{ height: '50%', marginTop: 20 }}>
-                        <FontAwesomeIcon icon={faFastForward} style={{
-                            height: 15,
-                            width: 30,
-                            margin: '5px 5px 5px 5px'
-                        }} />
-                    </Button>
-                </div>
-                <p>now playing:<br />{
+        <div className='flex flex-col'>
+            <div className='flex flex-row'>
+                <button className={styles.button} onClick={prevTrack}>
+                    <FontAwesomeIcon
+                        icon={faBackwardFast}
+                        color={theme.base03}
+                        className='m-5'
+                        size='xl'
+                    />
+                </button>
+                <button className={styles.button} onClick={handlePause}>
+                    <FontAwesomeIcon
+                        icon={paused ? faPlay : faPause}
+                        className='mx-8 my-5'
+                        color='color-mix(in srgb, var(--color-base03), var(--color-base09) var(--beat-pulse))'
+                        size='xl'
+                    />
+                </button>
+                <button className={styles.button} onClick={nextTrack}>
+                    <FontAwesomeIcon icon={faFastForward}
+                        className='m-5'
+                        color={theme.base03}
+                        size='xl'
+                    />
+                </button>
+            </div>
+            <p>
+                now playing:
+                <br />
+                {
                     currentTrackLoaded
                         ? currentTrack.displayName
                         : <FontAwesomeIcon icon={faEllipsis} beatFade />
-                }</p>
-            </div>
-            <br />
-        </>
+                }
+            </p>
+        </div>
     );
 };
 

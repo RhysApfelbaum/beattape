@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFMOD } from './FMODProvider';
-import PlayQueueProvider from './PlayQueueProvider';
+import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider';
 import TrackControls from './TrackControls';
 import TrackSliders from './TrackSliders';
 import AmbienceSliders from './AmbienceSliders';
@@ -13,11 +13,12 @@ import ArtPicker from './ArtPicker';
 import { EventInstance } from './fmod/event';
 import { FMOD } from './fmod/system';
 import { Pointer } from './fmod/pointer';
-import { Sound, StreamedSound } from './fmod/sound';
+import { StreamedSound } from './fmod/sound';
 
-import { MPEGDecoderWebWorker } from 'mpg123-decoder';
-import { ChunkedQueue } from './fmod/buffering';
-const decoder = new MPEGDecoderWebWorker();
+import './index.css';
+import Palette from './Palette';
+import { setTheme, theme, themes } from './styles/theme';
+import { main } from 'bun';
 
 
 const TrackControlContainer = styled.div`
@@ -25,28 +26,6 @@ const TrackControlContainer = styled.div`
     flex-direction: row;
     margin-top: 20px;
     justify-content: center;
-`;
-
-const Art = styled.img`
-    width: auto;
-    height: auto;
-    max-height: 440px;
-    border: 2px solid color-mix(
-        in srgb,
-        ${props => props.theme.colors.darkTint},
-        ${props => props.theme.colors.lightTint}
-        var(--beat-pulse)
-    );
-    border-radius: 5px;
-    filter: drop-shadow(
-        2px 4px 6px 
-        color-mix(
-            in srgb,
-            transparent,
-            ${props => props.theme.colors.warmLight}
-            var(--beat-pulse)
-        )
-    );
 `;
 
 const OpenCredits = styled.button`
@@ -80,57 +59,21 @@ const SelectArtButton = styled.button`
     }
 `;
 
-const GlobalStyles = createGlobalStyle`
-    body {
-        font-family: "DM Mono", monospace;
-        font-weight: 400;
-        font-size: 15px;
-        font-style: normal;
-        text-align: center;
-        color: ${props => props.theme.colors.brightLight};
-        background-color: ${props => props.theme.colors.background};
-    }
-`;
-
 const App: React.FC = () => {
     const fmod = useFMOD();
 
-    useEffect(() => {
-        if (!fmod.ready) return;
-        loadPCM();
-    }, [fmod]);
-
-    const loadPCM = async () => {
-        const channel = new Pointer<any>();
-        const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
-            () => {
-                console.log('pausing');
-                //channel.deref().setPaused(true);
-            },
-            () => {
-                console.log('unpausing');
-                //channel.deref().setPaused(false);
-            }
-        );
-        sound.fetch();
-        // await sound.source.fetchStatus.promise;
-        setTimeout(() => {
-            sound.load();
-            FMOD.Result = FMOD.Core.playSound(sound.handle, null, null, channel);
-        }, 5000);
-    };
-const [showingArt, setShowingArt] = useState(false);
+    const [showingArt, setShowingArt] = useState(false);
     const [artIndex, setArtIndex] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
     const art = artData[artIndex];
-    // piano.fetch().then(() => {
-    //     console.log(piano);
-    // });
 
     // App is unable to load if FMOD isn't loaded
     if (!fmod.ready) return (
         <p>loading...</p>
     );
+
+    setTheme(themes.catppuccinMocha);
+    console.log(theme);
 
 
     // const test = new EventInstance('event:/Tracks/banktest');
@@ -158,57 +101,16 @@ const [showingArt, setShowingArt] = useState(false);
     // test.start();
 
 
-
-
-
     return (
-        <ThemeProvider theme={{ colors: art.theme }}><PlayQueueProvider>
-            <GlobalStyles />
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '30% 40% 30%'
-            }}>
-                <div style={{
-                    justifySelf: 'end',
-                    alignSelf: 'end'
-                }}>
-                    {showingArt ?
-                        <ArtPicker
-                            artist={art.artist}
-                            setArtIndex={setArtIndex}
-                            handleClose={() => { setShowingArt(false) }}
-                        />
-                        :
-                        <SelectArtButton
-                            onClick={() => setShowingArt(true)}
-                        >
-                            <strong>Change Artwork</strong>
-                        </SelectArtButton>
-                    }
-
-
-                </div>
-                <div style={{ height: 440, alignSelf: 'center', display: 'flex', alignContent: 'end' }}>
-                    <Art src={art.url} style={{ margin: 'auto auto 0 auto' }} />
-                </div>
-                <div style={{
-                    justifySelf: 'start',
-                    alignSelf: 'end',
-                    width: '100%'
-                }}>
-                    <CreditBox artist={art.artist} />
-                </div>
-            </div>
-            <TrackControlContainer>
-                <TrackSliders />
-                <div style={{ width: 200 }}>
+        <main className='flex flex-col items-center'>
+            <img src={art.url} className='w-80 md:w-auto'/>
+            <PlayQueueProvider>
+                <div>
                     <TrackControls />
-                    <PlayQueue />
+                    <Palette />
                 </div>
-                <AmbienceSliders />
-                <Effects />
-            </TrackControlContainer>
-        </PlayQueueProvider></ThemeProvider>
+            </PlayQueueProvider>
+        </main>
     );
 };
 

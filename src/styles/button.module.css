@@ -1,0 +1,20 @@
+.button {
+    border-radius: 3px;
+    --button-fg: var(--color-base07);
+    --button-bg: var(--color-base04);
+    box-shadow: 5px 5px var(--button-bg);
+    background-color: var(--button-fg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+}
+
+.button:active {
+    box-shadow: 2px 2px var(--button-bg);
+    filter: brightness(50%);
+
+    /* This compensates for the shadow shrinking, and makes it look like the button is being pressed down.
+       It should be set to the difference between the box shadow when the button is active vs not active. */
+    translate: 3px 3px;
+}

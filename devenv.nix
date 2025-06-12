@@ -1,5 +1,8 @@
 { pkgs, lib, config, inputs, ... }:
 
+let
+  pkgs-unstable = import inputs.nixpkgs-unstable { system = pkgs.stdenv.system; };
+in 
 {
   # https://devenv.sh/basics/
   env.GREET = "devenv";
@@ -11,6 +14,7 @@
   languages.javascript = {
     enable = true;
     bun.enable = true;
+    bun.package = pkgs-unstable.bun;
   };
 
   # https://devenv.sh/processes/

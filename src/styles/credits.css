@@ -1,0 +1,27 @@
+.credits {
+    border: 1px solid var(--base05);
+    border-radius: 5px;
+    width: 40%;
+    padding: 10px;
+    margin: 0;
+}
+
+.credits li  {
+    list-style-type: none;
+    margin-bottom: 8px;
+}
+
+.credits strong {
+    font-weight: bold;
+    color: var(--base05);
+}
+
+.credits a {
+    color: var(--base05);
+    text-decoration: none;
+}
+
+.credits a:hover {
+    text-decoration: underline;
+}
+

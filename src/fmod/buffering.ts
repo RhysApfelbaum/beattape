@@ -25,6 +25,7 @@ export class RingBuffer {
     private writeIndex: number;
     private fullThreshold: number;
     private hotThreshold: number;
+    private emptyThreshold: number;
 
     capacity: number;
     ready: PromiseStatus;
@@ -36,6 +37,7 @@ export class RingBuffer {
         this.writeIndex = 0;
         this.fullThreshold = capacity * 0.95;
         this.hotThreshold = capacity * 0.5;
+        this.emptyThreshold = capacity * 0.05;
         this.buffer = new ArrayBuffer(capacity);
         this.ready = new PromiseStatus();
         this.ready.resolve();
@@ -82,11 +84,11 @@ export class RingBuffer {
         this.writeIndex = (this.writeIndex + chunkView.length) % this.capacity;
         this.size += chunkView.length;
 
-        const full = this.size >= this.fullThreshold;
-
-        if (full) {
-            this.ready.reset();
+        if (this.ready.isResolved && this.size <= this.hotThreshold) {
+            this.ready.resolve();
         }
+
+        const full = this.size >= this.fullThreshold;
 
         return {
             full: full,
@@ -97,11 +99,14 @@ export class RingBuffer {
     read(bytes: number): RingBufferReadResult {
 
 
-        if (this.size < bytes) return {
-            view: null,
-            wrappedView: null,
-            wrap: false,
-            underflow: true
+        if (this.size < bytes) {
+            this.ready.reset();
+            return {
+                view: null,
+                wrappedView: null,
+                wrap: false,
+                underflow: true
+            }
         };
 
         
@@ -125,9 +130,6 @@ export class RingBuffer {
         this.readIndex = (this.readIndex + bytes) % this.capacity;
         this.size -= bytes;
 
-        if (this.size <= this.hotThreshold) {
-            this.ready.resolve();
-        }
 
         return result;
     }

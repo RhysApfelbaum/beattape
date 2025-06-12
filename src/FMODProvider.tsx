@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { FMOD } from './fmod/system';
 import { Bank } from './fmod/bank';
 import { EventInstance } from './fmod/event';
-import { Sound } from './fmod/sound';
 
 declare const FMODModule: any;
 const preloadBanks: Bank[] = [];
@@ -68,6 +67,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (ref.current) {
         ref.current.style.setProperty('--thumb-color', '#ff0000');
+        ref.current.style.setProperty('--beat-pulse', '0%');
     }
 
     return (
