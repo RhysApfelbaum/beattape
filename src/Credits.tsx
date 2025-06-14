@@ -4,6 +4,7 @@ import React from 'react';
 
 import styles from './styles/credits.module.css';
 
+
 const Credits: React.FC<{ showing: boolean, handleClose: () => void }> = ({ showing, handleClose }) => {
     return showing && (
         <>

@@ -37,7 +37,7 @@
     "clean": "rm -rf ./dist/*",
     "build": "bun build.ts",
     "watch": "bun build.ts --watch",
-    "up": "bunx http-server -p 3000 -S -C ./test_certificates/cert.pem -K ./test_certificates/key.pem ./dist",
+    "up": "bun serve.ts",
     "dev": "concurrently -p name -n \"server,builder\" \"bun up\" \"bun watch\""
   }
 }

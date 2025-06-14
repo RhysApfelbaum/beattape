@@ -1,6 +1,8 @@
 import React from 'react';
 import contributors from './contributors.json';
 import './styles/credits.css';
+import CreditLink from './CreditLink';
+
 
 const CreditBox: React.FC<{ artist: string }> = ({ artist }) => {
 
@@ -13,19 +15,15 @@ const CreditBox: React.FC<{ artist: string }> = ({ artist }) => {
         <ul className='credits'>
             <li>
                 <strong>Music by </strong>
-                <a
-                    href={musicInfo.link}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                >
-                    {musicInfo.name} &rarr;
-                </a>
+                <CreditLink
+                    contributor={contributors.soundtomb}
+                />
             </li>
             <li>
                 <strong>Artwork by </strong>
-                <a href={artistInfo.link} target="_blank" rel="noreferrer noopener">
-                    {artistInfo.name} &rarr;
-                </a>
+                <CreditLink 
+                    contributor={artistInfo}
+                />
             </li>
         </ul>
     );

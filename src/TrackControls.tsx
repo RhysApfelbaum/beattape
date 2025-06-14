@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import { useFMOD } from './FMODProvider';
-import Button from './Button';
 import { FMOD } from './fmod/system';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
@@ -10,8 +9,12 @@ import { Pointer } from './fmod/pointer';
 import { StreamedSound } from './fmod/sound';
 import { gesture } from './fmod/gesture';
 
-import styles from './styles/button.module.css';
+import contributors from './contributors.json';
+
+import styles from './styles/Button.module.css';
 import { theme } from './styles/theme';
+import CreditLink from './CreditLink';
+import Button from './Button';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -41,13 +44,13 @@ const TrackControls: React.FC = () => {
         const channelGroup = new Pointer<any>();
         FMOD.Result = playQueue.currentTrack.event.instance.getChannelGroup(channelGroup);
         const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
-            onStop = () => {
+            () => {
                 console.log('pausing');
-                // channel.deref().setPaused(true);
+                channel.deref().setPaused(true);
             },
-            onRestart =() => {
+            () => {
                 console.log('unpausing');
-                // channel.deref().setPaused(false);
+                channel.deref().setPaused(false);
             }
         );
         sound.fetch();
@@ -270,42 +273,48 @@ const TrackControls: React.FC = () => {
         await beatPulseInterpolate(100, 0, 600);
     };
 
+    const musicInfo = contributors.soundtomb;
+
     return (
         <div className='flex flex-col'>
-            <div className='flex flex-row'>
-                <button className={styles.button} onClick={prevTrack}>
+            <section className='flex flex-row place-content-center'>
+                <CreditLink
+                    contributor={contributors.soundtomb}
+                />
+                <p className='mx-5 hidden md:block'>-</p>
+                <p>
+                    {
+                        currentTrackLoaded
+                            ? currentTrack.displayName
+                            : <FontAwesomeIcon icon={faEllipsis} beatFade />
+                    }
+                </p>
+            </section>
+            <div className='flex flex-row place-content-between gap-[1rem]'>
+                <Button onClick={prevTrack}>
                     <FontAwesomeIcon
                         icon={faBackwardFast}
                         color={theme.base03}
                         className='m-5'
                         size='xl'
                     />
-                </button>
-                <button className={styles.button} onClick={handlePause}>
+                </Button>
+                <Button onClick={handlePause}>
                     <FontAwesomeIcon
                         icon={paused ? faPlay : faPause}
                         className='mx-8 my-5'
                         color='color-mix(in srgb, var(--color-base03), var(--color-base09) var(--beat-pulse))'
                         size='xl'
                     />
-                </button>
-                <button className={styles.button} onClick={nextTrack}>
+                </Button>
+                <Button onClick={nextTrack}>
                     <FontAwesomeIcon icon={faFastForward}
                         className='m-5'
                         color={theme.base03}
                         size='xl'
                     />
-                </button>
+                </Button>
             </div>
-            <p>
-                now playing:
-                <br />
-                {
-                    currentTrackLoaded
-                        ? currentTrack.displayName
-                        : <FontAwesomeIcon icon={faEllipsis} beatFade />
-                }
-            </p>
         </div>
     );
 };

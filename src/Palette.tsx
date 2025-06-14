@@ -2,9 +2,11 @@ import React from 'react';
 import { hexToRgb, isLight, theme } from './styles/theme';
 
 
-const Palette: React.FC = () => {
+const Palette: React.FC<{ position?: 'bottom' | 'top' }> = ({ position = 'bottom' }) => {
+    const pos = position === 'top' ? 'top-0' : 'bottom-0';
+
     return (
-        <div className='flex fixed bottom-0 w-full'>
+        <div className={'flex fixed left-0 w-full ' + pos}>
             {
                 Object.keys(theme).map(key => {
                     const color = theme[key as keyof typeof theme];

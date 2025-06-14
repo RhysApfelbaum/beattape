@@ -73,8 +73,6 @@ const App: React.FC = () => {
     );
 
     setTheme(themes.catppuccinMocha);
-    console.log(theme);
-
 
     // const test = new EventInstance('event:/Tracks/banktest');
     // test.init();
@@ -102,15 +100,16 @@ const App: React.FC = () => {
 
 
     return (
-        <main className='flex flex-col items-center'>
-            <img src={art.url} className='w-80 md:w-auto'/>
-            <PlayQueueProvider>
-                <div>
-                    <TrackControls />
-                    <Palette />
-                </div>
-            </PlayQueueProvider>
-        </main>
+        <PlayQueueProvider>
+            <main className='flex flex-col items-center mx-40'>
+                <img src={art.url} className='w-80 md:w-auto'/>
+                <Palette position='top'/>
+                <PlayQueue />
+            </main>
+            <footer className='fixed bottom-0 w-full flex flex-row justify-center p-5 bg-base01 '>
+                <TrackControls />
+            </footer>
+        </PlayQueueProvider>
     );
 };
 

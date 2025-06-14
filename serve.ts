@@ -1,21 +1,32 @@
-import { withHtmlLiveReload } from "bun-html-live-reload";
+import { type HTMLBundle } from 'bun';
+
+import index from './src/index.html';
 
 
+console.log(index as HTMLBundle);
 
 const server = Bun.serve({
     port: 3000,
-    fetch: async (request) => {
-        const url = new URL(request.url);
-        const fileName = url.pathname === '/' ? '/index.html' : url.pathname;
-        console.log(request);
-        const filePath = `./dist${fileName}`;
-        return new Response(Bun.file(filePath));
+    // fetch: async (request) => {
+    //     const url = new URL(request.url);
+    //     const fileName = url.pathname === '/' ? '/index.html' : url.pathname;
+    //     const filePath = `./dist${fileName}`;
+    //     return new Response(Bun.file(filePath));
+    // },
+    routes: {
+        '/': index,
+        '/*': async req => {
+            const url = new URL(req.url);
+            return new Response(Bun.file(`./static${url.pathname}`), {
+                headers: { 'Access-Control-Allow-Origin': '*' }
+            });
+        }
     },
 
     error: error => {
-        return new Response(
-            `<pre>${error.stack}</pre>`,
-            { headers: { 'Content-Type': 'text/html' } }
+        return Response.json(
+            error,
+            { headers: { 'Content-Type': 'text/json' } }
         );
     },
 
@@ -24,6 +35,10 @@ const server = Bun.serve({
         key: Bun.file('./test_certificates/key.pem')
     },
 
+    development: {
+        console: true,
+        hmr: true
+    },
 });
 
 

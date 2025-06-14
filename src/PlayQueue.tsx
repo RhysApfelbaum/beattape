@@ -2,34 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { getNextTracks, usePlayQueue } from './PlayQueueProvider';
 import { Track } from './fmod/track';
 import { SliderState } from './fmod/sliderState';
-import styled, { keyframes, useTheme } from 'styled-components';
+import contributors from './contributors.json';
+import CreditLink from './CreditLink';
 
 
+const TrackRow: React.FC<{ track: Track, changed?: boolean, current?: boolean }> = ({
+    track,
+    changed = false,
+    current = false
+}) => {
+    
+    let classList = 'py-5';
 
-const ItemList = styled.ul`
-    list-style-type: none;
-    border-radius: 5px;
-    padding: 5px 5px 5px 5px;
-    outline: 1px solid ${props => props.theme.colors.brightLight};
-`;
+    if (changed) {
+        classList += ' animate-track-changed'
+    };
+
+    if (current) {
+        classList += ' bg-base01'
+    }
+
+    return (
+        <tr className='border-y border-solid'>
+            <td className={classList}>
+                {current && '>'}
+            </td>
+            <td className={classList}>
+                {track.displayName}
+            </td>
+            <td className={classList}>
+                <CreditLink contributor={contributors.soundtomb}/>
+            </td>
+        </tr>
+    )
+
+};
 
 const PlayQueue: React.FC = () => {
 
     const [ playQueue, setPlayQueue ] = usePlayQueue();
-
-    const theme = useTheme();
-
-    const TrackChangedAnimation = keyframes`
-        from {
-            color: ${theme.colors.lightTint};
-        } to {
-            color: ${theme.colors.brightLight};
-        }
-    `;
-
-    const ChangedItem = styled.li`
-        animation: ${TrackChangedAnimation} 1s;
-    `;
 
     type TrackItem = { track: Track, changed: boolean };
     const [ trackItems, setTrackItems] = useState<TrackItem[]>([]);
@@ -79,27 +90,27 @@ const PlayQueue: React.FC = () => {
     useEffect(fillNextTracks, [sliderState]);
 
     return (
-        <div>
-            <p>up next:</p>
-            <ItemList>
+        <table className='w-full table-auto text-left'>
+            <caption>Playqueue</caption>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Track</th>
+                    <th>Composer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <TrackRow track={playQueue.currentTrack} changed={false} current/>
                 {
-                    trackItems.map((item, index) => item.changed ?
-                        <ChangedItem
+                    trackItems.map((item, index) =>
+                        <TrackRow
                             key={item.track.name + index}
-                            style={{ textAlign: 'left' }}
-                        >
-                            {item.track.displayName}
-                        </ChangedItem> :
-                        <li
-                            key={item.track.name + index}
-                            style={{ textAlign: 'left' }}
-                        >
-                            {item.track.displayName}
-                        </li>
-                    )
+                            track={item.track}
+                            changed={item.changed}
+                        />)
                 }
-            </ItemList>
-        </div>
+            </tbody>
+        </table>
     );
 };
 
