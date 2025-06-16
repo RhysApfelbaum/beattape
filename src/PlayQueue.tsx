@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getNextTracks, usePlayQueue } from './PlayQueueProvider';
 import { Track } from './fmod/track';
 import { SliderState } from './fmod/sliderState';
 import contributors from './contributors.json';
 import CreditLink from './CreditLink';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowDown, faArrowUp, faArrowUp19, faArrows, faPlay, faUpDown } from '@fortawesome/free-solid-svg-icons';
 
+
+const playIcon = 
+    <FontAwesomeIcon
+        icon={faPlay}
+        className='ml-5'
+        size='xs'
+        style={{ transform: 'scale(calc(var(--beat-pulse) * 0.3 + 100%))' }}
+    />;
 
 const TrackRow: React.FC<{ track: Track, changed?: boolean, current?: boolean }> = ({
     track,
@@ -12,20 +22,20 @@ const TrackRow: React.FC<{ track: Track, changed?: boolean, current?: boolean }>
     current = false
 }) => {
     
-    let classList = 'py-5';
+    let classList = 'py-2';
 
     if (changed) {
         classList += ' animate-track-changed'
     };
 
     if (current) {
-        classList += ' bg-base01'
+        classList += ' bg-base02 bold py-10 text-lg'
     }
 
     return (
-        <tr className='border-y border-solid'>
+        <tr className=''>
             <td className={classList}>
-                {current && '>'}
+                { current && playIcon }
             </td>
             <td className={classList}>
                 {track.displayName}
@@ -35,16 +45,18 @@ const TrackRow: React.FC<{ track: Track, changed?: boolean, current?: boolean }>
             </td>
         </tr>
     )
-
 };
 
 const PlayQueue: React.FC = () => {
 
     const [ playQueue, setPlayQueue ] = usePlayQueue();
+    const [ collapsed, setCollapsed ] = useState(true);
 
     type TrackItem = { track: Track, changed: boolean };
     const [ trackItems, setTrackItems] = useState<TrackItem[]>([]);
     const [ sliderState, setSliderState ] = useState<SliderState>(playQueue.sliderState);
+
+    const ref = useRef<HTMLDivElement>(null);
 
     const fillNextTracks = () => {
         const nextTracks = getNextTracks(playQueue);
@@ -90,27 +102,62 @@ const PlayQueue: React.FC = () => {
     useEffect(fillNextTracks, [sliderState]);
 
     return (
-        <table className='w-full table-auto text-left'>
-            <caption>Playqueue</caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Track</th>
-                    <th>Composer</th>
-                </tr>
-            </thead>
-            <tbody>
-                <TrackRow track={playQueue.currentTrack} changed={false} current/>
-                {
-                    trackItems.map((item, index) =>
-                        <TrackRow
-                            key={item.track.name + index}
-                            track={item.track}
-                            changed={item.changed}
-                        />)
-                }
-            </tbody>
-        </table>
+        <div className='
+            w-full
+            md:w-150
+            bg-base01
+            md:rounded-t-lg
+            group
+            '
+        >
+            <button
+                className='
+                    hover:cursor-pointer
+                    border-2
+                    border-transparent
+                    md:animate-bounce
+                    w-full
+                    ease-in-out
+                    rounded
+                    px-10
+                    pt-2
+                    opacity-100
+                    md:opacity-0
+                    group-hover:opacity-100
+                    transition-all
+                    duration-500
+                '
+                onClick={() => setCollapsed(!collapsed)}>
+                <FontAwesomeIcon icon={collapsed ? faArrowUp : faArrowDown} />
+            </button>
+            <div className={'overflow-hidden transition-[height] ease-in-out duration-500'}
+                style={{
+                    height: collapsed ? 0 : ref.current?.scrollHeight
+                }}
+                ref={ref}
+            >
+                <table className='w-full table-auto text-left'>
+                    <thead>
+                        <tr>
+                            <th className='font-normal py-2 text-base03'></th>
+                            <th className='font-normal py-2 text-base03'>Track</th>
+                            <th className='font-normal py-2 text-base03'>Composer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <TrackRow track={playQueue.currentTrack} changed={false} current/>
+                        {
+                            trackItems.map((item, index) =>
+                                <TrackRow
+                                    key={item.track.name + index}
+                                    track={item.track}
+                                    changed={item.changed}
+                                />)
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     );
 };
 

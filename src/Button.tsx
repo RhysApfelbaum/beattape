@@ -15,6 +15,7 @@ const Button: React.FC<React.ComponentPropsWithoutRef<'button'>> = ({
                 active:shadow-[2px_2px_base04]
                 active:brightness-50
                 active:translate-x-[3px] active:translate-y-[3px]
+                hover:cursor-pointer
                 ${className ?? ''}
             `}
             {...props}

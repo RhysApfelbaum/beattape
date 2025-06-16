@@ -19,6 +19,7 @@ import './index.css';
 import Palette from './Palette';
 import { setTheme, theme, themes } from './styles/theme';
 import { main } from 'bun';
+import TapeReel from './TapeReel';
 
 
 const TrackControlContainer = styled.div`
@@ -101,13 +102,15 @@ const App: React.FC = () => {
 
     return (
         <PlayQueueProvider>
-            <main className='flex flex-col items-center mx-40'>
-                <img src={art.url} className='w-80 md:w-auto'/>
-                <Palette position='top'/>
-                <PlayQueue />
+            <main className='flex flex-col items-center mx-2 mt-2 md:mx-40'>
+                <img src={art.url} className='w-80 md:w-auto rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]'/>
+                {/* <Palette position='top'/> */}
             </main>
-            <footer className='fixed bottom-0 w-full flex flex-row justify-center p-5 bg-base01 '>
-                <TrackControls />
+            <footer className='fixed bottom-0 w-full flex flex-col justify-center items-center'>
+                <PlayQueue />
+                <section className='w-full'>
+                    <TrackControls />
+                </section>
             </footer>
         </PlayQueueProvider>
     );

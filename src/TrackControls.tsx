@@ -15,6 +15,7 @@ import styles from './styles/Button.module.css';
 import { theme } from './styles/theme';
 import CreditLink from './CreditLink';
 import Button from './Button';
+import TapeReel from './TapeReel';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -276,21 +277,20 @@ const TrackControls: React.FC = () => {
     const musicInfo = contributors.soundtomb;
 
     return (
-        <div className='flex flex-col'>
-            <section className='flex flex-row place-content-center'>
-                <CreditLink
-                    contributor={contributors.soundtomb}
-                />
-                <p className='mx-5 hidden md:block'>-</p>
-                <p>
-                    {
-                        currentTrackLoaded
-                            ? currentTrack.displayName
-                            : <FontAwesomeIcon icon={faEllipsis} beatFade />
-                    }
+        <div className='flex flex-row place-content-between  items-center bg-base01 w-full py-5 px-5'>
+            <div
+                className='hidden md:flex flex-col items-start w-[20%]'
+            >
+                <p className='text-base03'>now playing</p>
+                <p
+                    className='text-xl text-base05'
+                >
+                    { playQueue.currentTrack.displayName }
                 </p>
-            </section>
-            <div className='flex flex-row place-content-between gap-[1rem]'>
+                <CreditLink contributor={contributors.soundtomb} />
+            </div>
+            <div className='m-5 flex flex-row place-content-center items-center gap-[1rem]'>
+                <TapeReel className='w-10 h-10 mr-5'/>
                 <Button onClick={prevTrack}>
                     <FontAwesomeIcon
                         icon={faBackwardFast}
@@ -314,6 +314,16 @@ const TrackControls: React.FC = () => {
                         size='xl'
                     />
                 </Button>
+                <TapeReel className='w-10 h-10 ml-5'/>
+            </div>
+            <div className='hidden w-[20%] md:flex flex-col items-end text-base04'>
+                <p className='text-base03'>up next</p>
+                <p
+                    className='text-xl'
+                >
+                    { playQueue.nextTracks[0].displayName }
+                </p>
+                <CreditLink contributor={contributors.soundtomb} />
             </div>
         </div>
     );
