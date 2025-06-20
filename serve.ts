@@ -2,17 +2,8 @@ import { type HTMLBundle } from 'bun';
 
 import index from './src/index.html';
 
-
-console.log(index as HTMLBundle);
-
 const server = Bun.serve({
     port: 3000,
-    // fetch: async (request) => {
-    //     const url = new URL(request.url);
-    //     const fileName = url.pathname === '/' ? '/index.html' : url.pathname;
-    //     const filePath = `./dist${fileName}`;
-    //     return new Response(Bun.file(filePath));
-    // },
     routes: {
         '/': index,
         '/*': async req => {
@@ -41,8 +32,4 @@ const server = Bun.serve({
     },
 });
 
-
-// watch('./dist', { recursive: true }, async (event, filename) => {
-//     console.log(filename);
-//     // if (!filename?.endsWith('~')) return;
-// });
+console.log(`Started beattape dev server on https://127.0.0.1:${server.port}`)

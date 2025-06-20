@@ -1,6 +1,6 @@
 import { FMOD } from './system';
 import { PromiseStatus } from './promiseStatus';
-import { ChunkedQueue, StereoSampleQueue, chunkBatcher } from './buffering';
+import { ChunkedQueue} from './buffering';
 import { MPEGDecodedAudio, MPEGDecoderWebWorker } from 'mpg123-decoder';
 
 

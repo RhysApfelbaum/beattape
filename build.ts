@@ -16,9 +16,6 @@ const build = async () => {
         plugins: [tailwind],
         target: 'browser',
         minify: false,
-        // loader: {
-        //     '.css': 'css'
-        // }
     });
 
     if (result.success) {

@@ -1,64 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { useFMOD } from './FMODProvider';
-import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider';
-import TrackControls from './TrackControls';
-import TrackSliders from './TrackSliders';
-import AmbienceSliders from './AmbienceSliders';
-import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
-import Effects from './Effects';
-import PlayQueue from './PlayQueue';
-import CreditBox from './CreditBox';
-import artData from './art.json';
-import ArtPicker from './ArtPicker';
-import { EventInstance } from './fmod/event';
-import { FMOD } from './fmod/system';
-import { Pointer } from './fmod/pointer';
-import { StreamedSound } from './fmod/sound';
-
-import './index.css';
-import Palette from './Palette';
-import { setTheme, theme, themes } from './styles/theme';
-import { main } from 'bun';
-import TapeReel from './TapeReel';
-
-
-const TrackControlContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    margin-top: 20px;
-    justify-content: center;
-`;
-
-const OpenCredits = styled.button`
-    appearance: none;
-    background-color: transparent;
-    border: none;
-    position: absolute;
-    left: 1%;
-    top: 1%;
-    color: ${props => props.theme.colors.brightLight};
-
-    &:hover {
-        color: ${props => props.theme.colors.warmLight};
-    }
-`;
-
-const SelectArtButton = styled.button`
-    background: none;
-    border: none;
-    font: inherit;
-    color: ${props => props.theme.colors.brightLight};
-    border: 1px solid ${props => props.theme.colors.brightLight};
-    border-radius: 5px;
-    padding: 10px;
-    transition: background 0.3s ease;
-
-    &:hover {
-        background-color: ${props => props.theme.colors.brightLight};
-        color: ${props => props.theme.colors.darkTint};
-        font-weight: bolder;
-    }
-`;
+import React, { useEffect, useState } from 'react'; import { useFMOD } from './FMODProvider'; import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider'; import TrackControls from './TrackControls'; import artData from './art.json'; import './index.css'; import Palette from './Palette'; import { setTheme, themes } from './styles/theme'; import LoadingPage from './LoadingPage'; import { gesture } from './fmod/gesture';
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -66,12 +6,23 @@ const App: React.FC = () => {
     const [showingArt, setShowingArt] = useState(false);
     const [artIndex, setArtIndex] = useState(Math.floor(Math.random() * (Object.keys(artData).length - 2)));
 
+    const [ awaitingGesture, setAwaitingGesture ] = useState(true);
+
     const art = artData[artIndex];
 
+    gesture.then(() => setAwaitingGesture(false));
+
     // App is unable to load if FMOD isn't loaded
-    if (!fmod.ready) return (
-        <p>loading...</p>
-    );
+    if (!fmod.ready) {
+        return <LoadingPage message='Loading...' />;
+    }
+
+    // A gesture needs to be made on the page before audio can start
+    if (awaitingGesture) {
+        return <LoadingPage message='Click anywhere to start' />;
+    }
+
+
 
     setTheme(themes.catppuccinMocha);
 
@@ -107,10 +58,8 @@ const App: React.FC = () => {
                 {/* <Palette position='top'/> */}
             </main>
             <footer className='fixed bottom-0 w-full flex flex-col justify-center items-center'>
-                <PlayQueue />
-                <section className='w-full'>
-                    <TrackControls />
-                </section>
+                {/* <PlayQueue /> */}
+                <TrackControls />
             </footer>
         </PlayQueueProvider>
     );

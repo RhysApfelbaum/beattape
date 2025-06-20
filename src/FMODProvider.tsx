@@ -61,7 +61,12 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
-        FMODModule(FMOD);
+        const script = document.createElement('script');
+        script.src = '/fmodstudioL.js';
+        script.onload = () => {
+            FMODModule(FMOD);
+        };
+        document.head.appendChild(script);
     },[]);
 
 

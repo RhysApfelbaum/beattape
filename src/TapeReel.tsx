@@ -1,13 +1,12 @@
 import React from 'react';
-import { usePlayQueue } from './PlayQueueProvider';
 
 // AHHHHHH
-const TapeReel: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className, ...props }) => {
-    const [ playQueue ] = usePlayQueue();
+const TapeReel: React.FC<React.ComponentPropsWithoutRef<'div'> & { spinning?: boolean }> = ({ className, spinning = false, ...props }) => {
 
-    const playing = playQueue.currentTrack.event.isLoaded && playQueue.currentTrack.event.playbackState === 'playing';
+    const animation = spinning ? 'animate-spin' : 'animate-none';
+
     return (
-        <div className={'animate-spin rounded-[50%] bg-base04 relative border-base07 border-3 ' + className ?? ''}>
+        <div className={`${animation} rounded-[50%] bg-base04 relative border-base07 border-3 ${className ?? ''}`}>
             <div
                 className='w-[70%] h-[70%] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-[50%] rotate-[-15deg]'
                 style={{

@@ -3,47 +3,65 @@
     {
       "path": "heavyFog/heavy_drums.wav",
       "start": 0,
-      "end": 102.56756756756758
+      "end": 102.56756756756758,
+      "length": 6.486479166666666,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/light_drums.wav",
       "start": 0,
-      "end": 102.16216216216216
+      "end": 102.16216216216216,
+      "length": 3.24325,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/click.wav",
       "start": 0,
-      "end": 100.54075
+      "end": 100.54075,
+      "length": 1.621625,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/hats.wav",
       "start": 0,
-      "end": 100.54075
+      "end": 100.54075,
+      "length": 0.8108125,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/bass.wav",
       "start": 0,
-      "end": 103.78375
+      "end": 103.78375,
+      "length": 25.9459375,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/rhodes.wav",
       "start": 0,
-      "end": 103.78377083333334
+      "end": 103.78377083333334,
+      "length": 12.972979166666667,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/organ_fill.wav",
       "start": 9.729750000000001,
-      "end": 90.8107972972973
+      "end": 90.8107972972973,
+      "length": 3.24325,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/chops.wav",
       "start": 24.196043683674162,
-      "end": 103.78378209459461
+      "end": 103.78378209459461,
+      "length": 25.9459375,
+      "channelCount": 2
     },
     {
       "path": "heavyFog/piano.wav",
       "start": 25.945958333333333,
-      "end": 100.54075
+      "end": 100.54075,
+      "length": 12.972979166666667,
+      "channelCount": 2
     }
   ]
 }

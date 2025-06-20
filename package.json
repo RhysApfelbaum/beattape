@@ -37,7 +37,6 @@
     "clean": "rm -rf ./dist/*",
     "build": "bun build.ts",
     "watch": "bun build.ts --watch",
-    "up": "bun serve.ts",
-    "dev": "concurrently -p name -n \"server,builder\" \"bun up\" \"bun watch\""
+    "up": "bun serve.ts"
   }
 }

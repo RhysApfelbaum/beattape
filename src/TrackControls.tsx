@@ -178,11 +178,10 @@ const TrackControls: React.FC = () => {
 
                         if (type === FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
                             beatPulse();
-
-                            const time = parameters.position / 1000;
-
-
-                            console.log(time, currentTrack.sounds.bufferLength());
+                            // const time = parameters.position / 1000;
+                            //
+                            //
+                            // console.log(time, currentTrack.sounds.bufferLength());
                         }
 
                         if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
@@ -191,8 +190,13 @@ const TrackControls: React.FC = () => {
                                 // if (currentTrack.event.playbackState !== 'stopped') {
                                 //     currentTrack.event.setPaused(true);
                                 // }
-                                return;
+                                sound.load();
+                                // return;
                             }
+
+                            console.log('found sound', sound);
+
+                            // sound.seek(0);
 
                             parameters.sound = sound.handle;
                             parameters.subsoundIndex = -1;
@@ -277,20 +281,15 @@ const TrackControls: React.FC = () => {
     const musicInfo = contributors.soundtomb;
 
     return (
-        <div className='flex flex-row place-content-between  items-center bg-base01 w-full py-5 px-5'>
-            <div
-                className='hidden md:flex flex-col items-start w-[20%]'
-            >
-                <p className='text-base03'>now playing</p>
-                <p
-                    className='text-xl text-base05'
-                >
+        <div className='flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded'>
+            <div className='flex flex-col'>
+                <p className='text-xl text-base05'>
                     { playQueue.currentTrack.displayName }
                 </p>
                 <CreditLink contributor={contributors.soundtomb} />
             </div>
-            <div className='m-5 flex flex-row place-content-center items-center gap-[1rem]'>
-                <TapeReel className='w-10 h-10 mr-5'/>
+            <div className='m-5 flex flex-row items-center gap-3'>
+                <TapeReel spinning={!paused} className='w-10 h-10'/>
                 <Button onClick={prevTrack}>
                     <FontAwesomeIcon
                         icon={faBackwardFast}
@@ -314,16 +313,7 @@ const TrackControls: React.FC = () => {
                         size='xl'
                     />
                 </Button>
-                <TapeReel className='w-10 h-10 ml-5'/>
-            </div>
-            <div className='hidden w-[20%] md:flex flex-col items-end text-base04'>
-                <p className='text-base03'>up next</p>
-                <p
-                    className='text-xl'
-                >
-                    { playQueue.nextTracks[0].displayName }
-                </p>
-                <CreditLink contributor={contributors.soundtomb} />
+                <TapeReel spinning={!paused} className='w-10 h-10'/>
             </div>
         </div>
     );
