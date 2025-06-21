@@ -64,8 +64,8 @@ const TrackControls: React.FC = () => {
     };
 
     useEffect(() => {
-        updatePauseState(true);
-    }, [paused]);
+        if (currentTrackLoaded) updatePauseState(true);
+    }, [paused, currentTrackLoaded]);
 
     useEffect(() => {
         if (playQueue.currentTrack !== currentTrack) {
@@ -147,7 +147,7 @@ const TrackControls: React.FC = () => {
                 if (currentTrackLoaded) setCurrentTrackLoaded(false);
             case 'fetched':
                 await currentTrack.load()
-                alert('track loaded');
+                console.error('track loaded');
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
                 currentTrack.event.setCallback(

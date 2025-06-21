@@ -38,11 +38,11 @@ export class RingBuffer {
         this.readIndex = 0;
         this.writeIndex = 0;
         this.fullThreshold = capacity * 0.95;
-        this.hotThreshold = capacity * 0.5;
+        this.hotThreshold = 384000;
         this.emptyThreshold = capacity * 0.00;
         this.buffer = new ArrayBuffer(capacity);
         this.ready = new PromiseStatus();
-        this.ready.resolve();
+        // this.ready.resolve();
         this.loop = true;
         this.loopFull = false;
 
@@ -92,10 +92,16 @@ export class RingBuffer {
         }
 
         this.writeIndex = (this.writeIndex + chunkLength) % this.capacity;
-        this.size += chunkLength;
+
+        if (looping) {
+            this.size = this.capacity;
+        } else {
+            this.size += chunkLength;
+
+        }
 
 
-        if (this.ready.isResolved && this.size <= this.hotThreshold) {
+        if (!this.ready.isResolved && (this.loopFull || this.size >= this.hotThreshold)) {
             this.ready.resolve();
         }
 
@@ -143,12 +149,15 @@ export class RingBuffer {
         }
 
         this.readIndex = (this.readIndex + bytes) % this.capacity;
-        this.size -= bytes;
+
+        if (!this.loopFull) {
+            this.size -= bytes;
+        }
 
         return result;
     }
 
-    // HACK this is wildly unsafe
+    // HACK this is wildly unsafe... maybe?
     seek(position: number) {
         this.readIndex = position;
     }

@@ -67,23 +67,11 @@ export class StreamedSound implements RemoteSound {
         const source = context.createMediaElementSource(this.element);
         await context.audioWorklet.addModule('/pcmProcessor.js');
         const node = new AudioWorkletNode(context, 'pcm-processor');
-        if (this.url.includes('bass.wav')) {
-            console.log('called fetch on ' + this.url);
-        }
         node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
             const { full } = this.buffer.write(event.data);
-            // if (this.url.includes('bass.wav')) {
-            //     console.log('wrote ' + event.data.byteLength + 'to buffer');
-            //     console.log(this.buffer.getStatus());
-            // }
-            // if (full) {
-            //     console.log('full');
-            // }
-            // if (full) {
-            //     this.element.pause();
-            //     await this.buffer.ready;
-            //     this.element.play();
-            // }
+            if (full && !this.buffer.loop) {
+                // TODO
+            }
         };
         source.connect(node);
         this.element.play();
@@ -105,16 +93,7 @@ export class StreamedSound implements RemoteSound {
         return this.handle !== null;
     }
 
-    // get timeBuffered() {
-    //     const { size } = this.buffer.getStatus();
-    //     const bytesPerSecond = 48000 * 2 * 2;
-    //     return size / bytesPerSecond;
-    // }
-
     async load() {
-        // if (!this.source.fetchStatus.isResolved) {
-        //     return false;
-        // }
         await this.buffer.ready;
 
         const sound = new Pointer<any>();
@@ -140,18 +119,13 @@ export class StreamedSound implements RemoteSound {
         };
 
         info.pcmreadcallback = (sound: any, data: any, datalen: number) => {
-            const { view, wrappedView, wrap, underflow } = this.buffer.read(Math.min(datalen, this.buffer.capacity));
-            // const { view, underflow } = this.buffer.read(datalen);
-            if (this.url.includes('bass.wav')) {
-                console.log('trying to read ' + this.url);
-                // console.log('read ' + (view?.byteLength ?? 0) + (wrappedView?.byteLength ?? 0) + ' bytes');
-            }
+            const { view, wrappedView, wrap, underflow } = this.buffer.read(
+                Math.min(datalen, this.buffer.capacity)
+            );
 
             if (underflow) {
                 this.stop();
                 this.buffer.ready.then(() => this.restart());
-                console.error(this.url + ' underflow');
-                console.log(this.buffer.getStatus());
                 return FMOD.OK;
             }
             FMOD.HEAPU8.set(view, data);
