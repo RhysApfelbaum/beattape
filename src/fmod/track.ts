@@ -32,11 +32,11 @@ export class Track {
     // Requires no FMOD functions
     async fetch() {
         await this.bank.fetch();
-        this.sounds.fetch();
     }
 
     async load() {
         await this.bank.load();
+        await this.sounds.load();
 
         // Load the track event which is now available because of the newly loaded bank.
         this.event.init();

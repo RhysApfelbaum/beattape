@@ -3,6 +3,7 @@ import { gesture } from "./gesture";
 import { FMODMountedFile, RemoteSampleBuffer, RemoteSoundData } from "./mountedFile";
 import { Pointer } from "./pointer";
 import { PromiseStatus } from "./promiseStatus";
+import { RemoteFMODStatus } from "./remoteFMODStatus";
 import { SoundInfo } from "./soundLoader";
 import { FMOD } from "./system";
 
@@ -21,7 +22,6 @@ export interface RemoteSound {
     end: number;
     isLoaded: boolean;
     fetch: () => Promise<void>;
-    load: () => boolean;
     unload: () => Promise<void>;
     release: () => void;
 }
@@ -72,10 +72,10 @@ export class StreamedSound implements RemoteSound {
         }
         node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
             const { full } = this.buffer.write(event.data);
-            if (this.url.includes('bass.wav')) {
-                console.log('wrote ' + event.data.byteLength + 'to buffer');
-                console.log(this.buffer.getStatus());
-            }
+            // if (this.url.includes('bass.wav')) {
+            //     console.log('wrote ' + event.data.byteLength + 'to buffer');
+            //     console.log(this.buffer.getStatus());
+            // }
             // if (full) {
             //     console.log('full');
             // }
@@ -89,6 +89,18 @@ export class StreamedSound implements RemoteSound {
         this.element.play();
     }
 
+    get status(): RemoteFMODStatus {
+        if (this.buffer.ready.isResolved) {
+            return { status: 'fetched', error: null };
+        }
+
+        if (this.isLoaded) {
+            return { status: 'loaded', error: null };
+        }
+
+        return { status: 'unloaded', error: null };
+    }
+
     get isLoaded() {
         return this.handle !== null;
     }
@@ -99,10 +111,11 @@ export class StreamedSound implements RemoteSound {
     //     return size / bytesPerSecond;
     // }
 
-    load() {
+    async load() {
         // if (!this.source.fetchStatus.isResolved) {
         //     return false;
         // }
+        await this.buffer.ready;
 
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
@@ -137,7 +150,7 @@ export class StreamedSound implements RemoteSound {
             if (underflow) {
                 this.stop();
                 this.buffer.ready.then(() => this.restart());
-                console.log(this.url + ' underflow');
+                console.error(this.url + ' underflow');
                 console.log(this.buffer.getStatus());
                 return FMOD.OK;
             }

@@ -40,41 +40,28 @@ const TrackControls: React.FC = () => {
     }, [fmod]);
 
     const loadPCM = async () => {
-        await gesture;
-        const channel = new Pointer<any>();
-        const channelGroup = new Pointer<any>();
-        FMOD.Result = playQueue.currentTrack.event.instance.getChannelGroup(channelGroup);
-        const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
-            () => {
-                console.log('pausing');
-                channel.deref().setPaused(true);
-            },
-            () => {
-                console.log('unpausing');
-                channel.deref().setPaused(false);
-            }
-        );
-        sound.fetch();
-        // await sound.source.fetchStatus.promise;
-        sound.load();
-        // setTimeout(() => {
-        //     console.log('playing');
-            FMOD.Result = FMOD.Core.playSound(sound.handle, channelGroup.deref(), null, channel);
-        // }, 5000);
+        // await gesture;
+        // const channel = new Pointer<any>();
+        // const channelGroup = new Pointer<any>();
+        // FMOD.Result = playQueue.currentTrack.event.instance.getChannelGroup(channelGroup);
+        // const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
+        //     () => {
+        //         console.log('pausing');
+        //         channel.deref().setPaused(true);
+        //     },
+        //     () => {
+        //         console.log('unpausing');
+        //         channel.deref().setPaused(false);
+        //     }
+        // );
+        // sound.fetch();
+        // // await sound.source.fetchStatus.promise;
+        // sound.load();
+        // // setTimeout(() => {
+        // //     console.log('playing');
+        //     FMOD.Result = FMOD.Core.playSound(sound.handle, channelGroup.deref(), null, channel);
+        // // }, 5000);
     };
-    // const trackCallback = (type: number, _event: any, parameters: any) => {
-    //     if (currentTrack.event.playbackState === 'stopped') {
-    //         setPlayQueue({
-    //             ...playQueue,
-    //             history: [currentTrack, ...playQueue.history],
-    //             currentTrack: playQueue.nextTracks[0],
-    //             nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
-    //         });
-    //     } else {
-    //         beatPulse();
-    //     }
-    //     return FMOD.OK;
-    // };
 
     useEffect(() => {
         updatePauseState(true);
@@ -160,6 +147,7 @@ const TrackControls: React.FC = () => {
                 if (currentTrackLoaded) setCurrentTrackLoaded(false);
             case 'fetched':
                 await currentTrack.load()
+                alert('track loaded');
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
                 currentTrack.event.setCallback(
@@ -178,10 +166,6 @@ const TrackControls: React.FC = () => {
 
                         if (type === FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
                             beatPulse();
-                            // const time = parameters.position / 1000;
-                            //
-                            //
-                            // console.log(time, currentTrack.sounds.bufferLength());
                         }
 
                         if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {

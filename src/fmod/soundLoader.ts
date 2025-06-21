@@ -26,17 +26,13 @@ export class SoundLoader {
         });
     }
 
-    fetch() {
-        this.sounds.forEach(async (sound) => {
-            await sound.fetch();
-            // if (sound.source.fetchStatus.isRejected) {
-            //     console.error('something went wrong');
-            //     // throw sound.error;
-            //     // TODO: Figure this out
-            //     throw new Error();
-            // }
-            sound.load();
+    async load(time = 0) {
+        const promises = this.sounds.map(sound => {
+            sound.fetch();
+            return sound.load();
         })
+
+        await Promise.all(promises);
     }
 
     getSound(path: string) {
