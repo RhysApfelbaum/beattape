@@ -1,63 +1,558 @@
 {
-  "heavyFog": [
+  "snooze": [
     {
-      "path": "heavyFog/heavy_drums.mp3",
+      "path": "snooze/distorted_intro_sine.wav",
       "start": 0,
-      "end": 102.56756756756758,
-      "length": 6.486479166666666,
+      "end": 25.6,
+      "length": 25.6,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/light_drums.mp3",
+      "path": "snooze/distorted_intro.wav",
       "start": 0,
-      "end": 102.16216216216216,
-      "length": 3.24325,
+      "end": 25.6,
+      "length": 25.6,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/click.mp3",
-      "start": 0,
-      "end": 100.54075,
-      "length": 1.621625,
+      "path": "snooze/cymbals.wav",
+      "start": 12.8,
+      "end": 229.51370339685175,
+      "length": 230.4,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/hats.mp3",
+      "path": "snooze/bass_harmonics.wav",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 230.4,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/bass.wav",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 230.4,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/sine_chords.wav",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 230.4,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/rhodes.wav",
+      "start": 25.6,
+      "end": 230.4,
+      "length": 204.8,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/foley.wav",
+      "start": 25.6,
+      "end": 230.4,
+      "length": 204.8,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/distant_piano.wav",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 230.4,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/thin_hat.wav",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 3.2,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_thin.wav",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 208,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_medium.wav",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 208,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_thick.wav",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 208,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/synth.wav",
+      "start": 76.80000000000001,
+      "end": 243.20000000000002,
+      "length": 179.2,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/vox.wav",
+      "start": 128,
+      "end": 189.09851119917613,
+      "length": 102.4,
+      "channelCount": 2
+    }
+  ],
+  "doomscroll": [
+    {
+      "path": "bells/harmonics1.wav",
+      "start": 0,
+      "end": 211.21951575203252,
+      "length": 86.34145833333334,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/smooth_bass.wav",
+      "start": 7.792773859801563,
+      "end": 202.92682926829264,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/bouncy_bass.wav",
+      "start": 7.792773859801563,
+      "end": 202.92682926829264,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/noise.wav",
+      "start": 7.792773859801563,
+      "end": 210.73170731707313,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/glass_ting.wav",
+      "start": 7.792773859801563,
+      "end": 211.21951575203252,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/rustle.wav",
+      "start": 7.792773859801563,
+      "end": 226.34145833333332,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/hat.wav",
+      "start": 7.792773859801563,
+      "end": 214.24021992821065,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/snare.wav",
+      "start": 7.792773859801563,
+      "end": 214.24021992821065,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_sweep.wav",
+      "start": 7.804878048780488,
+      "end": 210.24390243902437,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_march.wav",
+      "start": 7.804878048780488,
+      "end": 210.73170731707313,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/gritty_kick.wav",
+      "start": 7.804878048780488,
+      "end": 214.24021992821065,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/kick.wav",
+      "start": 7.804878048780488,
+      "end": 214.24021992821068,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/wood_knocks.wav",
+      "start": 8.292682926829269,
+      "end": 211.2195121951219,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/piano.wav",
+      "start": 31.21951219512195,
+      "end": 211.21950711382112,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/sine.wav",
+      "start": 31.21951219512195,
+      "end": 211.21950711382115,
+      "length": 226.34145833333332,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/piano2.wav",
+      "start": 93.65853658536585,
+      "end": 124.87805741869919,
+      "length": 31.219520833333334,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/sine2.wav",
+      "start": 93.65853658536585,
+      "end": 124.87805741869919,
+      "length": 31.219520833333334,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/harmonics2.wav",
+      "start": 93.65853658536585,
+      "end": 124.87805741869919,
+      "length": 31.219520833333334,
+      "channelCount": 2
+    }
+  ],
+  "court": [
+    {
+      "path": "court/ting_hit_2.wav",
+      "start": 0,
+      "end": 1,
+      "length": 12.3529375,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_hit_1.wav",
+      "start": 0,
+      "end": 3.5294166666666666,
+      "length": 3.5294166666666666,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano.wav",
+      "start": 0,
+      "end": 112.94116789215686,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/bass.wav",
+      "start": 0,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_thick.wav",
+      "start": 14.117645833333333,
+      "end": 112.94125,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/taps.wav",
+      "start": 14.117645833333333,
+      "end": 225.88264583333333,
+      "length": 7.058833333333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/foley.wav",
+      "start": 14.117647058823529,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums.wav",
+      "start": 14.117647058823529,
+      "end": 225.88243749999998,
+      "length": 7.058833333333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/vox.wav",
+      "start": 28.2353125,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting.wav",
+      "start": 84.70587622549019,
+      "end": 225.88250000000002,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_piano.wav",
+      "start": 112.94125,
+      "end": 225.88252083333333,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_melody.wav",
+      "start": 141.17654166666665,
+      "end": 225.88250000000002,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_orch.wav",
+      "start": 169.41185416666667,
+      "end": 225.8824375,
+      "length": 14.117645833333333,
+      "channelCount": 2
+    }
+  ],
+  "murky": [
+    {
+      "path": "limp/piano_intro.wav",
+      "start": 0,
+      "end": 47.931028735632225,
+      "length": 49.655166666666666,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/drum_intro.wav",
+      "start": 17.58620689655174,
+      "end": 50.689665229885094,
+      "length": 33.103458333333336,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/reverse_trill.wav",
+      "start": 23.103448275862103,
+      "end": 166.55171910919543,
+      "length": 143.44827083333334,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/reverse_cymbal.wav",
+      "start": 39.65517241379313,
+      "end": 203.79310991379313,
+      "length": 164.1379375,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/vox.wav",
+      "start": 45.172413793103495,
+      "end": 210.68966379310348,
+      "length": 165.51725,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/synth_pluck.wav",
+      "start": 45.172413793103495,
+      "end": 210.68966379310348,
+      "length": 165.51725,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano.wav",
+      "start": 45.172413793103495,
+      "end": 155.51724137931035,
+      "length": 44.1379375,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_sample.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/bass.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/hats.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/perc.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/fat_snare.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/snare.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/deep_kick.wav",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/sine.wav",
+      "start": 67.24137931034487,
+      "end": 210.6896501436782,
+      "length": 143.44827083333334,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_lead.wav",
+      "start": 89.3103448275862,
+      "end": 210.68966379310342,
+      "length": 124.1379375,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/dist_drums_middle.wav",
+      "start": 133.44827586206907,
+      "end": 155.5172341954024,
+      "length": 22.068958333333335,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/counter_bass.wav",
+      "start": 174.82758620689663,
+      "end": 210.68964870689663,
+      "length": 35.8620625,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_outro.wav",
+      "start": 199.65516379310355,
+      "end": 210.68966379310348,
+      "length": 13.793104166666666,
+      "channelCount": 2
+    }
+  ],
+  "bubbles": [
+    {
+      "path": "bubbles/rhodes_choopy.wav",
+      "start": 0,
+      "end": 71.69117647058823,
+      "length": 35.294125,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/rhodes.wav",
+      "start": 0,
+      "end": 71.69117647058823,
+      "length": 35.294125,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/main.wav",
+      "start": 1.7647058823529411,
+      "end": 71.69708225876556,
+      "length": 35.294125,
+      "channelCount": 2
+    }
+  ],
+  "butternutSquash": [
+    {
+      "path": "butternutSquash/Butternut Squash.wav",
+      "start": 0,
+      "end": 51.095668934240365,
+      "length": 51.095668934240365,
+      "channelCount": 2
+    }
+  ],
+  "heavyFog Test": [
+    {
+      "path": "heavyFog/hats.wav",
       "start": 0,
       "end": 100.54075,
       "length": 0.8108125,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/bass.mp3",
+      "path": "heavyFog/click.wav",
       "start": 0,
-      "end": 103.78375,
-      "length": 25.9459375,
+      "end": 100.54075,
+      "length": 1.621625,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/rhodes.mp3",
+      "path": "heavyFog/rhodes.wav",
       "start": 0,
       "end": 103.78377083333334,
       "length": 12.972979166666667,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/organ_fill.mp3",
+      "path": "heavyFog/bass.wav",
+      "start": 0,
+      "end": 103.78375,
+      "length": 25.9459375,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/light_drums.wav",
+      "start": 0,
+      "end": 102.16216216216216,
+      "length": 3.24325,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/heavy_drums.wav",
+      "start": 0,
+      "end": 102.56756756756758,
+      "length": 6.486479166666666,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill.wav",
       "start": 9.729750000000001,
       "end": 90.8107972972973,
       "length": 3.24325,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/chops.mp3",
+      "path": "heavyFog/chops.wav",
       "start": 24.196043683674162,
       "end": 103.78378209459461,
       "length": 25.9459375,
       "channelCount": 2
     },
     {
-      "path": "heavyFog/piano.mp3",
+      "path": "heavyFog/piano.wav",
       "start": 25.945958333333333,
       "end": 100.54075,
       "length": 12.972979166666667,
