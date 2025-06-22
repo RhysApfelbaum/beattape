@@ -8,7 +8,7 @@ in
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [ git tailwindcss-language-server ];
+  packages = with pkgs; [ git tailwindcss-language-server ffmpeg ];
 
   # https://devenv.sh/languages/
   languages.javascript = {

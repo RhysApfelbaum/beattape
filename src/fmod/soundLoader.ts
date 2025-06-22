@@ -36,8 +36,13 @@ export class SoundLoader {
     }
 
     getSound(path: string) {
+        let newPath = path;
+        if (path.endsWith('.wav')) {
+            newPath = path.replace('.wav', '.mp3');
+        }
+        console.log(newPath);
         for (const sound of this.sounds) {
-            if (sound.url === pathToTrackURL(path)) {
+            if (sound.url === pathToTrackURL(newPath)) {
                 return sound;
             }
         }

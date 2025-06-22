@@ -2,6 +2,7 @@ import React from 'react';
 
 const Button: React.FC<React.ComponentPropsWithoutRef<'button'>> = ({
     className,
+    disabled,
     ...props
 }) => {
     return (
@@ -15,7 +16,8 @@ const Button: React.FC<React.ComponentPropsWithoutRef<'button'>> = ({
                 active:shadow-[2px_2px_base04]
                 active:brightness-50
                 active:translate-x-[3px] active:translate-y-[3px]
-                hover:cursor-pointer
+                cursor-pointer
+                ${disabled && 'grayscale brightness-50 hover:cursor-not-allowed active:none'}
                 ${className ?? ''}
             `}
             {...props}

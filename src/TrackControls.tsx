@@ -170,21 +170,8 @@ const TrackControls: React.FC = () => {
 
                         if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
                             const sound = currentTrack.sounds.getSound(parameters.name);
-                            if (!sound.isLoaded) {
-                                // if (currentTrack.event.playbackState !== 'stopped') {
-                                //     currentTrack.event.setPaused(true);
-                                // }
-                                sound.load();
-                                // return;
-                            }
-
-                            console.log('found sound', sound);
-
-                            // sound.seek(0);
-
                             parameters.sound = sound.handle;
                             parameters.subsoundIndex = -1;
-                            // updatePauseState(false);
                         }
 
 
@@ -264,13 +251,23 @@ const TrackControls: React.FC = () => {
 
     const musicInfo = contributors.soundtomb;
 
+    let playButtonIcon = paused ? faPlay : faPause;
+    if (!currentTrackLoaded) playButtonIcon = faEllipsis;
+
     return (
         <div className='flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded'>
             <div className='flex flex-col'>
-                <p className='text-xl text-base05'>
-                    { playQueue.currentTrack.displayName }
-                </p>
-                <CreditLink contributor={contributors.soundtomb} />
+                {
+                    currentTrackLoaded ? (<>
+                        <p className='text-xl text-base05'>
+                            { playQueue.currentTrack.displayName }
+                        </p>
+                        <CreditLink contributor={contributors.soundtomb} />
+                    </>) : 
+                        (<p className='text-xl text-base05 animate-pulse'>
+                            loading ...
+                        </p>)
+                }
             </div>
             <div className='m-5 flex flex-row items-center gap-3'>
                 <TapeReel spinning={!paused} className='w-10 h-10'/>
@@ -282,9 +279,9 @@ const TrackControls: React.FC = () => {
                         size='xl'
                     />
                 </Button>
-                <Button onClick={handlePause}>
+                <Button onClick={handlePause} disabled={!currentTrackLoaded}>
                     <FontAwesomeIcon
-                        icon={paused ? faPlay : faPause}
+                        icon={playButtonIcon}
                         className='mx-8 my-5'
                         color='color-mix(in srgb, var(--color-base03), var(--color-base09) var(--beat-pulse))'
                         size='xl'

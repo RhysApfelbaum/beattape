@@ -1,13 +1,10 @@
-import { RingBuffer, SizedBuffer, StereoSampleQueue } from "./buffering";
-import { gesture } from "./gesture";
-import { FMODMountedFile, RemoteSampleBuffer, RemoteSoundData } from "./mountedFile";
+import { MPEGDecoderWebWorker } from "mpg123-decoder";
+import { RingBuffer } from "./buffering";
+import { gesture, onUserGesture } from "./gesture";
+import { FMODMountedFile  } from "./mountedFile";
 import { Pointer } from "./pointer";
-import { PromiseStatus } from "./promiseStatus";
 import { RemoteFMODStatus } from "./remoteFMODStatus";
-import { SoundInfo } from "./soundLoader";
 import { FMOD } from "./system";
-
-const MAX_SIGNED_INT_16 = 32767;
 
 const DEFAULT_SOUND_INFO = {
     sampleRate: 48000,
@@ -57,24 +54,45 @@ export class StreamedSound implements RemoteSound {
         this.element = new Audio(url);
         this.length = length;
         this.element.crossOrigin = 'anonymous';
+        this.element.playbackRate = 1;
         const { sampleRate, numChannels, bytesPerSample } = this.soundInfo;
         this.buffer = new RingBuffer(sampleRate * numChannels * bytesPerSample * length);
     }
 
     async fetch() {
-        await gesture.promise;
-        const context = new AudioContext();
-        const source = context.createMediaElementSource(this.element);
-        await context.audioWorklet.addModule('/pcmProcessor.js');
-        const node = new AudioWorkletNode(context, 'pcm-processor');
-        node.port.onmessage = async (event: MessageEvent<ArrayBuffer>) => {
-            const { full } = this.buffer.write(event.data);
-            if (full && !this.buffer.loop) {
-                // TODO
+        const decoder = new MPEGDecoderWebWorker();
+        await decoder.ready;
+        const response = await fetch(this.url);
+        if (!response.body) {
+            throw new Error('Something went wrong with fetching audio here ahhh');
+        }
+        const reader = response.body.getReader({ mode: 'byob' });
+        let chunkBuffer = new ArrayBuffer(10000);
+        while (true) {
+            const view = new Uint8Array(chunkBuffer);
+            const { done, value } = await reader.read(view);
+            if (done) {
+                break;
             }
-        };
-        source.connect(node);
-        this.element.play();
+            const { channelData } = await decoder.decode(value);
+
+            chunkBuffer = value.buffer as ArrayBuffer;
+
+            const [ left, right ] = channelData;
+
+            const length = Math.min(left.length, left.le;
+
+            // Create Int16Array for interleaved stereo output
+            const int16Buffer = new Int16Array(length * 2);
+
+            // TODO Maybe there's a clever way to sort out the floats
+            for (let i = 0; i < length; i++) {
+                // Clamp float sample to [-1, 1] and convert to 16-bit PCM
+                int16Buffer[i * 2] = Math.max(-1, Math.min(1, left[i])) * 0x7FFF;
+                int16Buffer[i * 2 + 1] = Math.max(-1, Math.min(1, right[i])) * 0x7FFF;
+            }
+            const { full, loss } = this.buffer.write(int16Buffer.buffer as ArrayBuffer);
+        }
     }
 
     get status(): RemoteFMODStatus {

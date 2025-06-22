@@ -38,11 +38,10 @@ export class RingBuffer {
         this.readIndex = 0;
         this.writeIndex = 0;
         this.fullThreshold = capacity * 0.95;
-        this.hotThreshold = 384000;
+        this.hotThreshold = Math.min(48000 * 2 * 2 * 4, this.capacity);
         this.emptyThreshold = capacity * 0.00;
         this.buffer = new ArrayBuffer(capacity);
         this.ready = new PromiseStatus();
-        // this.ready.resolve();
         this.loop = true;
         this.loopFull = false;
 
