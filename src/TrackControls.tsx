@@ -109,8 +109,9 @@ const TrackControls: React.FC = () => {
             fmod.events.paused.start();
 
             // Tape stop effect jankery
+            // HACK
             // This is awful. It polls intensity parameter in the FMOD snapshot every 50ms until it's 0.
-            const intervalID = setInterval(() => {
+            const intervalID = setInterval(_ => {
                 const intensity = fmod.events.paused.getParameter('Intensity');
                 if (intensity >= 100) {
                     currentTrack.event.setPaused(true);
@@ -128,6 +129,7 @@ const TrackControls: React.FC = () => {
         const { status: currentTrackStatus, error: currentTrackError } = currentTrack.bank.getStatus();
         const { status: nextTrackStatus } = playQueue.nextTracks[0].bank.getStatus();
 
+
         if (currentTrackStatus === 'unloaded') {
             currentTrack.fetch();
         }
@@ -136,26 +138,28 @@ const TrackControls: React.FC = () => {
         //     playQueue.nextTracks[0].fetch();
         // }
 
-        for (let i = 1; i < playQueue.nextTracks.length; i++) {
-            if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
-                playQueue.nextTracks[i].unload();
-            }
-        }
+        // for (let i = 1; i < playQueue.nextTracks.length; i++) {
+        //     if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
+        //         playQueue.nextTracks[i].unload();
+        //     }
+        // }
 
         switch (currentTrackStatus) {
             case 'unloaded':
                 if (currentTrackLoaded) setCurrentTrackLoaded(false);
             case 'fetched':
                 await currentTrack.load()
-                console.error('track loaded');
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
+                console.log('started track');
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
                     FMOD.STUDIO_EVENT_CALLBACK_STOPPED |
                     FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
                     (type, _event, parameters) => {
-                        if (currentTrack.event.playbackState === 'stopped') {
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_STOPPED) {
+                            console.log('track stopped');
+
                             setPlayQueue({
                                 ...playQueue,
                                 history: [currentTrack, ...playQueue.history],
@@ -164,12 +168,13 @@ const TrackControls: React.FC = () => {
                             });
                         }
 
-                        if (type === FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
                             beatPulse();
                         }
 
-                        if (type === FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
                             const sound = currentTrack.sounds.getSound(parameters.name);
+                            console.log(sound);
                             parameters.sound = sound.handle;
                             parameters.subsoundIndex = -1;
                         }

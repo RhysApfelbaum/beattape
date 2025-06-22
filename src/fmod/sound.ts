@@ -125,12 +125,11 @@ export class StreamedSound implements RemoteSound {
         info.format = FMOD.SOUND_FORMAT_PCM16;
 
         info.pcmsetposcallback = (
-            sound: any,
-            subsound: any,
-            position: any,
-            postype: any
+            _sound: any,
+            _subsound: any,
+            position: number,
+            _postype: any
         ) => {
-            console.log(this.url, 'seeking', position);
             const { sampleRate } = this.soundInfo;
             this.seek(position / sampleRate);
             return FMOD.OK;

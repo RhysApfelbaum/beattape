@@ -62,7 +62,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const script = document.createElement('script');
-        script.src = '/fmodstudioL.js';
+        script.src = '/fmodstudio.js';
         script.onload = () => {
             FMODModule(FMOD);
         };
