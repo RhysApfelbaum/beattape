@@ -80,7 +80,7 @@ export class StreamedSound implements RemoteSound {
 
             const [ left, right ] = channelData;
 
-            const length = Math.min(left.length, left.le;
+            const length = Math.min(left.length, right.length);
 
             // Create Int16Array for interleaved stereo output
             const int16Buffer = new Int16Array(length * 2);
