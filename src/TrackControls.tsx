@@ -151,7 +151,6 @@ const TrackControls: React.FC = () => {
                 await currentTrack.load()
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
-                console.log('started track');
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
                     FMOD.STUDIO_EVENT_CALLBACK_STOPPED |
@@ -170,11 +169,11 @@ const TrackControls: React.FC = () => {
 
                         if (type & FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
                             beatPulse();
+                            currentTrack.sounds.load(parameters.position / 1000);
                         }
 
                         if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
                             const sound = currentTrack.sounds.getSound(parameters.name);
-                            console.log(sound);
                             parameters.sound = sound.handle;
                             parameters.subsoundIndex = -1;
                         }

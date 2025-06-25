@@ -27,7 +27,6 @@ export interface RemoteSound {
 export class StreamedSound implements RemoteSound {
     private buffer: RingBuffer;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
-    private element: HTMLAudioElement;
     url: string;
     handle: any;
     start: number;
@@ -51,12 +50,10 @@ export class StreamedSound implements RemoteSound {
         this.restart = onRestart;
         this.url = url;
         this.soundInfo = DEFAULT_SOUND_INFO;
-        this.element = new Audio(url);
         this.length = length;
-        this.element.crossOrigin = 'anonymous';
-        this.element.playbackRate = 1;
         const { sampleRate, numChannels, bytesPerSample } = this.soundInfo;
         this.buffer = new RingBuffer(sampleRate * numChannels * bytesPerSample * length);
+        console.log(this.url);
     }
 
     async fetch() {
@@ -67,7 +64,7 @@ export class StreamedSound implements RemoteSound {
             throw new Error('Something went wrong with fetching audio here ahhh');
         }
         const reader = response.body.getReader({ mode: 'byob' });
-        let chunkBuffer = new ArrayBuffer(10000);
+        let chunkBuffer = new ArrayBuffer(4096);
         while (true) {
             const view = new Uint8Array(chunkBuffer);
             const { done, value } = await reader.read(view);
@@ -143,6 +140,7 @@ export class StreamedSound implements RemoteSound {
             if (underflow) {
                 this.stop();
                 this.buffer.ready.then(() => this.restart());
+                console.error('underflow', datalen, this.url);
                 return FMOD.OK;
             }
             FMOD.HEAPU8.set(view, data);

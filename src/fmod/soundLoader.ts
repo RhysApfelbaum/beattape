@@ -10,9 +10,13 @@ const pathToTrackURL = (path: string) => `./track_audio/${path}`;
 
 export class SoundLoader {
     private sounds: StreamedSound[];
+    private threshold: number;
+    private fetched: StreamedSound[];
 
     constructor() {
         this.sounds = [];
+        this.fetched = [];
+        this.threshold = 0;
     }
 
     // TODO: type this properly
@@ -23,14 +27,25 @@ export class SoundLoader {
             // const sound = new StaticSound(path, localPath, item.start, item.end);
             const stream = new StreamedSound(path, item.start, item.end, item.length);
             this.sounds.push(stream);
+            this.sounds.sort((a, b) => a.start - b.start );
         });
     }
 
-    async load(time = 0) {
+    async load(time = 0, offset = 10) {
+        if (time < this.threshold) return;
+        console.log(time, this.threshold);
         const promises = this.sounds.map(sound => {
+            if (sound.start > time + offset
+                || sound.start < this.threshold
+                || this.fetched.includes(sound)) {
+                return null;
+            }
+            console.log('loading', sound.url, sound.start);
+            this.fetched.push(sound);
             sound.fetch();
             return sound.load();
-        })
+        });
+        this.threshold = time + offset / 2;
 
         await Promise.all(promises);
     }
@@ -38,7 +53,7 @@ export class SoundLoader {
     getSound(path: string) {
         let newPath = path;
         // HACK
-        if (path.endsWith('.wav')) {
+        if (path.includes('.wav')) {
             newPath = path.replace('.wav', '.mp3');
         }
         for (const sound of this.sounds) {
@@ -47,7 +62,7 @@ export class SoundLoader {
             }
         }
 
-        throw new Error(`Could not find sound: ${path}`);
+        throw new Error(`Could not find sound: ${newPath}`);
     }
 
     bufferLength(start: number = 0) {

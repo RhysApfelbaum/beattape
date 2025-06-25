@@ -38,7 +38,7 @@ export class RingBuffer {
         this.readIndex = 0;
         this.writeIndex = 0;
         this.fullThreshold = capacity * 0.95;
-        this.hotThreshold = Math.min(48000 * 2 * 2 * 4, this.capacity);
+        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
         this.emptyThreshold = capacity * 0.00;
         this.buffer = new ArrayBuffer(capacity);
         this.ready = new PromiseStatus();
@@ -100,6 +100,7 @@ export class RingBuffer {
         }
 
 
+        // console.log(this.size, this.hotThreshold, this.loopFull || this.size >= this.hotThreshold);
         if (!this.ready.isResolved && (this.loopFull || this.size >= this.hotThreshold)) {
             this.ready.resolve();
         }
