@@ -34,14 +34,11 @@ export class StreamedSound implements RemoteSound {
     private decodeBuffer: RingBuffer;
     private startBuffer: RingBuffer;
     private decoder: MPEGDecoderWebWorker;
-    private reserveDecoder: MPEGDecoderWebWorker;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition: number;
     private decodePosition: number;
     private decodeChunk: (chunk: Uint8Array) => Promise<Uint8Array>;
-    private scanChunk: typeof this.decodeChunk;
     private startThreshold: number;
-    private fileStartThreshold: { filePosition: number, samplePosition: number };
 
     private decodeLeftover: Uint8Array;
 
@@ -79,12 +76,10 @@ export class StreamedSound implements RemoteSound {
         this.startBuffer = new RingBuffer(true);
         this.decodeBuffer = new RingBuffer(false);
         this.startThreshold = this.soundInfo.bytesPerSecond * 5;
-        this.fileStartThreshold = { filePosition: 0, samplePosition: 0 };
 
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
         this.decoder = new MPEGDecoderWebWorker();
-        this.reserveDecoder = new MPEGDecoderWebWorker();
         this.decoding = true;
 
         this.decodeLeftover = new Uint8Array();
@@ -111,16 +106,7 @@ export class StreamedSound implements RemoteSound {
             }
             return new Uint8Array(int16Buffer.buffer);
         }
-
-        this.scanChunk = async chunk => {
-            await this.reserveDecoder.decode(chunk);
-            return new Uint8Array();
-        }
     }
-
-    private async preDecodeStart() {
-    }
-
 
     private async download() {
         const response = await fetch(this.url);
@@ -225,7 +211,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     async fetch() {
-        await Promise.all ([ this.decoder.ready, this.reserveDecoder.ready ]);
+        await this.decoder.ready;
 
         this.decodeBuffer.allocate(this.soundInfo.bytesPerSecond * 10, this.soundInfo.bytesPerSecond * 2);
         this.startBuffer.allocate(this.startThreshold, this.startThreshold);
