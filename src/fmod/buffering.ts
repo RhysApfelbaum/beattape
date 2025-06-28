@@ -1,7 +1,8 @@
+import { assertNotNull, unreachable } from "./helpers";
 import { PromiseStatus } from "./promiseStatus";
 
 
-type RingBufferReadResult = {
+export type RingBufferReadResult = {
     view: Uint8Array,
     wrappedView: null,
     underflow: false,
@@ -18,8 +19,12 @@ type RingBufferReadResult = {
     wrap: true
 };
 
+const BlackHole = {
+    write: async (chunk: Uint8Array) => new Uint8Array()
+};
+
 export class RingBuffer {
-    private buffer: ArrayBuffer; 
+    private buffer: ArrayBuffer | null; 
     private size: number;
     private readIndex: number;
     private writeIndex: number;
@@ -27,24 +32,30 @@ export class RingBuffer {
     private hotThreshold: number;
     private emptyThreshold: number;
     private loopFull: boolean;
+    private locked: PromiseStatus;
 
     capacity: number;
     loop: boolean;
-    ready: PromiseStatus;
+    canRead: PromiseStatus;
+    canWrite: PromiseStatus;
+    fresh: boolean;
 
-    constructor(capacity: number) {
-        this.capacity = capacity;
+    constructor(loop: boolean) {
+        this.capacity = 0;
         this.size = 0;
         this.readIndex = 0;
         this.writeIndex = 0;
-        this.fullThreshold = capacity * 0.95;
-        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
-        this.emptyThreshold = capacity * 0.00;
-        this.buffer = new ArrayBuffer(capacity);
-        this.ready = new PromiseStatus();
-        this.loop = true;
+        this.fullThreshold = 0;
+        this.hotThreshold = 0;
+        this.emptyThreshold = 0;
+        this.buffer = null;
+        this.canRead = new PromiseStatus();
+        this.canWrite = new PromiseStatus();
+        this.locked = new PromiseStatus();
+        this.canWrite.resolve();
+        this.loop = loop;
         this.loopFull = false;
-
+        this.fresh = true;
     }
 
     getStatus() {
@@ -65,60 +76,93 @@ export class RingBuffer {
         return this.size === 0;
     }
 
-    write(chunk: ArrayBuffer): {
-        full: boolean,
-        loss: boolean
-    } {
+    // Cancel any new or pending writes
+    lock() {
+        this.locked.resolve();
+    }
+
+    // Allow new writes
+    unlock() {
+        this.locked.reset();
+    }
+
+    async write(chunk: Uint8Array) {
+        assertNotNull(this.buffer);
+
+        await Promise.race([ this.locked, this.canWrite ]);
+
+        // Completely discard the write
+        if (this.locked.isResolved)
+            return new Uint8Array();
+
         const writeView = new Uint8Array(this.buffer);
-        const chunkView = new Uint8Array(chunk);
+        const capacity = this.capacity;
 
-        // The chunk covers the distance from the write pointer to the end of the buffer.
-        const looping = this.loop && (this.writeIndex + chunkView.length >= this.capacity);
-
-        const firstPartSize = Math.min(chunkView.length, this.capacity - this.writeIndex);
-
-        const chunkLength = looping ? firstPartSize : chunkView.length;
-
-        const secondPartSize = chunkView.length - firstPartSize;
-
-        writeView.set(chunkView.subarray(0, firstPartSize), this.writeIndex);
-
-        if (looping) {
-            this.loopFull = true;
-        } else if (secondPartSize > 0) {
-            // Discard the left-over part if we are looping, as it's probably zeros.
-            writeView.set(chunkView.subarray(firstPartSize), 0);
+        // Case 1: Looping mode and already full — reject all writes
+        if (this.loop && this.loopFull) {
+            return chunk;
         }
 
-        this.writeIndex = (this.writeIndex + chunkLength) % this.capacity;
+        const remaining = capacity - this.writeIndex;
+        const firstPartSize = Math.min(chunk.length, remaining);
+        const secondPartSize = chunk.length - firstPartSize;
 
-        if (looping) {
-            this.size = this.capacity;
-        } else {
-            this.size += chunkLength;
 
+        // Write first part
+        writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
+
+        let totalWritten = firstPartSize;
+
+        // Looping mode: stop at end of buffer, discard second part
+        if (this.loop) {
+            if (this.writeIndex + chunk.length >= capacity) {
+                this.loopFull = true;
+                this.writeIndex = 0;
+                this.size = capacity;
+                this.canWrite.reset();
+                if (!this.canRead.isResolved) this.canRead.resolve();
+                return chunk.subarray(firstPartSize); // discard second half
+            } else {
+                this.writeIndex += firstPartSize;
+                this.size += firstPartSize;
+            }
         }
 
+        // Non-looping: wrap around and write second part
+        else {
+            if (secondPartSize > 0) {
+                writeView.set(chunk.subarray(firstPartSize), 0);
+                this.writeIndex = secondPartSize;
+                totalWritten += secondPartSize;
+            } else {
+                this.writeIndex = (this.writeIndex + firstPartSize) % capacity;
+            }
 
-        // console.log(this.size, this.hotThreshold, this.loopFull || this.size >= this.hotThreshold);
-        if (!this.ready.isResolved && (this.loopFull || this.size >= this.hotThreshold)) {
-            this.ready.resolve();
+            this.size = Math.min(this.size + totalWritten, capacity);
+
+            // Backpressure: full?
+            if (this.size >= this.fullThreshold) {
+                this.canWrite.reset();
+            }
         }
 
-        const full = this.size >= this.fullThreshold;
+        // Resolve canRead if enough data
+        if (!this.canRead.isResolved && (this.loopFull || this.size >= this.hotThreshold)) {
+            this.canRead.resolve();
+        }
 
-        return {
-            full: full,
-            loss: false
-        };
+        return new Uint8Array(); // nothing left over
     }
 
     read(requestedBytes: number): RingBufferReadResult {
+        assertNotNull(this.buffer);
+        this.fresh = false;
 
         const bytes = Math.min(requestedBytes, this.capacity);
 
         const viewSize = Math.min(bytes, this.capacity - this.readIndex);
         const wrapSize = bytes - viewSize;
+
 
 
         const result: RingBufferReadResult = (wrapSize > 0)
@@ -137,9 +181,10 @@ export class RingBuffer {
 
         if (this.loopFull || this.isFull()) {
             this.readIndex = (this.readIndex + bytes) % this.capacity;
+            this.fresh = false;
             return result;
         } else if (this.size < bytes) {
-            this.ready.reset();
+            this.canRead.reset();
             return {
                 view: null,
                 wrappedView: null,
@@ -148,23 +193,96 @@ export class RingBuffer {
             }
         }
 
+        this.fresh = false;
         this.readIndex = (this.readIndex + bytes) % this.capacity;
 
         if (!this.loopFull) {
             this.size -= bytes;
         }
 
+        if (this.size < this.fullThreshold) {
+            this.canWrite.resolve();
+        }
+
         return result;
     }
 
-    // HACK this is wildly unsafe... maybe?
-    seek(position: number) {
-        this.readIndex = position;
+    // HACK this is wildly unsafe
+    relativeSeek(offset: number) {
+        console.log(offset, this.size, this.capacity);
+        if (offset > this.size) {
+            return false;
+        }
+        if (-offset >= this.capacity - this.size) {
+            return false;
+        }
+        this.readIndex = (this.readIndex + offset) % this.capacity;
+        this.size -= offset;
+        return true;
+    }
+
+    unsafeSeek(index: number) {
+        this.readIndex = index;
     }
 
     flush() {
         this.readIndex = 0;
         this.writeIndex = 0;
         this.size = 0;
+        this.canWrite.resolve();
+        this.canRead.reset();
     }
+
+    allocate(bytes: number, hotThreshold: number) {
+        this.buffer = new ArrayBuffer(bytes);
+        this.capacity = bytes;
+        this.fullThreshold = this.capacity * 0.8;
+        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
+        this.emptyThreshold = this.capacity * 0.00;
+    }
+
+    free() {
+        this.buffer = null;
+    }
+
+    async pipe(target: RingBuffer | typeof BlackHole = BlackHole, requestedBytes: number, process = async (view: Uint8Array) => view, processedOffset = 0) {
+        await this.canRead;
+        const { view, wrappedView, wrap, underflow } = this.read(requestedBytes);
+        if (underflow) {
+            unreachable();
+        }
+
+        let bytesRead = view.length;
+
+        const processedView = await process(view);
+        let totalLength = processedView.length;
+
+        const processedOffsetInWrap = processedView.length < processedOffset;
+ 
+        let leftover = new Uint8Array();
+
+        if (!processedOffsetInWrap) {
+            leftover = await target.write(
+                processedView.subarray(
+                    processedOffsetInWrap ? 0 : processedOffset
+                )
+            );
+        }
+
+        if (leftover.length > 0 || !wrap) {
+            return { leftover: leftover, bytesWritten: totalLength - leftover.length, bytesRead: bytesRead };
+        }
+
+        bytesRead += wrappedView.length;
+
+        // view was fully written and we have a wrappedView to write
+        const processedWrapped = await process(wrappedView);
+        const processedWrapOffset = processedOffsetInWrap ? (processedOffset - processedView.length) : 0;
+        totalLength += processedWrapped.length;
+        return {
+            leftover: await target.write(processedWrapped.subarray(processedWrapOffset)),
+            bytesWritten: totalLength - leftover.length,
+            bytesRead: bytesRead
+        };
+    }
 }
