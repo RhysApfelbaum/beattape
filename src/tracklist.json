@@ -1,10 +1,10 @@
 [
     {
-        "name": "heavyFog",
-        "displayName": "heavy fog",
+        "name": "bubbles",
+        "displayName": "test",
         "grit": 0.5,
-        "brightness": 0.4,
-        "chops": 0.4,
-        "vocals": 0
+        "brightness": 0.5,
+        "chops": 0.5,
+        "vocals": 0.5
     }
 ]

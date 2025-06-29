@@ -49,5 +49,6 @@ export class Track {
             this.event.unload();
         }
         this.bank.unload();
+        this.sounds.unload();
     }
 }

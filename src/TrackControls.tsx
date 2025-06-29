@@ -178,10 +178,11 @@ const TrackControls: React.FC = () => {
                             console.log('handle', sound.handle, sound.url);
                             sound.stop = () => {
                                 currentTrack.event.setPaused(true);
+                                console.log('playback state', currentTrack.event.getPaused());
                             };
                             sound.restart = () => {
                                 console.log('restarting');
-                                // FMOD.Result = currentTrack.event.instance.setTimelinePosition(1000 * sound.start + sound.getPositionMilliseconds());
+                                FMOD.Result = currentTrack.event.instance.setTimelinePosition(1000 * sound.start + sound.getPositionMilliseconds());
                                 currentTrack.event.setPaused(false);
                             }
                             parameters.sound = sound.handle;

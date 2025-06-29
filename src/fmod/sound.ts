@@ -1,5 +1,5 @@
 import { MPEGDecoderWebWorker } from "mpg123-decoder";
-import { RingBuffer, RingBufferReadResult } from "./buffering";
+import { RingBuffer, RingBufferReadResult, Sink } from "./buffering";
 import { gesture, onUserGesture } from "./gesture";
 import { FMODMountedFile  } from "./mountedFile";
 import { Pointer } from "./pointer";
@@ -37,12 +37,14 @@ export class StreamedSound implements RemoteSound {
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition: number;
     private decodePosition: number;
+    private decodeBufferStartPosition: number;
     private decodeChunk: (chunk: Uint8Array) => Promise<Uint8Array>;
     private startThreshold: number;
-
-    private decodeLeftover: Uint8Array;
+    private readCallbackLastCalled: number;
+    private timelinePosition: number;
 
     private decoding: boolean;
+    private decodingStatus: PromiseStatus;
 
     private static DECODE_CHUNK_SIZE = 4096;
     private static DECODE_BUFFER_SECONDS = 10;
@@ -81,10 +83,13 @@ export class StreamedSound implements RemoteSound {
 
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
+        this.decodeBufferStartPosition = this.startThreshold;
         this.decoder = new MPEGDecoderWebWorker();
         this.decoding = true;
-
-        this.decodeLeftover = new Uint8Array();
+        this.decodingStatus = new PromiseStatus();
+        this.decodingStatus.resolve();
+        this.readCallbackLastCalled = 0;
+        this.timelinePosition = 0;
 
         this.decodeChunk = async chunk => {
             const { channelData, samplesDecoded, errors } = await this.decoder.decode(chunk);
@@ -154,24 +159,11 @@ export class StreamedSound implements RemoteSound {
     private async startDecoding(start: boolean) {
         let atStart = start;
         this.decoding = true;
-        if (this.url.includes('heavy_drums')) {
-            console.log('started decoding')
-        }
-
-        let bytesToScan = 0;
+        this.decodingStatus.reset();
         while (this.decoding) {
-            // console.log(this.url, this.decodeBuffer.getStatus())
             const buffer = atStart ? this.startBuffer : this.decodeBuffer;
-            const { leftover, bytesRead } = await this.fileBuffer.pipe(buffer, StreamedSound.DECODE_CHUNK_SIZE, this.decodeChunk);
+            const { leftover } = await this.fileBuffer.pipe(buffer, StreamedSound.DECODE_CHUNK_SIZE, this.decodeChunk);
 
-
-            if (atStart) {
-                bytesToScan += bytesRead;
-            }
-
-            if (this.url.includes('chops')) {
-                console.log('decodeBuffer', this.decodeBuffer.getStatus())
-            }
             if (buffer.isFull()) {
 
                 // Sanity check. The decode buffer should never be completely full
@@ -181,17 +173,22 @@ export class StreamedSound implements RemoteSound {
                 }
 
                 if (leftover.length > 0) {
-                    this.decodeLeftover = leftover;
                     await this.decodeBuffer.write(leftover);
                 }
             }
         }
+        this.decodingStatus.resolve();
     }
 
-    private stopDecoding() {
+    private async stopDecoding() {
         this.decoding = false;
         this.decodeBuffer.lock();
         this.decodeBuffer.unlock();
+        await this.decodingStatus;
+    }
+
+    updateTime(seconds: number) {
+        this.timelinePosition = (seconds - this.start) * this.soundInfo.bytesPerSecond;
     }
 
     async fetch() {
@@ -246,8 +243,6 @@ export class StreamedSound implements RemoteSound {
             Math.min(requestedBytes, this.decodeBuffer.capacity)
         );
 
-        // Advance the seek pointer no matter what
-
         if (underflow) {
             console.error(this.url, 'underflow');
             this.stop();
@@ -257,12 +252,80 @@ export class StreamedSound implements RemoteSound {
 
         FMOD.HEAPU8.set(view, heapPointer);
 
-        // this.advanceSeekPosition(view.length);
+        this.decodeBufferStartPosition = this.decodeBufferStartPosition + view.length;
 
         if (wrap) {
             FMOD.HEAPU8.set(wrappedView, heapPointer + view.length);
-            // this.advanceSeekPosition(wrappedView.length);
+            this.decodeBufferStartPosition += wrappedView.length
         }
+
+        this.decodeBufferStartPosition %= this.soundInfo.bytesPerSecond * this.length;
+
+    }
+
+    updateDecoderPosition(seconds: number) {
+        const targetSeekPosition = (seconds - this.start) * this.soundInfo.bytesPerSecond - this.startThreshold;
+        const targetPosition = targetSeekPosition - this.decodeBufferStartPosition;
+        console.log(this.url);
+        if (targetPosition <= 0) {
+            console.log('decode buffer ahead of playback');
+            return;
+        }
+
+        // if (targetSeekPosition - this.readCallbackLastCalled < 4 * this.soundInfo.bytesPerSecond) {
+        //     console.log('readCallbackCalled recently');
+        //     return;
+        // }
+
+        console.log(this.decodeBuffer.getStatus());
+        console.log(targetPosition);
+
+        if (targetPosition >= this.decodeBuffer.bytesAvailable) {
+            console.error('aggressively seeking', targetPosition);
+            this.forceSeekDecodeBuffer(targetSeekPosition);
+        } else {
+            console.error('passively reading', targetPosition);
+            this.decodeBuffer.read(targetPosition);
+            this.decodeBufferStartPosition += targetPosition;
+            this.decodeBufferStartPosition %= this.soundInfo.bytesPerSecond * this.length;
+        }
+    }
+
+    async forceSeekDecodeBuffer(position: number) {
+        await this.stopDecoding();
+
+        // // All reads are sync
+        const { numChannels, bytesPerSample } = this.soundInfo;
+
+        
+        // Completely rebuild the decoder, as this may cause errors
+        await this.decoder.free();
+        this.fileBuffer.unsafeSeek(0);
+        this.decoder = new MPEGDecoderWebWorker();
+        await this.decoder.ready;
+
+        this.decodePosition = 0;
+
+        this.decodeBuffer.flush();
+        const sink = new Sink(position);
+        let leftover = new Uint8Array();
+        while (!sink.isFull()) {
+            const result = await this.fileBuffer.pipe(
+                sink,
+                StreamedSound.DECODE_CHUNK_SIZE,
+                this.decodeChunk
+            );
+            leftover = result.leftover;
+        }
+
+        if (leftover.length > 0) {
+            await this.decodeBuffer.write(leftover);
+        }
+
+        this.decodeBufferStartPosition = position;
+        console.log(this.decodeBuffer.getStatus());
+        this.startDecoding(false);
+
     }
 
 
@@ -296,7 +359,7 @@ export class StreamedSound implements RemoteSound {
 
         info.pcmreadcallback = (sound: any, data: number, datalen: number) => {
             // if (this.url.includes('heavy_drums')) {
-            //     console.log('requested', datalen);
+            console.log(this.url, 'requested', datalen);
             // }
             //
             if (this.seekPosition < this.startThreshold) {
@@ -304,6 +367,7 @@ export class StreamedSound implements RemoteSound {
             } else {
                 this.readPCM(data, datalen);
             }
+            this.readCallbackLastCalled = this.seekPosition;
             this.advanceSeekPosition(datalen);
             return FMOD.OK;
         };
@@ -331,46 +395,28 @@ export class StreamedSound implements RemoteSound {
         if (position < this.startThreshold) {
             // The seek is inside the start buffer, so it can be done immediately
             this.startBuffer.unsafeSeek(position);
+
+            this.seekPosition = position;
+
+            if (this.decodeBuffer.fresh)
+                return;
+
+            await this.forceSeekDecodeBuffer(this.startThreshold);
+        } else if (
+            position >= this.decodeBufferStartPosition &&
+            position < (this.decodeBufferStartPosition + this.decodeBuffer.bytesAvailable)
+        ) {
+            this.decodeBuffer.read(position - this.decodeBufferStartPosition);
+            this.decodeBufferStartPosition += position;
+            this.seekPosition = position;
         } else {
-            console.error(this.url, 'OH NO YOU TRIED TO SEEK TO', position);
-            return;
+            this.stop();
+
+            await this.forceSeekDecodeBuffer(this.startThreshold);
+            await this.decodeBuffer.canRead;
+            this.seekPosition = position;
+            this.restart();
         }
-        this.seekPosition = position;
-
-        if (this.decodeBuffer.fresh)
-            return;
-
-        this.stopDecoding();
-
-        // All reads are sync
-        this.fileBuffer.unsafeSeek(0);
-
-
-        await this.decoder.free();
-        this.decoder = new MPEGDecoderWebWorker();
-        await this.decoder.ready;
-        this.decodePosition = 0;
-        console.log('the decoder has been reset');
-        this.decodeBuffer.flush();
-        console.log(this.url, 'BUFFER FLUSHED');
-
-        this.fileBuffer.unsafeSeek(0);
-        const blackHole = new RingBuffer(true);
-        blackHole.allocate(this.startThreshold, this.startThreshold);
-        let leftover = new Uint8Array();
-        while (!blackHole.isFull()) {
-            const result = await this.fileBuffer.pipe(blackHole, StreamedSound.DECODE_CHUNK_SIZE, this.decodeChunk);
-            leftover = result.leftover;
-        }
-        blackHole.free();
-
-        if (leftover.length > 0) {
-            await this.decodeBuffer.write(leftover);
-        }
-
-        console.log(this.decodeBuffer.getStatus());
-        this.startDecoding(false);
-
     }
 
     async unload() {

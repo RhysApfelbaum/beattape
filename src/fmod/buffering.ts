@@ -19,9 +19,30 @@ export type RingBufferReadResult = {
     wrap: true
 };
 
-const BlackHole = {
-    write: async (chunk: Uint8Array) => new Uint8Array()
-};
+export class Sink {
+    private capacity: number;
+    private size: number;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.size = 0;
+    }
+
+    write(chunk: Uint8Array) {
+        const remaining = this.capacity - this.size;
+        const writeSize = Math.min(remaining, chunk.length);
+        this.size += writeSize;
+
+        if (writeSize < chunk.length) {
+            return chunk.subarray(writeSize);
+        }
+        return new Uint8Array();
+    }
+
+    isFull() {
+        return this.size >= this.capacity;
+    }
+}
 
 export class RingBuffer {
     private buffer: ArrayBuffer | null; 
@@ -56,6 +77,10 @@ export class RingBuffer {
         this.loop = loop;
         this.loopFull = false;
         this.fresh = true;
+    }
+
+    get bytesAvailable() {
+        return this.size;
     }
 
     getStatus() {
@@ -109,7 +134,13 @@ export class RingBuffer {
 
 
         // Write first part
-        writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
+        try {
+            writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
+
+        } catch (error) {
+            console.log('tried to write with firstPartSize', firstPartSize);
+            console.error(error);
+        }
 
         let totalWritten = firstPartSize;
 
@@ -245,7 +276,12 @@ export class RingBuffer {
         this.buffer = null;
     }
 
-    async pipe(target: RingBuffer | typeof BlackHole = BlackHole, requestedBytes: number, process = async (view: Uint8Array) => view, processedOffset = 0) {
+    async pipe(
+        target: RingBuffer | Sink,
+        requestedBytes: number,
+        process = async (view: Uint8Array) => view,
+        processedOffset = 0
+    ) {
         await this.canRead;
         const { view, wrappedView, wrap, underflow } = this.read(requestedBytes);
         if (underflow) {

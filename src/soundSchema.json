@@ -17,7 +17,7 @@
       "channelCount": 2
     },
     {
-      "path": "snooze/cymbals3.mp3",
+      "path": "snooze/cymbals-Trimmed3.mp3",
       "start": 12.799999999999983,
       "end": 38.400000000000006,
       "length": 25.6,
@@ -105,7 +105,7 @@
       "channelCount": 2
     },
     {
-      "path": "snooze/cymbals.mp3",
+      "path": "snooze/cymbals-Trimmed.mp3",
       "start": 67.2,
       "end": 89.60000000000001,
       "length": 22.4,
@@ -121,7 +121,7 @@
       "channelCount": 2
     },
     {
-      "path": "snooze/cymbals2.mp3",
+      "path": "snooze/cymbals-Trimmed2.mp3",
       "start": 121.60000000000001,
       "end": 192,
       "length": 70.39997916666667,
@@ -389,25 +389,25 @@
       "channelCount": 2
     },
     {
-      "path": "court/main_riff_piano.mp3",
+      "path": "court/main_riff_piano4.mp3",
       "start": 0,
-      "end": 112.94116789215686,
+      "end": 14.117645833333333,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/bass.mp3",
+      "path": "court/bass2.mp3",
       "start": 0,
-      "end": 225.88243749999998,
+      "end": 112.94116666666666,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/main_riff_thick.mp3",
+      "path": "court/main_riff_thick2.mp3",
       "start": 14.117645833333333,
-      "end": 112.94125,
+      "end": 56.47058333333333,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
@@ -421,50 +421,114 @@
       "channelCount": 2
     },
     {
-      "path": "court/foley.mp3",
+      "path": "court/main_riff_piano3.mp3",
       "start": 14.117647058823529,
-      "end": 225.88243749999998,
+      "end": 56.470584558823525,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/drums.mp3",
+      "path": "court/foley2.mp3",
       "start": 14.117647058823529,
-      "end": 225.88243749999998,
+      "end": 168.5294117647059,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums3.mp3",
+      "start": 14.117647058823529,
+      "end": 112.9413137254902,
       "length": 7.058833333333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/vox.mp3",
+      "path": "court/vox2.mp3",
       "start": 28.2353125,
+      "end": 56.47064583333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano2.mp3",
+      "start": 56.47058333333333,
+      "end": 84.70587499999999,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting3.mp3",
+      "start": 84.70587622549019,
+      "end": 112.9411887254902,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano.mp3",
+      "start": 84.70587622549019,
+      "end": 112.94116789215686,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/vox.mp3",
+      "start": 84.70595833333333,
       "end": 225.88243749999998,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/ting.mp3",
-      "start": 84.70587622549019,
-      "end": 225.88250000000002,
+      "path": "court/main_riff_thick.mp3",
+      "start": 84.70595833333333,
+      "end": 112.94125,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/second_riff_piano.mp3",
+      "path": "court/second_riff_piano2.mp3",
       "start": 112.94125,
-      "end": 225.88252083333333,
+      "end": 167.56683997078753,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
     {
-      "path": "court/ting_melody.mp3",
+      "path": "court/ting_melody2.mp3",
       "start": 141.17654166666665,
-      "end": 225.88250000000002,
+      "end": 169.41185416666667,
       "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting2.mp3",
+      "start": 141.17654166666665,
+      "end": 169.41185416666667,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/bass.mp3",
+      "start": 141.17654166666665,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums2.mp3",
+      "start": 155.29410539215687,
+      "end": 169.41177205882354,
+      "length": 7.058833333333333,
       "sampleRate": 48000,
       "channelCount": 2
     },
@@ -472,6 +536,46 @@
       "path": "court/second_riff_orch.mp3",
       "start": 169.41185416666667,
       "end": 225.8824375,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_piano.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88252083333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/foley.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88243749999998,
+      "length": 7.058833333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_melody.mp3",
+      "start": 197.6471875,
+      "end": 225.88250000000002,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting.mp3",
+      "start": 197.6471875,
+      "end": 225.88250000000002,
       "length": 14.117645833333333,
       "sampleRate": 48000,
       "channelCount": 2
@@ -759,7 +863,7 @@
       "start": 0,
       "end": 51.095668934240365,
       "length": 51.095668934240365,
-      "sampleRate": 44100,
+      "sampleRate": 44099.998474121094,
       "channelCount": 2
     }
   ],

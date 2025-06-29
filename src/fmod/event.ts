@@ -70,6 +70,11 @@ export class EventInstance {
         FMOD.Result = this.instance.setPaused(paused);
     }
 
+    getPaused(): boolean {
+        const paused = new Pointer<boolean>();
+        FMOD.Result = this.instance.getPaused(paused);
+        return paused.deref();
+    }
 
     getParameter(name: string): number {
         const outval = new Pointer<number>();
