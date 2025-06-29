@@ -16,8 +16,8 @@ const SliderInput = styled.input`
     position: relative;
     --thumb-background: color-mix(
         in srgb, 
-        ${props => props.theme.colors.grey},
-        ${props => props.theme.colors.brightLight}
+        var(--color-base03),
+        var(--color-base0A)
         var(--activation)
     );
 
@@ -64,8 +64,8 @@ const SliderTrack = styled.div`
     position: absolute;
     background-color: color-mix(
         in srgb, 
-        ${props => props.theme.colors.grey},
-        ${props => props.theme.colors.warmLight}
+        var(--color-base03),
+        var(--color-base0A)
         var(--activation)
     );
     margin-left: 48px;
@@ -91,8 +91,8 @@ const SliderText = styled.p`
     text-align: center;
     color: color-mix(
         in srgb, 
-        ${props => props.theme.colors.grey},
-        #FFFFFF
+        var(--color-base03),
+        var(--color-base05)
         var(--activation)
     );
 `;

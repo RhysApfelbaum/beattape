@@ -179,7 +179,7 @@ const TrackControls: React.FC = () => {
                             };
                             sound.restart = () => {
                                 console.log('restarting');
-                                FMOD.Result = currentTrack.event.instance.setTimelinePosition(1000 * sound.start + sound.getPositionMilliseconds());
+                                // FMOD.Result = currentTrack.event.instance.setTimelinePosition(1000 * sound.start + sound.getPositionMilliseconds());
                                 currentTrack.event.setPaused(false);
                             }
                             parameters.sound = sound.handle;
@@ -194,7 +194,7 @@ const TrackControls: React.FC = () => {
                 currentTrack.event.setParameter('Brightness', playQueue.sliderState.brightness, false);
                 currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
                 currentTrack.event.setParameter('Vocals', playQueue.sliderState.vocals, false);
-                break;
+                break
             case 'error':
                 console.error(`Error loading ${currentTrack.name}: ${currentTrackError}`);
                 break;

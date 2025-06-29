@@ -75,7 +75,7 @@ export class StreamedSound implements RemoteSound {
         this.fileBuffer = new RingBuffer(true);
         this.startBuffer = new RingBuffer(true);
         this.decodeBuffer = new RingBuffer(false);
-        this.startThreshold = this.soundInfo.bytesPerSecond * 5;
+        this.startThreshold = this.soundInfo.bytesPerSecond * 4;
 
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
@@ -166,9 +166,8 @@ export class StreamedSound implements RemoteSound {
             if (atStart) {
                 bytesToScan += bytesRead;
             }
-            // console.log('COMAPRING', this.url, atStart, bytesToScan, this.fileBuffer.getStatus().readIndex);
 
-            if (this.url.includes('heavy_drums')) {
+            if (this.url.includes('chops')) {
                 console.log('decodeBuffer', this.decodeBuffer.getStatus())
             }
             if (buffer.isFull()) {
@@ -177,27 +176,10 @@ export class StreamedSound implements RemoteSound {
                 if (atStart) {
                     atStart = false;
                     this.startBuffer.lock();
-
-                    // if (this.length >= 4) {
-                    //     this.fileBuffer.unsafeSeek(0);
-                    //
-                    //     const { underflow, view: chunk } = this.fileBuffer.read(bytesToScan);
-                    //     if (underflow) {
-                    //         unreachable();
-                    //     }
-                    //     this.reserveDecoder.decode(chunk).then(() => console.log('decoded chunk', chunk.length));
-                    //     const { readIndex } = this.fileBuffer.getStatus();
-                    //     // this.fileBuffer.unsafeSeek(readIndex);
-                    //     this.fileStartThreshold.filePosition = readIndex;
-                    // }
                 }
 
                 if (leftover.length > 0) {
                     this.decodeLeftover = leftover;
-                    console.log('LEFTOVER', leftover.length);
-                    if (this.url.includes('heavy_drums')) {
-                        console.log('LEFTOVER', leftover.length);
-                    }
                     await this.decodeBuffer.write(leftover);
                 }
             }
@@ -213,7 +195,7 @@ export class StreamedSound implements RemoteSound {
     async fetch() {
         await this.decoder.ready;
 
-        this.decodeBuffer.allocate(this.soundInfo.bytesPerSecond * 10, this.soundInfo.bytesPerSecond * 2);
+        this.decodeBuffer.allocate(this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS, this.soundInfo.bytesPerSecond * 2);
         this.startBuffer.allocate(this.startThreshold, this.startThreshold);
 
         // Start downloading the file
@@ -304,21 +286,17 @@ export class StreamedSound implements RemoteSound {
         ) => {
             const { sampleRate } = this.soundInfo;
             // console.log('seeking', this.url, position * this.soundInfo.bytesPerSample * this.soundInfo.numChannels);
-            if (this.url.includes('heavy_drums')) {
-                // console.log('filebuffer', this.fileBuffer.getStatus())
-                // console.log('startBuffer', this.startBuffer.getStatus())
-                console.log('seek', position)
-            }
+            console.log(this.url, 'seek', position)
             const bytePosition = position * this.soundInfo.bytesPerSample * this.soundInfo.numChannels;
-            this.seekPosition = bytePosition;
             this.seek(bytePosition);
             return FMOD.OK;
         };
 
         info.pcmreadcallback = (sound: any, data: number, datalen: number) => {
-            if (this.url.includes('heavy_drums')) {
-                console.log('requested', datalen);
-            }
+            // if (this.url.includes('heavy_drums')) {
+            //     console.log('requested', datalen);
+            // }
+            //
             if (this.seekPosition < this.startThreshold) {
                 this.readPCMFromStart(data, datalen);
             } else {
@@ -344,11 +322,14 @@ export class StreamedSound implements RemoteSound {
     }
 
     async seek(position: number) {
-        this.seekPosition = position;
         if (position < this.startThreshold) {
             // The seek is inside the start buffer, so it can be done immediately
             this.startBuffer.unsafeSeek(position);
+        } else {
+            console.error(this.url, 'OH NO YOU TRIED TO SEEK TO', position);
+            return;
         }
+        this.seekPosition = position;
 
         if (this.decodeBuffer.fresh)
             return;
@@ -359,10 +340,13 @@ export class StreamedSound implements RemoteSound {
         this.fileBuffer.unsafeSeek(0);
 
 
-        await this.decoder.reset();
+        await this.decoder.free();
+        this.decoder = new MPEGDecoderWebWorker();
+        await this.decoder.ready;
         this.decodePosition = 0;
+        console.log('the decoder has been reset');
         this.decodeBuffer.flush();
-        if (this.url.includes('heavy_drums')) console.log('BUFFER FLUSHED');
+        console.log(this.url, 'BUFFER FLUSHED');
 
         this.fileBuffer.unsafeSeek(0);
         const blackHole = new RingBuffer(true);
@@ -373,9 +357,6 @@ export class StreamedSound implements RemoteSound {
             leftover = result.leftover;
         }
         blackHole.free();
-
-        console.log('leftover length is', leftover.length);
-        console.log('leftover length should be', this.decodeLeftover.length);
 
         if (leftover.length > 0) {
             await this.decodeBuffer.write(leftover);
@@ -395,6 +376,7 @@ export class StreamedSound implements RemoteSound {
         this.decodeBuffer.free();
         this.startBuffer.free();
         this.fileBuffer.free();
+        await this.decoder.free();
     };
 
     release() {

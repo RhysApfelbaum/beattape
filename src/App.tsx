@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'; import { useFMOD } from './FMODProvider'; import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider'; import TrackControls from './TrackControls'; import artData from './art.json'; import './index.css'; import Palette from './Palette'; import { setTheme, themes } from './styles/theme'; import LoadingPage from './LoadingPage'; import { gesture } from './fmod/gesture';
+import TrackSliders from './TrackSliders';
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -56,6 +57,7 @@ const App: React.FC = () => {
             <main className='flex flex-col items-center mx-2 mt-2 md:mx-40'>
                 <img src={art.url} className='w-80 md:w-auto rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]'/>
                 {/* <Palette position='top'/> */}
+                <TrackSliders />
             </main>
             <footer className='fixed bottom-0 w-full flex flex-col justify-center items-center'>
                 {/* <PlayQueue /> */}

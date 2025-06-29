@@ -1,10 +1,19 @@
 
-import { readdirSync, mkdirSync, existsSync, statSync } from "fs";
-import { spawnSync } from "child_process";
-import path from "path";
+import { readdirSync, mkdirSync, existsSync, statSync } from 'fs';
+import { spawnSync } from 'child_process';
+import path from 'path';
+import { $ }  from 'bun'
 
-const inputDir = "./static/track_audio";  // root directory to start scanning
-const outputRoot = "./static/mp3_output";  // root output directory
+const inputDir = './audio_assets';
+const outputRoot = './static/track_audio';
+
+function convertFileName(path: string) {
+    return path
+        .replaceAll(' ', '')
+        .replaceAll('-Trimmed', '')
+        .replaceAll(/[\(\)]/g, '')
+        .replaceAll(/wav$/g, 'mp3');
+}
 
 function convertDir(inputPath: string, outputPath: string) {
     if (!existsSync(outputPath)) {
@@ -22,16 +31,21 @@ function convertDir(inputPath: string, outputPath: string) {
         if (stat.isDirectory()) {
             // Recurse into subdirectory
             convertDir(fullInputPath, fullOutputPath);
-        } else if (stat.isFile() && entry.toLowerCase().endsWith(".wav")) {
-            const mp3OutputPath = fullOutputPath.replace(/\.wav$/i, ".mp3");
+        } else if (
+            // Only convert trimmed WAVE files
+            stat.isFile() &&
+            entry.toLowerCase().endsWith('.wav') &&
+            entry.includes('- Trimmed')
+        ) {
+            const mp3OutputPath = convertFileName(fullOutputPath);
             console.log(`Converting ${fullInputPath} -> ${mp3OutputPath}`);
 
-            const result = spawnSync("ffmpeg", [
-                "-i", fullInputPath,
-                "-codec:a", "libmp3lame",
-                "-qscale:a", "2",
+            const result = spawnSync('ffmpeg', [
+                '-i', fullInputPath,
+                '-codec:a', 'libmp3lame',
+                '-qscale:a', '2',
                 mp3OutputPath,
-            ], { stdio: "inherit" });
+            ], { stdio: 'inherit' });
 
             if (result.error) {
                 console.error(`Error converting ${fullInputPath}:`, result.error);
@@ -40,4 +54,6 @@ function convertDir(inputPath: string, outputPath: string) {
     }
 }
 
+
+await $`rm -rf ${outputRoot}/*`;
 convertDir(inputDir, outputRoot);
