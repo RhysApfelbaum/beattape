@@ -174,6 +174,8 @@ const TrackControls: React.FC = () => {
 
                         if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
                             const sound = currentTrack.sounds.getSound(parameters.name);
+                            console.log(sound.isLoaded);
+                            console.log('handle', sound.handle, sound.url);
                             sound.stop = () => {
                                 currentTrack.event.setPaused(true);
                             };

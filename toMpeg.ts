@@ -32,7 +32,7 @@ function convertDir(inputPath: string, outputPath: string) {
             // Recurse into subdirectory
             convertDir(fullInputPath, fullOutputPath);
         } else if (
-            // Only convert trimmed WAVE files
+            // Only convert trimmed .wav files
             stat.isFile() &&
             entry.toLowerCase().endsWith('.wav') &&
             entry.includes('- Trimmed')
@@ -55,5 +55,5 @@ function convertDir(inputPath: string, outputPath: string) {
 }
 
 
-await $`rm -rf ${outputRoot}/*`;
+// await $`rm -rf ${outputRoot}/*`;
 convertDir(inputDir, outputRoot);

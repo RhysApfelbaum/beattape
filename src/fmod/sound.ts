@@ -62,6 +62,7 @@ export class StreamedSound implements RemoteSound {
         start: number,
         end: number,
         length: number,
+        sampleRate: number,
         onStop = () => {},
         onRestart = () => {}
     ) {
@@ -71,6 +72,7 @@ export class StreamedSound implements RemoteSound {
         this.restart = onRestart;
         this.url = url;
         this.soundInfo = DEFAULT_SOUND_INFO;
+        this.soundInfo.sampleRate = sampleRate;
         this.length = length;
         this.fileBuffer = new RingBuffer(true);
         this.startBuffer = new RingBuffer(true);
@@ -307,6 +309,10 @@ export class StreamedSound implements RemoteSound {
         };
         FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME, info, sound);
         this.handle = sound.deref();
+        console.log(this.url, this.handle);
+        if (this.handle === undefined) {
+            throw new Error('handle is undefined ' + this.url);
+        }
     };
 
     getPositionMilliseconds() {

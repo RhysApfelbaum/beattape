@@ -23,9 +23,7 @@ export class SoundLoader {
     addSoundInfo(soundInfo: any) {
         soundInfo.forEach((item: any) => {
             const path = pathToTrackURL(item.path);
-            const localPath = item.path.split('/').pop();
-            // const sound = new StaticSound(path, localPath, item.start, item.end);
-            const stream = new StreamedSound(path, item.start, item.end, item.length);
+            const stream = new StreamedSound(path, item.start, item.end, item.length, item.sampleRate);
             this.sounds.push(stream);
             this.sounds.sort((a, b) => a.start - b.start );
         });
@@ -53,9 +51,7 @@ export class SoundLoader {
     getSound(path: string) {
         let newPath = path;
         // HACK
-        if (path.includes('.wav')) {
-            newPath = path.replace('.wav', '.mp3');
-        }
+        console.log(newPath);
         for (const sound of this.sounds) {
             if (sound.url === pathToTrackURL(newPath)) {
                 return sound;
