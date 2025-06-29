@@ -55,5 +55,5 @@ function convertDir(inputPath: string, outputPath: string) {
 }
 
 
-// await $`rm -rf ${outputRoot}/*`;
+await $`rm -rf ${outputRoot}/*`;
 convertDir(inputDir, outputRoot);
