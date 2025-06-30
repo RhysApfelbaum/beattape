@@ -134,15 +134,11 @@ const TrackControls: React.FC = () => {
             currentTrack.fetch();
         }
 
-        // if (nextTrackStatus === 'unloaded') {
-        //     playQueue.nextTracks[0].fetch();
-        // }
-
-        // for (let i = 1; i < playQueue.nextTracks.length; i++) {
-        //     if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
-        //         playQueue.nextTracks[i].unload();
-        //     }
-        // }
+        for (let i = 1; i < playQueue.nextTracks.length; i++) {
+            if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
+                playQueue.nextTracks[i].unload();
+            }
+        }
 
         switch (currentTrackStatus) {
             case 'unloaded':
