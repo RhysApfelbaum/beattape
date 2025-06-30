@@ -47,12 +47,14 @@ function convertDir(inputPath: string, outputPath: string) {
                 mp3OutputPath,
             ], { stdio: 'inherit' });
 
+
             if (result.error) {
                 console.error(`Error converting ${fullInputPath}:`, result.error);
             }
         }
     }
 }
+
 
 
 await $`rm -rf ${outputRoot}/*`;

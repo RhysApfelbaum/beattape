@@ -74,13 +74,12 @@ export class StreamedSound implements RemoteSound {
         this.restart = onRestart;
         this.url = url;
         this.soundInfo = DEFAULT_SOUND_INFO;
-        this.soundInfo.sampleRate = sampleRate;
+        this.soundInfo.sampleRate = Math.round(sampleRate);
         this.length = length;
         this.fileBuffer = new RingBuffer(true);
         this.startBuffer = new RingBuffer(true);
         this.decodeBuffer = new RingBuffer(false);
         this.startThreshold = this.soundInfo.bytesPerSecond * 4;
-        // this.startThreshold = this.soundInfo.bytesPerSecond * this.length;
 
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
@@ -91,6 +90,7 @@ export class StreamedSound implements RemoteSound {
         this.decodingStatus.resolve();
         this.readCallbackLastCalled = 0;
         this.timelinePosition = 0;
+        console.log(this.soundInfo);
 
         this.decodeChunk = async chunk => {
             const { channelData, samplesDecoded, errors } = await this.decoder.decode(chunk);
@@ -224,6 +224,7 @@ export class StreamedSound implements RemoteSound {
         );
 
 
+        console.log('request from decoder', requestedBytes);
 
         if (underflow) {
             console.error(this.url, 'underflow');
