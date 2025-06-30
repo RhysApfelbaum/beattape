@@ -36,32 +36,7 @@ const TrackControls: React.FC = () => {
 
     useEffect(() => {
         if (!fmod.ready) return;
-        loadPCM();
     }, [fmod]);
-
-    const loadPCM = async () => {
-        // await gesture;
-        // const channel = new Pointer<any>();
-        // const channelGroup = new Pointer<any>();
-        // FMOD.Result = playQueue.currentTrack.event.instance.getChannelGroup(channelGroup);
-        // const sound = new StreamedSound('https://play.streamafrica.net/radiojazz', 0, 10,
-        //     () => {
-        //         console.log('pausing');
-        //         channel.deref().setPaused(true);
-        //     },
-        //     () => {
-        //         console.log('unpausing');
-        //         channel.deref().setPaused(false);
-        //     }
-        // );
-        // sound.fetch();
-        // // await sound.source.fetchStatus.promise;
-        // sound.load();
-        // // setTimeout(() => {
-        // //     console.log('playing');
-        //     FMOD.Result = FMOD.Core.playSound(sound.handle, channelGroup.deref(), null, channel);
-        // // }, 5000);
-    };
 
     useEffect(() => {
         if (currentTrackLoaded) updatePauseState(true);

@@ -43,3 +43,112 @@ body {
 bun-hmr {
     display: none !important;
 }
+
+
+.slider-input {
+    -webkit-appearance: none; 
+    -moz-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 50px;
+    margin: 0 0 0 0 !important;
+    transform: translateY(17px) rotate(270deg);
+    transform-origin: center;
+    background: transparent;
+    position: relative;
+    --thumb-background: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base0A)
+        var(--activation)
+    );
+
+
+}
+
+/* Butt-ugly hack to make the sliders line up in firefox */
+@-moz-document url-prefix() {
+    .slider-input {
+        transform: translateY(25px) rotate(270deg);
+    }
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 5px;
+    background: var(--thumb-background);
+    height: 20px;
+    transform: translateX(-8px);
+    border-radius: 2px;
+}
+
+.slider-input::-moz-range-thumb {
+    -moz-appearance: none transparent;
+    -moz-transform: none;
+    width: 5px;
+    background: var(--thumb-background);
+
+    height: 20px;
+    border-radius: 2px;
+    position: relative;
+    z-index: 100;
+    border: none;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+/* Make the default slider track invisible because it'll be replaced by a custom element. */
+.slider-input::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+}
+
+.slider-input::-moz-range-track {
+    -moz-appearance: none;
+}
+
+.slider-text {
+    text-align: center;
+    margin-top: 110px;
+    color: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base05)
+        var(--activation)
+    );
+}
+
+.slider-shadow {
+    /* width: 25vw; */
+    /* height: 100px; */
+    position: absolute;
+    top: 0%;
+    right: calc(50% - 50px);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    filter: drop-shadow(0 0 10px color-mix(
+        in srgb,
+        rgb(255, 238, 222, 0),
+        rgb(255, 238, 222, 1)
+        var(--activation)
+    ));
+
+}
+
+
+.slider-track {
+    position: absolute;
+    background-color: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base0A)
+        var(--activation)
+    );
+    margin-left: 48px;
+    height: 100px;
+    width: 4px;
+    border-radius: 2px;
+    border: none;
+}

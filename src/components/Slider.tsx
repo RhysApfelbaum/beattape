@@ -102,8 +102,9 @@ const Slider: React.FC<{
     update: (value: number) => any,
     onMouseUp?: (value: number) => any,
     label: string,
-    activation: string
-}> = ({ update, onMouseUp = (value: number) => {}, label, activation }) => {
+    activation: string,
+    className?: string
+}> = ({ update, onMouseUp = (value: number) => {}, label, activation, className = '' }) => {
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         update(parseInt(event.target.value) / 100);
@@ -116,17 +117,20 @@ const Slider: React.FC<{
     };
 
     return (
-        <div style={{
-            width: 100,
-            display: 'grid',
-            gridTemplateRows: '100px 50px',
-            '--activation': activation
-        } as React.CSSProperties}>
-            <SliderShadow>
-                <SliderTrack />
-                <SliderInput type="range" onChange={handleChange} onMouseUp={handleMouseUp}/>
-            </SliderShadow>
-            <SliderText>{label}</SliderText>
+        <div
+            className={'flex flex-col relative space-between overflow-clip ' + className}
+            style={{ '--activation': activation } as React.CSSProperties}
+        >
+            <div className="slider-shadow">
+                <div className="slider-track" />
+                <input
+                    type="range"
+                    className="slider-input"
+                    onChange={handleChange}
+                    onMouseUp={handleMouseUp}
+                />
+            </div>
+            <p className="slider-text">{label}</p>
         </div>
     );
 };
