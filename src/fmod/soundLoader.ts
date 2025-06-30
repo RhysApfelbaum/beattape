@@ -29,11 +29,19 @@ export class SoundLoader {
         });
     }
 
+    testUnderflow() {
+        console.log('testing underflow');
+        this.sounds.forEach(sound => {
+            if (sound.isLoaded)
+                sound.underflow();
+        })
+    }
+
     async load(time = 0, offset = 10) {
         this.sounds.map(sound => {
             if (sound.isLoaded) {
                 // sound.updateTime(0)
-                sound.updateDecoderPosition(time);
+                // sound.updateDecoderPosition(time);
             } 
         })
 
