@@ -47,7 +47,7 @@ export class StreamedSound implements RemoteSound {
     private decodingStatus: PromiseStatus;
 
     private static DECODE_CHUNK_SIZE = 4096;
-    private static DECODE_BUFFER_SECONDS = 4;
+    private static DECODE_BUFFER_SECONDS = 10;
 
 
     url: string;
@@ -131,6 +131,10 @@ export class StreamedSound implements RemoteSound {
 
         if (!response.body) {
             throw new Error(`Failed to fetch ${this.url}: No response body`);
+        }
+
+        if (response.type === 'error') {
+
         }
 
         const lengthHeader = response.headers.get('Content-Length');
