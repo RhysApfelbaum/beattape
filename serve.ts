@@ -15,9 +15,25 @@ const server = Bun.serve({
     },
 
     error: error => {
+        let status = 500;
+
+        if (error?.code === 'ENOENT') {
+            status = 404;
+        } else if (error?.code === 'EACCES') {
+            status = 403;
+        }
+
         return Response.json(
-            error,
-            { headers: { 'Content-Type': 'text/json' } }
+            {
+                message: error.message,
+                code: error.code,
+                errno: error.errno,
+                stack: error.stack
+            },
+            {
+                status,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
     },
 
@@ -27,7 +43,7 @@ const server = Bun.serve({
     },
 
     development: {
-        console: true,
+        console: false,
         hmr: true
     },
 });
