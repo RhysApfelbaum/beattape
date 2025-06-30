@@ -79,7 +79,8 @@ export class StreamedSound implements RemoteSound {
         this.fileBuffer = new RingBuffer(true);
         this.startBuffer = new RingBuffer(true);
         this.decodeBuffer = new RingBuffer(false);
-        this.startThreshold = this.soundInfo.bytesPerSecond * 4;
+        // this.startThreshold = this.soundInfo.bytesPerSecond * 4;
+        this.startThreshold = this.soundInfo.bytesPerSecond * this.length;
 
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
@@ -264,31 +265,52 @@ export class StreamedSound implements RemoteSound {
     }
 
     updateDecoderPosition(seconds: number) {
-        const targetSeekPosition = (seconds - this.start) * this.soundInfo.bytesPerSecond - this.startThreshold;
-        const targetPosition = targetSeekPosition - this.decodeBufferStartPosition;
-        console.log(this.url);
-        if (targetPosition <= 0) {
-            console.log('decode buffer ahead of playback');
-            return;
-        }
-
-        // if (targetSeekPosition - this.readCallbackLastCalled < 4 * this.soundInfo.bytesPerSecond) {
-        //     console.log('readCallbackCalled recently');
+        // if (this.url.includes('rhodes2')) {
+        //     console.log(this.url);
+        //     console.log('seconds', seconds);
+        //     console.log('seek position', this.seekPosition / this.soundInfo.bytesPerSecond);
+        //     console.log('timeline position', seconds);
+        //     console.log('internal position', (seconds - this.start) % this.length);
+        //     console.log(this.seekPosition > (seconds - this.start) % this.length);
+        //
+        // }
+        // const targetSeekPosition = (
+        //     (seconds - this.start) % this.length
+        // ) * this.soundInfo.bytesPerSecond - this.startThreshold;
+        //
+        //
+        // const targetPosition = targetSeekPosition - this.decodeBufferStartPosition;
+        //
+        // if (targetPosition <= 0 || targetSeekPosition < this.startThreshold) {
         //     return;
         // }
-
-        console.log(this.decodeBuffer.getStatus());
-        console.log(targetPosition);
-
-        if (targetPosition >= this.decodeBuffer.bytesAvailable) {
-            console.error('aggressively seeking', targetPosition);
-            this.forceSeekDecodeBuffer(targetSeekPosition);
-        } else {
-            console.error('passively reading', targetPosition);
-            this.decodeBuffer.read(targetPosition);
-            this.decodeBufferStartPosition += targetPosition;
-            this.decodeBufferStartPosition %= this.soundInfo.bytesPerSecond * this.length;
-        }
+        //
+        // console.log(this.url);
+        // console.log('absolute timeline position', targetSeekPosition);
+        // console.log('buffer starts at', this.decodeBufferStartPosition);
+        // console.log('offset from that point', targetPosition);
+        //
+        //
+        // // if (targetSeekPosition - this.readCallbackLastCalled < 4 * this.soundInfo.bytesPerSecond) {
+        // //     console.log('readCallbackCalled recently');
+        // //     return;
+        // // }
+        //
+        // console.log(this.url);
+        // console.log('absolute timeline position', targetSeekPosition);
+        // console.log('buffer starts at', this.decodeBufferStartPosition);
+        // console.log('offset from that point', targetPosition);
+        //
+        // if (targetPosition >= this.decodeBuffer.bytesAvailable) {
+        //     console.error('aggressively seeking', targetPosition);
+        //     this.forceSeekDecodeBuffer(targetSeekPosition);
+        // } else {
+        //     console.error('passively reading', targetPosition);
+        //     this.decodeBuffer.read(targetPosition);
+        //     this.decodeBufferStartPosition += targetPosition;
+        //     this.decodeBufferStartPosition %= this.soundInfo.bytesPerSecond * this.length;
+        //     this.advanceSeekPosition(targetPosition);
+        // }
     }
 
     async forceSeekDecodeBuffer(position: number) {
@@ -331,7 +353,7 @@ export class StreamedSound implements RemoteSound {
 
     async load() {
         assertNotNull(this.fileBuffer, 'file buffer is not initialised');
-        await this.decodeBuffer.canRead;
+        await this.startBuffer.canRead;
 
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
@@ -403,11 +425,10 @@ export class StreamedSound implements RemoteSound {
 
             await this.forceSeekDecodeBuffer(this.startThreshold);
         } else if (
-            position >= this.decodeBufferStartPosition &&
-            position < (this.decodeBufferStartPosition + this.decodeBuffer.bytesAvailable)
+            position >= this.seekPosition &&
+            position < (this.seekPosition + this.decodeBuffer.bytesAvailable)
         ) {
-            this.decodeBuffer.read(position - this.decodeBufferStartPosition);
-            this.decodeBufferStartPosition += position;
+            this.decodeBuffer.read(position - this.seekPosition);
             this.seekPosition = position;
         } else {
             this.stop();

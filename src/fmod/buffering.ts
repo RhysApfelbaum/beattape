@@ -138,7 +138,7 @@ export class RingBuffer {
             writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
 
         } catch (error) {
-            console.log('tried to write with firstPartSize', firstPartSize);
+            console.log(this.getStatus());
             console.error(error);
         }
 
