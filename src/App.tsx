@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'; import { useFMOD } from './FMODProvider'; import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider'; import TrackControls from './TrackControls'; import artData from './art.json'; import './index.css'; import Palette from './Palette'; import { setTheme, themes } from './styles/theme'; import LoadingPage from './LoadingPage'; import { gesture } from './fmod/gesture';
 import TrackSliders from './TrackSliders';
-import Button from './Button';
-import Underflow from './UnderflowTest';
+import { AnimatePresence } from 'framer-motion';
+import SliderSwiper from './SliderSwiper';
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -12,27 +12,19 @@ const App: React.FC = () => {
     const [ awaitingGesture, setAwaitingGesture ] = useState(true);
 
     const art = artData[artIndex];
+    setTheme(themes.catppuccinMocha);
 
     gesture.then(() => setAwaitingGesture(false));
 
-    // App is unable to load if FMOD isn't loaded
-    if (!fmod.ready) {
-        return <LoadingPage message='Loading...' />;
-    }
+    const pageReady = fmod.ready && !awaitingGesture;
 
-    // A gesture needs to be made on the page before audio can start
-    if (awaitingGesture) {
-        return <LoadingPage message='Click anywhere to start' />;
-    }
-
-    setTheme(themes.catppuccinMocha);
-
-    return (
+    // App is unable to load if FMOD isn't loade
+    const mainPage = (
         <PlayQueueProvider>
             <main className='flex flex-col items-center mx-2 mt-2 md:mx-40'>
                 <img src={art.url} className='w-80 md:w-auto rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]'/>
                 {/* <Palette position='top'/> */}
-                <TrackSliders />
+                <SliderSwiper />
                 {/* <Underflow /> */}
             </main>
             <footer className='fixed bottom-0 w-full flex flex-col justify-center items-center'>
@@ -40,6 +32,12 @@ const App: React.FC = () => {
                 <TrackControls />
             </footer>
         </PlayQueueProvider>
+    );
+
+    return (
+        <AnimatePresence mode="wait">
+            { pageReady ? mainPage : <LoadingPage key="loading"/> }
+        </AnimatePresence>
     );
 };
 

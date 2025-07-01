@@ -64,7 +64,7 @@ const TrackSliders: React.FC = () => {
     };
 
     return (
-        <div className="flex m-5 w-90">
+        <div className="flex m-5">
             <Slider 
                 update={updateGrit}
                 label="grit"

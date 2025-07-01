@@ -3,7 +3,7 @@ import styled, { useTheme } from 'styled-components';
 import contributors from './contributors.json';
 import artData from './art.json';
 
-import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Navigation, Scrollbar } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 type Contributor = typeof contributors.soundtomb;

@@ -7,23 +7,24 @@ const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) =>
 
     const lightColor = pressed ? 'bg-base08' : 'bg-base03';
 
+        // {/* <button */}
+        // {/*     onClick={() => { */}
+        // {/*         action(!pressed); */}
+        // {/*         setPressed(!pressed); */}
+        // {/*     }} */}
+        // {/*     className={styles.button + ' w-8 h-8'} */}
+        // {/* > */}
+        // {/*     <div className={lightColor + ' w-2 h-2 rounded-[2px]'} style={{ */}
+        // {/*         // width: '8px', */}
+        // {/*         // height: '8px', */}
+        // {/*         // margin: '2px 3px 3px 3px', */}
+        // {/*         // // backgroundColor: pressed ? theme.colors.warmLight : theme.colors.dark, */}
+        // {/*         // borderRadius: '2px', */}
+        // {/*         // boxShadow: 'none' */}
+        // {/*     }} /> */}
+        // {/* </button> */}
     return (
-        <button
-            onClick={() => {
-                action(!pressed);
-                setPressed(!pressed);
-            }}
-            className={styles.button + ' w-8 h-8'}
-        >
-            <div className={lightColor + ' w-2 h-2 rounded-[2px]'} style={{
-                // width: '8px',
-                // height: '8px',
-                // margin: '2px 3px 3px 3px',
-                // // backgroundColor: pressed ? theme.colors.warmLight : theme.colors.dark,
-                // borderRadius: '2px',
-                // boxShadow: 'none'
-            }} />
-        </button>
+        <p>TODO</p>
     );
 };
 

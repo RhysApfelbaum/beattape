@@ -247,17 +247,10 @@ const TrackControls: React.FC = () => {
     return (
         <div className='flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded'>
             <div className='flex flex-col'>
-                {
-                    currentTrackLoaded ? (<>
-                        <p className='text-xl text-base05'>
-                            { playQueue.currentTrack.displayName }
-                        </p>
-                        <CreditLink contributor={contributors.soundtomb} />
-                    </>) : 
-                        (<p className='text-xl text-base05 animate-pulse'>
-                            loading ...
-                        </p>)
-                }
+                <p className='text-xl text-base05'>
+                    { playQueue.currentTrack.displayName }
+                </p>
+                <CreditLink contributor={contributors.soundtomb} />
             </div>
             <div className='m-5 flex flex-row items-center gap-3'>
                 <TapeReel spinning={!paused} className='w-10 h-10'/>
@@ -265,21 +258,21 @@ const TrackControls: React.FC = () => {
                     <FontAwesomeIcon
                         icon={faBackwardFast}
                         color={theme.base03}
-                        className='m-5'
+                        className='m-3'
                         size='xl'
                     />
                 </Button>
                 <Button onClick={handlePause} disabled={!currentTrackLoaded}>
                     <FontAwesomeIcon
                         icon={playButtonIcon}
-                        className='mx-8 my-5'
+                        className='mx-8 my-3'
                         color='color-mix(in srgb, var(--color-base03), var(--color-base09) var(--beat-pulse))'
                         size='xl'
                     />
                 </Button>
                 <Button onClick={nextTrack}>
                     <FontAwesomeIcon icon={faFastForward}
-                        className='m-5'
+                        className='m-3'
                         color={theme.base03}
                         size='xl'
                     />

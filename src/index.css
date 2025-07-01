@@ -30,6 +30,16 @@
     }
 }
 
+
+/* This is a bit of a HACK */
+:root {
+    --activation: 0%;
+    --grit: 0%;
+    --brightness: 0%;
+    --chops: 0%;
+    --vocals: 0%;
+}
+
 body {
     font-family: "DM Mono", monospace;
     font-weight: 400;
@@ -44,6 +54,8 @@ bun-hmr {
     display: none !important;
 }
 
+
+/* This is some of the most God-forsaken CSS I've ever written */
 
 .slider-input {
     -webkit-appearance: none; 
@@ -97,7 +109,8 @@ bun-hmr {
     pointer-events: all;
 }
 
-/* Make the default slider track invisible because it'll be replaced by a custom element. */
+/* Make the default slider track invisible because it'll be replaced by a
+* custom element. */
 .slider-input::-webkit-slider-runnable-track {
     -webkit-appearance: none;
 }
@@ -118,8 +131,6 @@ bun-hmr {
 }
 
 .slider-shadow {
-    /* width: 25vw; */
-    /* height: 100px; */
     position: absolute;
     top: 0%;
     right: calc(50% - 50px);
@@ -151,4 +162,9 @@ bun-hmr {
     width: 4px;
     border-radius: 2px;
     border: none;
+}
+
+.swiper-button-prev, .swiper-button-next {
+    color: var(--color-base0A);
+    transform: scale(0.5);
 }
