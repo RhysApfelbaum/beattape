@@ -33,7 +33,7 @@ export class StreamedSound implements RemoteSound {
     private fileBuffer: RingBuffer;
     private decodeBuffer: RingBuffer;
     private startBuffer: RingBuffer;
-    private decoder: MPEGDecoderWebWorker;
+    private decoder: MPEGDecoderWebWorker | null;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition: number;
     private decodePosition: number;
@@ -84,7 +84,7 @@ export class StreamedSound implements RemoteSound {
         this.decodePosition = 0; // Measured in SAMPLES
         this.seekPosition = 0;
         this.decodeBufferStartPosition = this.startThreshold;
-        this.decoder = new MPEGDecoderWebWorker();
+        this.decoder = null;
         this.decoding = true;
         this.decodingStatus = new PromiseStatus();
         this.decodingStatus.resolve();
@@ -93,6 +93,7 @@ export class StreamedSound implements RemoteSound {
         console.log(this.soundInfo);
 
         this.decodeChunk = async chunk => {
+            assertNotNull(this.decoder);
             const { channelData, samplesDecoded, errors } = await this.decoder.decode(chunk);
             const [ left, right ] = channelData;
 
@@ -202,6 +203,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     async fetch() {
+        this.decoder = new MPEGDecoderWebWorker();
         await this.decoder.ready;
 
         this.decodeBuffer.allocate(this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS, this.soundInfo.bytesPerSecond * 2);
@@ -282,6 +284,7 @@ export class StreamedSound implements RemoteSound {
 
         
         // Completely rebuild the decoder, as this may cause errors
+        assertNotNull(this.decoder);
         await this.decoder.free();
         this.fileBuffer.unsafeSeek(0);
         this.decoder = new MPEGDecoderWebWorker();
@@ -407,10 +410,12 @@ export class StreamedSound implements RemoteSound {
         }
         this.handle.release();
         this.handle = null;
-        this.decodeBuffer.free();
         this.startBuffer.free();
         this.fileBuffer.free();
-        await this.decoder.free();
+        if (this.decoder !== null) {
+            await this.decoder.free();
+            this.decoder = null;
+        }
     };
 
     release() {
