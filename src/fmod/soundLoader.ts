@@ -30,7 +30,6 @@ export class SoundLoader {
     }
 
     testUnderflow() {
-        console.log('testing underflow');
         this.sounds.forEach(sound => {
             if (sound.isLoaded)
                 sound.underflow();
@@ -46,7 +45,6 @@ export class SoundLoader {
         })
 
         if (time < this.threshold) return;
-        console.log(time, this.threshold);
         const promises = this.sounds.map(sound => {
 
             if (
@@ -64,14 +62,12 @@ export class SoundLoader {
                 return null;
             }
 
-            console.log('loading', sound.url, sound.start);
             this.fetched.push(sound);
             sound.fetch();
             return sound.load();
         });
         this.threshold = time + offset / 2;
 
-        console.log(promises);
         await Promise.all(promises);
     }
 
@@ -85,8 +81,6 @@ export class SoundLoader {
 
     getSound(path: string) {
         let newPath = path;
-        // HACK
-        console.log(newPath);
         for (const sound of this.sounds) {
             if (sound.url === pathToTrackURL(newPath)) {
                 return sound;

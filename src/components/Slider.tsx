@@ -22,7 +22,7 @@ const Slider: React.FC<{
 
     return (
         <div
-            className={'flex flex-col relative space-between overflow-clip ' + className}
+            className={'flex flex-col relative overflow-clip items-center h-40 justify-start ' + className}
             style={{ '--activation': activation } as React.CSSProperties}
         >
             <div className="slider-shadow">
@@ -34,6 +34,10 @@ const Slider: React.FC<{
                     onMouseUp={handleMouseUp}
                 />
             </div>
+
+            {/* Spacer */}
+            <span className='h-[100px]' />
+
             <p className="slider-text">{label}</p>
         </div>
     );

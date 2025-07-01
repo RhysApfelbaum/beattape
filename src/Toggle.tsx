@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './styles/button.module.css';
+import Button from './Button';
 
 
 const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) => {
@@ -7,24 +7,20 @@ const Toggle: React.FC<{ action: (pressed: boolean) => void }> = ({ action }) =>
 
     const lightColor = pressed ? 'bg-base08' : 'bg-base03';
 
-        // {/* <button */}
-        // {/*     onClick={() => { */}
-        // {/*         action(!pressed); */}
-        // {/*         setPressed(!pressed); */}
-        // {/*     }} */}
-        // {/*     className={styles.button + ' w-8 h-8'} */}
-        // {/* > */}
-        // {/*     <div className={lightColor + ' w-2 h-2 rounded-[2px]'} style={{ */}
-        // {/*         // width: '8px', */}
-        // {/*         // height: '8px', */}
-        // {/*         // margin: '2px 3px 3px 3px', */}
-        // {/*         // // backgroundColor: pressed ? theme.colors.warmLight : theme.colors.dark, */}
-        // {/*         // borderRadius: '2px', */}
-        // {/*         // boxShadow: 'none' */}
-        // {/*     }} /> */}
-        // {/* </button> */}
     return (
-        <p>TODO</p>
+        <Button className="w-8 h-8" onClick={() => {
+            action(!pressed);
+            setPressed(!pressed);
+        }}> 
+            <div className={lightColor + ' w-2 h-2 rounded-[2px]'} style={{
+                width: '8px',
+                height: '8px',
+                margin: '2px 3px 3px 3px',
+                backgroundColor: pressed ? 'var(--color-base0A)' : 'var(--color-base00)',
+                borderRadius: '2px',
+                boxShadow: 'none'
+            }} />
+        </Button>
     );
 };
 

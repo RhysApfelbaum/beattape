@@ -58,13 +58,31 @@ const AmbienceSliders: React.FC = () => {
     };
 
     return (
-        <div className='ambience'>
-            <Slider update={updateRain} label="rain" activation={ ambience.rain ? '100%' : '0%'}/>
-            <Slider update={updateVinyl} label="vinyl crackle"  activation={ ambience.vinyl ? '100%' : '0%'}/>
-            <Slider update={updateBirds} label="birds chirping"  activation={ ambience.birds ? '100%' : '0%'}/>
-            <Toggle action={toggleRain}/>
-            <Toggle action={toggleVinyl}/>
-            <Toggle action={toggleBirds}/>
+        <div className='flex w-full items-center '>
+            <div className="w-[33%] flex flex-col items-center">
+                <Slider
+                    update={updateRain}
+                    label="rain"
+                    activation={ ambience.rain ? '100%' : '0%'}
+                />
+                <Toggle action={toggleRain}/>
+            </div>
+            <div className="w-[33%] flex flex-col items-center">
+                <Slider
+                    update={updateVinyl}
+                    label="vinyl crackle"
+                    activation={ ambience.vinyl ? '100%' : '0%'}
+                />
+                <Toggle action={toggleVinyl}/>
+            </div>
+            <div className="w-[33%] flex flex-col items-center">
+                <Slider
+                    update={updateBirds}
+                    label="birds chirping"
+                    activation={ ambience.birds ? '100%' : '0%'}
+                />
+                <Toggle action={toggleBirds}/>
+            </div>
         </div>
     );
 };

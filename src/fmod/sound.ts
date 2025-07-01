@@ -90,7 +90,6 @@ export class StreamedSound implements RemoteSound {
         this.decodingStatus.resolve();
         this.readCallbackLastCalled = 0;
         this.timelinePosition = 0;
-        console.log(this.soundInfo);
 
         this.decodeChunk = async chunk => {
             assertNotNull(this.decoder);
@@ -160,9 +159,7 @@ export class StreamedSound implements RemoteSound {
             if (done) {
                 break;
             }
-            // console.log('filebuffer write');
             await this.fileBuffer.write(value);
-            // console.log('wrote', value.byteLength);
             chunkBuffer = value.buffer as ArrayBuffer;
         }
     }
@@ -226,7 +223,6 @@ export class StreamedSound implements RemoteSound {
         );
 
 
-        console.log('request from decoder', requestedBytes);
 
         if (underflow) {
             console.error(this.url, 'underflow');
@@ -249,9 +245,6 @@ export class StreamedSound implements RemoteSound {
 
     private readPCM(heapPointer: number, requestedBytes: number) {
 
-        if (this.url === './track_audio/heavyFog/heavy_drums.mp3') {
-            console.log(this.url, 'decode buffer request', requestedBytes);
-        }
         const { wrap, view, wrappedView, underflow } = this.decodeBuffer.read(
             Math.min(requestedBytes, this.decodeBuffer.capacity)
         );
@@ -309,7 +302,6 @@ export class StreamedSound implements RemoteSound {
         }
 
         this.decodeBufferStartPosition = position;
-        console.log(this.decodeBuffer.getStatus());
         this.startDecoding(false);
 
     }
@@ -336,18 +328,12 @@ export class StreamedSound implements RemoteSound {
             _postype: any
         ) => {
             const { sampleRate } = this.soundInfo;
-            // console.log('seeking', this.url, position * this.soundInfo.bytesPerSample * this.soundInfo.numChannels);
-            console.log(this.url, 'seek', position)
             const bytePosition = position * this.soundInfo.bytesPerSample * this.soundInfo.numChannels;
             this.seek(bytePosition);
             return FMOD.OK;
         };
 
         info.pcmreadcallback = (sound: any, data: number, datalen: number) => {
-            // if (this.url.includes('heavy_drums')) {
-            console.log(this.url, 'requested', datalen);
-            // }
-            //
             if (this.seekPosition < this.startThreshold) {
                 this.readPCMFromStart(data, datalen);
             } else {
@@ -359,7 +345,6 @@ export class StreamedSound implements RemoteSound {
         };
         FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME, info, sound);
         this.handle = sound.deref();
-        console.log(this.url, this.handle);
         if (this.handle === undefined) {
             throw new Error('handle is undefined ' + this.url);
         }

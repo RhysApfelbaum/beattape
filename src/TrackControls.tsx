@@ -128,7 +128,6 @@ const TrackControls: React.FC = () => {
                     FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
                     (type, _event, parameters) => {
                         if (type & FMOD.STUDIO_EVENT_CALLBACK_STOPPED) {
-                            console.log('track stopped');
 
                             setPlayQueue({
                                 ...playQueue,
@@ -145,8 +144,6 @@ const TrackControls: React.FC = () => {
 
                         if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
                             const sound = currentTrack.sounds.getSound(parameters.name);
-                            console.log(sound.isLoaded);
-                            console.log('handle', sound.handle, sound.url);
                             sound.stop = () => {
                                 if (!currentTrack.event.getPaused()) {
                                     currentTrack.event.setPaused(true);
