@@ -114,7 +114,7 @@ const Drag: React.FC<{
                 style={{
                     position: 'fixed',
                     cursor: 'move',
-                    zIndex: 100,
+                    zIndex: 50,
                 }}
             >
                 {children}
