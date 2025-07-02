@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+
+:root {
+    --base00: #031A16;
+    --base01: #0B342D;
+    --base02: #184E45;
+    --base03: #2B685E;
+    --base04: #5F9C92;
+    --base05: #81B5AC;
+    --base06: #A7CEC8;
+    --base07: #D2E7E4;
+    --base08: #3E9688;
+    --base09: #3E7996;
+    --base0A: #3E4C96;
+    --base0B: #883E96;
+    --base0C: #963E4C;
+    --base0D: #96883E;
+    --base0E: #4C963E;
+    --base0F: #3E965B;
+}
+
+body {
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 15px;
+    font-style: normal;
+    text-align: center;
+    color: var(--base05);
+    background-color: var(--base00);
+}
+
+.art {
+    width: auto;
+    height: auto;
+    max-height: 440px;
+    max-width: 80vw;
+    margin: auto auto 0 auto;
+    border: 2px solid color-mix(
+        in srgb,
+        var(--base01),
+        var(--base05),
+        var(--beat-pulse)
+    );
+    border-radius: 5px;
+    filter: drop-shadow(
+        2px 4px 6px 
+        color-mix(
+            in srgb,
+            transparent,
+            ${props => props.theme.colors.warmLight}
+            var(--beat-pulse)
+        )
+    );
+} 

@@ -1,4 +1,5 @@
 import { argv, $ } from 'bun';
+import tailwind from 'bun-plugin-tailwind';
 import { watch, mkdirSync, existsSync } from 'fs';
 
 const staticDirectory = './static';
@@ -7,10 +8,14 @@ const build = async () => {
     console.log(`Copying ${staticDirectory} to ${outputDirectory}`);
     await $`cp -R ${staticDirectory}/* ${outputDirectory}`;
     console.log('Building...');
+
     const result = await Bun.build({
-        entrypoints: [ './src/index.tsx' ],
-        sourcemap: 'external',
-        outdir: outputDirectory
+        entrypoints: [ './src/index.html' ],
+        sourcemap: 'linked',
+        outdir: outputDirectory,
+        plugins: [tailwind],
+        target: 'browser',
+        minify: false,
     });
 
     if (result.success) {

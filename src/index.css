@@ -1,0 +1,172 @@
+
+@import "tailwindcss";
+
+@theme static {
+    --color-base00: #031A16;
+    --color-base01: #0B342D;
+    --color-base02: #184E45;
+    --color-base03: #2B685E;
+    --color-base04: #5F9C92;
+    --color-base05: #81B5AC;
+    --color-base06: #A7CEC8;
+    --color-base07: #D2E7E4;
+    --color-base08: #3E9688;
+    --color-base09: #3E7996;
+    --color-base0A: #3E4C96;
+    --color-base0B: #883E96;
+    --color-base0C: #963E4C;
+    --color-base0D: #96883E;
+    --color-base0E: #4C963E;
+    --color-base0F: #3E965B;
+
+    --animate-track-changed: track-changed 1s ease-in-out;
+
+    @keyframes track-changed {
+        from {
+            color: var(--color-base0A);
+        } to {
+            color: var(--color-base05);
+        }
+    }
+}
+
+
+/* This is a bit of a HACK */
+:root {
+    --activation: 0%;
+    --grit: 0%;
+    --brightness: 0%;
+    --chops: 0%;
+    --vocals: 0%;
+}
+
+body {
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 15px;
+    font-style: normal;
+    text-align: center;
+    @apply bg-base00 text-base05;
+}
+
+/* disable bun's error reporting */
+bun-hmr {
+    display: none !important;
+}
+
+
+/* This is some of the most God-forsaken CSS I've ever written */
+
+.slider-input {
+    -webkit-appearance: none; 
+    -moz-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 50px;
+    margin: 0 0 0 0 !important;
+    transform: translateY(17px) rotate(270deg);
+    transform-origin: center;
+    background: transparent;
+    position: relative;
+    --thumb-background: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base0A)
+        var(--activation)
+    );
+
+
+}
+
+/* Butt-ugly hack to make the sliders line up in firefox */
+@-moz-document url-prefix() {
+    .slider-input {
+        transform: translateY(25px) rotate(270deg);
+    }
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 5px;
+    background: var(--thumb-background);
+    height: 20px;
+    transform: translateX(-8px);
+    border-radius: 2px;
+}
+
+.slider-input::-moz-range-thumb {
+    -moz-appearance: none transparent;
+    -moz-transform: none;
+    width: 5px;
+    background: var(--thumb-background);
+
+    height: 20px;
+    border-radius: 2px;
+    position: relative;
+    z-index: 100;
+    border: none;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+/* Make the default slider track invisible because it'll be replaced by a
+* custom element. */
+.slider-input::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+}
+
+.slider-input::-moz-range-track {
+    -moz-appearance: none;
+}
+
+.slider-text {
+    text-align: center;
+    /* margin-top: 110px; */
+    max-width: 100px;
+    text-align: center;
+    color: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base05)
+        var(--activation)
+    );
+}
+
+.slider-shadow {
+    position: absolute;
+    top: 0%;
+    right: calc(50% - 50px);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    filter: drop-shadow(0 0 10px color-mix(
+        in srgb,
+        rgb(255, 238, 222, 0),
+        rgb(255, 238, 222, 1)
+        var(--activation)
+    ));
+
+}
+
+
+.slider-track {
+    position: absolute;
+    background-color: color-mix(
+        in srgb, 
+        var(--color-base03),
+        var(--color-base0A)
+        var(--activation)
+    );
+    margin-left: 48px;
+    height: 100px;
+    width: 4px;
+    border-radius: 2px;
+    border: none;
+}
+
+.swiper-button-prev, .swiper-button-next {
+    color: var(--color-base0A);
+    transform: scale(0.5);
+}

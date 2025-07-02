@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
-import { LoadingState } from './fmod/bank';
 import { useFMOD } from './FMODProvider';
-import Button from './Button';
 import { FMOD } from './fmod/system';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faBackwardFast, faEllipsis, faFastForward, faPause } from '@fortawesome/free-solid-svg-icons';
-import { useTheme } from 'styled-components';
+import { Pointer } from './fmod/pointer';
+import { StreamedSound } from './fmod/sound';
+import { gesture } from './fmod/gesture';
+
+import contributors from './contributors.json';
+
+import styles from './styles/Button.module.css';
+import { theme } from './styles/theme';
+import CreditLink from './CreditLink';
+import Button from './Button';
+import TapeReel from './TapeReel';
 
 const mix = (amount: number) => `${(1 - (amount - 1) * (amount - 1)) * 100}%`;
 
@@ -17,19 +25,22 @@ let beatPulseID: number;
 
 const TrackControls: React.FC = () => {
 
-    const [ paused, setPaused ] = useState(true);
-    const [ playQueue, setPlayQueue ] = usePlayQueue();
-    const [ amountPoll, setAmountPoll ] = useState<Timer | null>(null);
-    const [ currentTrack, setCurrentTrack ] = useState(playQueue.currentTrack);
-    const [ currentTrackLoaded, setCurrentTrackLoaded ] = useState(false);
-    
+    const [paused, setPaused] = useState(true);
+    const [playQueue, setPlayQueue] = usePlayQueue();
+    const [amountPoll, setAmountPoll] = useState<Timer | null>(null);
+    const [currentTrack, setCurrentTrack] = useState(playQueue.currentTrack);
+    const [currentTrackLoaded, setCurrentTrackLoaded] = useState(false);
+
     const fmod = useFMOD();
 
-    const theme = useTheme();
 
     useEffect(() => {
-        updatePauseState(true);
-    }, [paused]);
+        if (!fmod.ready) return;
+    }, [fmod]);
+
+    useEffect(() => {
+        if (currentTrackLoaded) updatePauseState(true);
+    }, [paused, currentTrackLoaded]);
 
     useEffect(() => {
         if (playQueue.currentTrack !== currentTrack) {
@@ -51,13 +62,13 @@ const TrackControls: React.FC = () => {
             const brightness = currentTrack.event.getParameter('BrightnessAmount');
             const chops = currentTrack.event.getParameter('ChopsAmount');
             const vocals = currentTrack.event.getParameter('VocalsAmount');
-            
+
             if (fmod.ref?.current) {
                 const style = fmod.ref.current.style;
-                style.setProperty('--grit', mix(grit)); 
-                style.setProperty('--brightness', mix(brightness)); 
-                style.setProperty('--chops', mix(chops)); 
-                style.setProperty('--vocals', mix(vocals)); 
+                style.setProperty('--grit', mix(grit));
+                style.setProperty('--brightness', mix(brightness));
+                style.setProperty('--chops', mix(chops));
+                style.setProperty('--vocals', mix(vocals));
             }
         }, 100);
 
@@ -73,8 +84,9 @@ const TrackControls: React.FC = () => {
             fmod.events.paused.start();
 
             // Tape stop effect jankery
+            // HACK
             // This is awful. It polls intensity parameter in the FMOD snapshot every 50ms until it's 0.
-            const intervalID = setInterval(() => {
+            const intervalID = setInterval(_ => {
                 const intensity = fmod.events.paused.getParameter('Intensity');
                 if (intensity >= 100) {
                     currentTrack.event.setPaused(true);
@@ -88,41 +100,68 @@ const TrackControls: React.FC = () => {
     };
 
     const updatePlayQueueLoading = async () => {
-        if (currentTrack.bank.loadingState === LoadingState.UNLOADED) {
+
+        const { status: currentTrackStatus, error: currentTrackError } = currentTrack.bank.getStatus();
+        const { status: nextTrackStatus } = playQueue.nextTracks[0].bank.getStatus();
+
+
+        if (currentTrackStatus === 'unloaded') {
             currentTrack.fetch();
         }
 
-        if (playQueue.nextTracks[0].bank.loadingState === LoadingState.UNLOADED) {
-            playQueue.nextTracks[0].fetch();
-        }
-
         for (let i = 1; i < playQueue.nextTracks.length; i++) {
-            if (playQueue.nextTracks[i].bank.loadingState == LoadingState.LOADED) {
+            if (playQueue.nextTracks[i].bank.getStatus().status === 'loaded') {
                 playQueue.nextTracks[i].unload();
             }
         }
 
-        switch (currentTrack.bank.loadingState) {
-            case LoadingState.UNLOADED:
+        switch (currentTrackStatus) {
+            case 'unloaded':
                 if (currentTrackLoaded) setCurrentTrackLoaded(false);
-            case LoadingState.FETCHED:
+            case 'fetched':
                 await currentTrack.load()
                 setCurrentTrackLoaded(true);
                 currentTrack.event.start();
                 currentTrack.event.setCallback(
                     FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
-                    FMOD.STUDIO_EVENT_CALLBACK_STOPPED,
-                    parameters => {
-                        if (currentTrack.event.playbackState === 'stopped') {
+                    FMOD.STUDIO_EVENT_CALLBACK_STOPPED |
+                    FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
+                    (type, _event, parameters) => {
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_STOPPED) {
+
                             setPlayQueue({
                                 ...playQueue,
                                 history: [currentTrack, ...playQueue.history],
                                 currentTrack: playQueue.nextTracks[0],
                                 nextTracks: [...playQueue.nextTracks.slice(1), playQueue.nextTracks[0]]
                             });
-                        } else {
-                            beatPulse();
                         }
+
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
+                            beatPulse();
+                            currentTrack.sounds.load(parameters.position / 1000);
+                        }
+
+                        if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+                            const sound = currentTrack.sounds.getSound(parameters.name);
+                            sound.stop = () => {
+                                if (!currentTrack.event.getPaused()) {
+                                    currentTrack.event.setPaused(true);
+                                    setCurrentTrackLoaded(false);
+                                }
+                            };
+                            sound.restart = () => {
+                                if (currentTrack.event.getPaused()) {
+                                    // FMOD.Result = currentTrack.event.instance.setTimelinePosition(1000 * sound.start + sound.getPositionMilliseconds());
+                                    currentTrack.event.setPaused(false);
+                                    setCurrentTrackLoaded(true);
+                                }
+                            }
+                            parameters.sound = sound.handle;
+                            parameters.subsoundIndex = -1;
+                        }
+
+
                         return FMOD.OK;
                     }
                 );
@@ -130,11 +169,11 @@ const TrackControls: React.FC = () => {
                 currentTrack.event.setParameter('Brightness', playQueue.sliderState.brightness, false);
                 currentTrack.event.setParameter('Chops', playQueue.sliderState.chops, false);
                 currentTrack.event.setParameter('Vocals', playQueue.sliderState.vocals, false);
+                break
+            case 'error':
+                console.error(`Error loading ${currentTrack.name}: ${currentTrackError}`);
                 break;
-            case LoadingState.ERROR:
-                console.error(`Error loading ${currentTrack.name}`);
-                break;
-            case LoadingState.LOADED:
+            case 'loaded':
                 break;
         }
         updatePauseState(false)
@@ -163,7 +202,7 @@ const TrackControls: React.FC = () => {
         setPlayQueue({
             ...playQueue,
             nextTracks: playQueue.history.length > 0
-                ? [currentTrack , ...playQueue.nextTracks]
+                ? [currentTrack, ...playQueue.nextTracks]
                 : playQueue.nextTracks,
             currentTrack: playQueue.history[0],
             history: playQueue.history.slice(1)
@@ -197,48 +236,45 @@ const TrackControls: React.FC = () => {
         await beatPulseInterpolate(100, 0, 600);
     };
 
-    return (
-        <>
-            <div style={{
-                display: 'block'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                }}>
+    let playButtonIcon = paused ? faPlay : faPause;
+    if (!currentTrackLoaded) playButtonIcon = faEllipsis;
 
-                <Button onClick={prevTrack} style={{ height: '50%', marginTop: 20 }}>
-                    <FontAwesomeIcon icon={faBackwardFast} style={{
-                        height: 15,
-                        width: 30,
-                        margin: '5px 5px 5px 5px'
-                    }}/>
-                </Button>
-                <Button onClick={handlePause}>
-                    <FontAwesomeIcon icon={paused ? faPlay : faPause} style={{
-                        width: '2em',
-                        height: '2em',
-                        margin: '1em 1em 1em 1em',
-                        boxShadow: 'none',
-                        color: `color-mix(in srgb, ${theme.colors.dark}, ${theme.colors.warmTint} var(--beat-pulse))`
-                    }} />
-                </Button>
-                <Button onClick={nextTrack} style={{ height: '50%', marginTop: 20}}>
-                    <FontAwesomeIcon icon={faFastForward} style={{
-                        height: 15,
-                        width: 30,
-                        margin: '5px 5px 5px 5px'
-                    }}/>
-                </Button>
-                </div>
-                <p>now playing:<br />{
-                    currentTrackLoaded
-                        ? currentTrack.displayName
-                        : <FontAwesomeIcon icon={faEllipsis} beatFade />
-                }</p>
+    return (
+        <div className='flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded'>
+            <div className='flex flex-col'>
+                <p className='text-xl text-base05'>
+                    { playQueue.currentTrack.displayName }
+                </p>
+                <CreditLink contributor={contributors.soundtomb} />
             </div>
-            <br />
-        </>
+            <div className='m-5 flex flex-row items-center gap-3'>
+                <TapeReel spinning={!paused} className='w-10 h-10'/>
+                <Button onClick={prevTrack}>
+                    <FontAwesomeIcon
+                        icon={faBackwardFast}
+                        color={theme.base03}
+                        className='m-3'
+                        size='xl'
+                    />
+                </Button>
+                <Button onClick={handlePause} disabled={!currentTrackLoaded}>
+                    <FontAwesomeIcon
+                        icon={playButtonIcon}
+                        className='mx-8 my-3'
+                        color='color-mix(in srgb, var(--color-base03), var(--color-base09) var(--beat-pulse))'
+                        size='xl'
+                    />
+                </Button>
+                <Button onClick={nextTrack}>
+                    <FontAwesomeIcon icon={faFastForward}
+                        className='m-3'
+                        color={theme.base03}
+                        size='xl'
+                    />
+                </Button>
+                <TapeReel spinning={!paused} className='w-10 h-10'/>
+            </div>
+        </div>
     );
 };
 

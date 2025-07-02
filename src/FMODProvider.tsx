@@ -61,12 +61,18 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
-        FMODModule(FMOD);
+        const script = document.createElement('script');
+        script.src = '/fmodstudio.js';
+        script.onload = () => {
+            FMODModule(FMOD);
+        };
+        document.head.appendChild(script);
     },[]);
 
 
     if (ref.current) {
         ref.current.style.setProperty('--thumb-color', '#ff0000');
+        ref.current.style.setProperty('--beat-pulse', '0%');
     }
 
     return (

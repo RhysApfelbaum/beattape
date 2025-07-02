@@ -1,6 +1,5 @@
 import { Track } from './track';
 import { SliderState } from './sliderState';
-import { LoadingState } from './bank';
 
 export class PlayQueue {
     private tracklist: Track[];

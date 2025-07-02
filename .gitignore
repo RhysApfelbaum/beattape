@@ -5,3 +5,16 @@ dist/
 fmodstudio_download/
 test_certificates/
 bun.lockb
+*.wav
+*.flp
+audio_assets/*
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml

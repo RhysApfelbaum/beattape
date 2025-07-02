@@ -1,0 +1,1024 @@
+{
+  "snooze": [
+    {
+      "path": "snooze/distorted_intro_sine.mp3",
+      "start": 0,
+      "end": 25.6,
+      "length": 25.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/distorted_intro.mp3",
+      "start": 0,
+      "end": 25.6,
+      "length": 25.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/cymbals3.mp3",
+      "start": 12.799999999999983,
+      "end": 38.400000000000006,
+      "length": 25.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/bass_harmonics.mp3",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 217.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/bass.mp3",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 217.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/sine_chords.mp3",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 217.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/rhodes.mp3",
+      "start": 25.6,
+      "end": 230.4,
+      "length": 204.8,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/foley.mp3",
+      "start": 25.6,
+      "end": 230.4,
+      "length": 204.8,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/distant_piano.mp3",
+      "start": 25.6,
+      "end": 243.20000000000002,
+      "length": 217.6,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/thin_hat.mp3",
+      "start": 25.6,
+      "end": 153.60000000000002,
+      "length": 3.2,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_thin.mp3",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 203.9136875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_medium.mp3",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 203.9136875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/kicksnare_thick.mp3",
+      "start": 25.6,
+      "end": 229.51370339685172,
+      "length": 203.9136875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/cymbals.mp3",
+      "start": 67.2,
+      "end": 89.60000000000001,
+      "length": 22.4,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/synth.mp3",
+      "start": 76.80000000000001,
+      "end": 243.20000000000002,
+      "length": 166.4,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/cymbals2.mp3",
+      "start": 121.60000000000001,
+      "end": 192,
+      "length": 70.39997916666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/vox.mp3",
+      "start": 128,
+      "end": 189.09851119917613,
+      "length": 61.0985,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "snooze/thin_hat2.mp3",
+      "start": 179.20000000000002,
+      "end": 229.51370339685172,
+      "length": 3.2,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ],
+  "doomscroll": [
+    {
+      "path": "bells/harmonics1.mp3",
+      "start": 0,
+      "end": 86.34145833333334,
+      "length": 86.34145833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/bouncy_bass2.mp3",
+      "start": 7.792773859801563,
+      "end": 34.706143716872546,
+      "length": 26.913354166666668,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/smooth_bass2.mp3",
+      "start": 7.792773859801563,
+      "end": 85.84155434760643,
+      "length": 78.04877083333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/noise.mp3",
+      "start": 7.792773859801563,
+      "end": 210.73170731707313,
+      "length": 7.804875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_sweep2.mp3",
+      "start": 7.804878048780488,
+      "end": 121.46341463414635,
+      "length": 15.60975,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_march2.mp3",
+      "start": 7.804878048780488,
+      "end": 121.46341463414635,
+      "length": 7.804875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/glass_ting.mp3",
+      "start": 7.804878048780488,
+      "end": 14.819590703798767,
+      "length": 7.014708333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/rustle.mp3",
+      "start": 7.804878048780488,
+      "end": 226.35356252231225,
+      "length": 3.9024375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/hat2.mp3",
+      "start": 7.804878048780488,
+      "end": 123.38058483393789,
+      "length": 1.9512291666666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/snare2.mp3",
+      "start": 7.804878048780488,
+      "end": 123.38058483393789,
+      "length": 1.9512291666666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/gritty_kick2.mp3",
+      "start": 7.804878048780488,
+      "end": 123.38058483393789,
+      "length": 3.9024375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/kick2.mp3",
+      "start": 7.804878048780488,
+      "end": 123.36848064495896,
+      "length": 3.9024375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/wood_knocks2.mp3",
+      "start": 8.292682926829269,
+      "end": 121.46341463414633,
+      "length": 7.804875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/piano.mp3",
+      "start": 31.21951219512195,
+      "end": 85.84155434760643,
+      "length": 54.62204166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/sine2.mp3",
+      "start": 31.21951219512195,
+      "end": 124.87805741869919,
+      "length": 31.219520833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/piano2.mp3",
+      "start": 93.65853658536585,
+      "end": 211.21950711382112,
+      "length": 31.219520833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/harmonics2.mp3",
+      "start": 93.65853658536585,
+      "end": 124.87805741869919,
+      "length": 31.219520833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/harmonics12.mp3",
+      "start": 124.87805741869919,
+      "end": 211.21951575203252,
+      "length": 86.34145833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/smooth_bass.mp3",
+      "start": 140.4878048780488,
+      "end": 202.92682926829264,
+      "length": 62.43902083333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/bouncy_bass.mp3",
+      "start": 140.4878048780488,
+      "end": 162.01850076370556,
+      "length": 21.5306875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_sweep.mp3",
+      "start": 140.4878048780488,
+      "end": 210.73205487804876,
+      "length": 15.60975,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/brush_march.mp3",
+      "start": 140.4878048780488,
+      "end": 210.7316798780488,
+      "length": 7.804875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/hat.mp3",
+      "start": 140.4878048780488,
+      "end": 214.24021992821065,
+      "length": 1.9512291666666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/snare.mp3",
+      "start": 140.4878048780488,
+      "end": 214.24021992821065,
+      "length": 1.9512291666666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/gritty_kick.mp3",
+      "start": 140.4878048780488,
+      "end": 214.24021992821065,
+      "length": 3.9024375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/kick.mp3",
+      "start": 140.4878048780488,
+      "end": 214.24021992821068,
+      "length": 3.9024375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/wood_knocks.mp3",
+      "start": 140.97560975609755,
+      "end": 210.73205487804879,
+      "length": 7.804875,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bells/sine.mp3",
+      "start": 156.09756097560975,
+      "end": 211.21950711382115,
+      "length": 54.634145833333335,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ],
+  "court": [
+    {
+      "path": "court/ting_hit_2.mp3",
+      "start": 0,
+      "end": 1,
+      "length": 12.3529375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_hit_1.mp3",
+      "start": 0,
+      "end": 3.5294166666666666,
+      "length": 3.5294166666666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano4.mp3",
+      "start": 0,
+      "end": 14.117645833333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/bass2.mp3",
+      "start": 0,
+      "end": 112.94116666666666,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_thick2.mp3",
+      "start": 14.117645833333333,
+      "end": 56.47058333333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/taps.mp3",
+      "start": 14.117645833333333,
+      "end": 225.88264583333333,
+      "length": 7.058833333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano3.mp3",
+      "start": 14.117647058823529,
+      "end": 56.470584558823525,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/foley2.mp3",
+      "start": 14.117647058823529,
+      "end": 168.5294117647059,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums3.mp3",
+      "start": 14.117647058823529,
+      "end": 112.9413137254902,
+      "length": 7.058833333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/vox2.mp3",
+      "start": 28.2353125,
+      "end": 56.47064583333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano2.mp3",
+      "start": 56.47058333333333,
+      "end": 84.70587499999999,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting3.mp3",
+      "start": 84.70587622549019,
+      "end": 112.9411887254902,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_piano.mp3",
+      "start": 84.70587622549019,
+      "end": 112.94116789215686,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/vox.mp3",
+      "start": 84.70595833333333,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/main_riff_thick.mp3",
+      "start": 84.70595833333333,
+      "end": 112.94125,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_piano2.mp3",
+      "start": 112.94125,
+      "end": 167.56683997078753,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_melody2.mp3",
+      "start": 141.17654166666665,
+      "end": 169.41185416666667,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting2.mp3",
+      "start": 141.17654166666665,
+      "end": 169.41185416666667,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/bass.mp3",
+      "start": 141.17654166666665,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums2.mp3",
+      "start": 155.29410539215687,
+      "end": 169.41177205882354,
+      "length": 7.058833333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_orch.mp3",
+      "start": 169.41185416666667,
+      "end": 225.8824375,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/second_riff_piano.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88252083333333,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/foley.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88243749999998,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/drums.mp3",
+      "start": 169.41185416666667,
+      "end": 225.88243749999998,
+      "length": 7.058833333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting_melody.mp3",
+      "start": 197.6471875,
+      "end": 225.88250000000002,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "court/ting.mp3",
+      "start": 197.6471875,
+      "end": 225.88250000000002,
+      "length": 14.117645833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ],
+  "murky": [
+    {
+      "path": "limp/piano_intro.mp3",
+      "start": 0,
+      "end": 47.931028735632225,
+      "length": 47.931020833333335,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/drum_intro.mp3",
+      "start": 17.58620689655174,
+      "end": 50.689665229885094,
+      "length": 33.103458333333336,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/reverse_trill.mp3",
+      "start": 23.103448275862103,
+      "end": 166.55171910919543,
+      "length": 143.44827083333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/reverse_cymbal.mp3",
+      "start": 39.65517241379313,
+      "end": 203.79310991379313,
+      "length": 164.1379375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/vox.mp3",
+      "start": 45.172413793103495,
+      "end": 210.68966379310348,
+      "length": 165.51722916666668,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/synth_pluck.mp3",
+      "start": 45.172413793103495,
+      "end": 210.68966379310348,
+      "length": 165.51722916666668,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano6.mp3",
+      "start": 45.172413793103495,
+      "end": 89.3103512931035,
+      "length": 44.1379375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_sample3.mp3",
+      "start": 45.172413793103495,
+      "end": 155.51724137931035,
+      "length": 110.3448125,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/bass3.mp3",
+      "start": 45.172413793103495,
+      "end": 133.44827586206898,
+      "length": 88.27585416666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/hats.mp3",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/perc.mp3",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/fat_snare.mp3",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/snare.mp3",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/deep_kick.mp3",
+      "start": 45.172413793103495,
+      "end": 199.6551637931035,
+      "length": 154.48275,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/sine2.mp3",
+      "start": 67.24137931034487,
+      "end": 133.44827586206898,
+      "length": 66.20689583333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_lead.mp3",
+      "start": 89.3103448275862,
+      "end": 210.68966379310342,
+      "length": 121.3793125,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano5.mp3",
+      "start": 89.3103512931035,
+      "end": 94.82758620689656,
+      "length": 5.517229166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano4.mp3",
+      "start": 96.20689655172414,
+      "end": 111.37931034482759,
+      "length": 15.172395833333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano3.mp3",
+      "start": 111.37931034482759,
+      "end": 116.89654525862065,
+      "length": 5.517229166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano2.mp3",
+      "start": 118.27585560344824,
+      "end": 133.44827586206898,
+      "length": 15.172416666666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/sine.mp3",
+      "start": 133.44827586206898,
+      "end": 210.6896501436782,
+      "length": 77.24135416666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/choppy_piano.mp3",
+      "start": 133.44827586206898,
+      "end": 155.51724137931035,
+      "length": 22.068958333333335,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/bass2.mp3",
+      "start": 133.44827586206898,
+      "end": 155.51724137931035,
+      "length": 22.068958333333335,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/dist_drums_middle.mp3",
+      "start": 133.44827586206907,
+      "end": 155.5172341954024,
+      "length": 22.068958333333335,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_sample2.mp3",
+      "start": 155.51724137931035,
+      "end": 199.6551637931035,
+      "length": 44.13791666666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/bass.mp3",
+      "start": 155.51724137931035,
+      "end": 199.6551637931035,
+      "length": 44.13791666666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/counter_bass.mp3",
+      "start": 174.82758620689663,
+      "end": 210.68964870689663,
+      "length": 35.8620625,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "limp/piano_outro.mp3",
+      "start": 199.65516379310355,
+      "end": 210.68966379310348,
+      "length": 11.034479166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ],
+  "bubbles": [
+    {
+      "path": "bubbles/rhodes_choopy2.mp3",
+      "start": 0,
+      "end": 35.294125,
+      "length": 35.294125,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/rhodes2.mp3",
+      "start": 0,
+      "end": 35.294125,
+      "length": 35.294125,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/main2.mp3",
+      "start": 1.7647058823529411,
+      "end": 36.17647058823529,
+      "length": 34.41175,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/rhodes_choopy.mp3",
+      "start": 36.17647058823529,
+      "end": 71.47059558823528,
+      "length": 35.29410416666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/rhodes.mp3",
+      "start": 36.17647058823529,
+      "end": 71.47059558823528,
+      "length": 35.29410416666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "bubbles/main.mp3",
+      "start": 37.94117647058823,
+      "end": 71.69708225876556,
+      "length": 33.755895833333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ],
+  "butternutSquash": [
+    {
+      "path": "butternutSquash/ButternutSquash.mp3",
+      "start": 0,
+      "end": 51.095668934240365,
+      "length": 51.095668934240365,
+      "sampleRate": 44099.998474121094,
+      "channelCount": 2
+    }
+  ],
+  "heavyFog": [
+    {
+      "path": "heavyFog/rhodes2.mp3",
+      "start": 0,
+      "end": 51.89191666666667,
+      "length": 12.972979166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/bass.mp3",
+      "start": 0,
+      "end": 103.78375,
+      "length": 25.9459375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/hats.mp3",
+      "start": 0,
+      "end": 100.54075,
+      "length": 0.8108125,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/click.mp3",
+      "start": 0,
+      "end": 100.54075,
+      "length": 1.621625,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/light_drums.mp3",
+      "start": 0,
+      "end": 102.16216216216216,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/heavy_drums.mp3",
+      "start": 0,
+      "end": 102.56756756756758,
+      "length": 6.486479166666666,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill3.mp3",
+      "start": 9.729750000000001,
+      "end": 12.973,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill2.mp3",
+      "start": 22.70272297297298,
+      "end": 25.945972972972978,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/chops.mp3",
+      "start": 24.196043683674162,
+      "end": 25.94532905538491,
+      "length": 1.7492708333333333,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/piano.mp3",
+      "start": 25.945958333333333,
+      "end": 51.891916666666674,
+      "length": 12.972979166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/chops2.mp3",
+      "start": 25.945972972972978,
+      "end": 51.89191047297298,
+      "length": 25.9459375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill.mp3",
+      "start": 35.67567567567568,
+      "end": 38.91892567567568,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill4.mp3",
+      "start": 48.64864864864865,
+      "end": 51.891898648648656,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill5.mp3",
+      "start": 61.62162162162163,
+      "end": 64.86487162162163,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill6.mp3",
+      "start": 74.59459459459461,
+      "end": 77.83784459459461,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/rhodes.mp3",
+      "start": 77.8378125,
+      "end": 103.78377083333334,
+      "length": 12.972979166666667,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/chops3.mp3",
+      "start": 77.83784459459461,
+      "end": 103.78378209459461,
+      "length": 25.9459375,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/organ_fill7.mp3",
+      "start": 87.5675472972973,
+      "end": 90.8107972972973,
+      "length": 3.24325,
+      "sampleRate": 48000,
+      "channelCount": 2
+    },
+    {
+      "path": "heavyFog/piano2.mp3",
+      "start": 90.81079166666666,
+      "end": 100.54075,
+      "length": 9.729958333333334,
+      "sampleRate": 48000,
+      "channelCount": 2
+    }
+  ]
+}
