@@ -10,7 +10,7 @@ const build = async () => {
     console.log('Building...');
 
     const result = await Bun.build({
-        entrypoints: [ './src/index.tsx' ],
+        entrypoints: [ './src/index.html' ],
         sourcemap: 'linked',
         outdir: outputDirectory,
         plugins: [tailwind],
