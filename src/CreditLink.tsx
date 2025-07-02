@@ -10,7 +10,13 @@ const CreditLink: React.FC<{ contributor: Contributor }> = ({ contributor }) => 
         href={contributor.link}
         target="_blank"
         rel="noreferrer noopener"
-        className="hover:underline transition-all"
+        className="
+
+        underline
+        text-base04
+
+        hover:text-base05 transition-all
+        "
     >
         { contributor.name }
     </a>

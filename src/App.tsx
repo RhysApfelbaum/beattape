@@ -13,6 +13,8 @@ import { setTheme, themes } from './styles/theme';
 import LoadingPage from './LoadingPage';
 import { gesture } from './fmod/gesture';
 import Art from './Art';
+import PlayQueue from './PlayQueue';
+import Palette from './Palette';
 
 const App: React.FC = () => {
     const fmod = useFMOD();
@@ -41,19 +43,8 @@ const App: React.FC = () => {
             <main className='flex flex-col items-center mx-2 mt-2 md:mx-40'>
                 <Art />
                 <SliderSwiper />
-                { radioShowing &&
-                    <Drag onPositionUpdate={updateRadioPosition}>
-                        <div style={{
-                            alignSelf: 'end',
-                            transform: 'translateY(calc(-0.2 * var(--beat-pulse)))'
-                        }}>
-                            <FontAwesomeIcon icon={faRadio} color={'grey'} size='xl'/>
-                        </div>
-                    </Drag>
-
-                }
             </main>
-            <footer className='fixed bottom-0 w-full flex flex-col justify-center items-center'>
+            <footer className='fixed bottom-0 md:right-[50vw] md:translate-x-[50%] md:w-fit w-full flex flex-col justify-center items-center z-[60]'>
                 {/* <PlayQueue /> */}
                 <TrackControls />
             </footer>

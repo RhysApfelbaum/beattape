@@ -104,7 +104,6 @@ const PlayQueue: React.FC = () => {
     return (
         <div className='
             w-full
-            md:w-150
             bg-base01
             md:rounded-t-lg
             group
@@ -147,7 +146,7 @@ const PlayQueue: React.FC = () => {
                     <tbody>
                         <TrackRow track={playQueue.currentTrack} changed={false} current/>
                         {
-                            trackItems.map((item, index) =>
+                            trackItems.slice(0, trackItems.length - 1).map((item, index) => 
                                 <TrackRow
                                     key={item.track.name + index}
                                     track={item.track}

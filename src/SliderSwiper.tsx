@@ -19,13 +19,13 @@ const SliderSwiper: React.FC = () => {
                 height={200}
             >
                 <SwiperSlide>
-                    <p>Track Sliders</p>
+                    <p className="text-base04">Track Sliders</p>
                 </SwiperSlide>
                 <SwiperSlide>
-                    <p>Ambience Sliders</p>
+                    <p className="text-base04">Ambience Sliders</p>
                 </SwiperSlide>
                 <SwiperSlide>
-                    <p>Effects</p>
+                    <p className="text-base04">Effects</p>
                 </SwiperSlide>
             </Swiper>
             <Swiper

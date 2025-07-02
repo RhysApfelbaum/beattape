@@ -2,6 +2,8 @@ import React, { useState } from "react";
 
 import artData from './art.json';
 import ArtPicker from "./ArtPicker";
+import CreditLink from "./CreditLink";
+import contributors from './contributors.json';
 
 const Art: React.FC = () => {
 
@@ -12,12 +14,20 @@ const Art: React.FC = () => {
     const art = artData[artIndex];
 
     return (
-        <section className="p-5 mb-10">
+        <section className="py-5 mb-10">
             <img
                 src={art.url}
-                className='w-80 md:w-auto rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]'
+                className='w-80 md:w-auto md:max-h-80 rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]'
             />
-            <ArtPicker artist={art.artist} index={artIndex} setIndex={setArtIndex} />
+            <div className="flex justify-between items-center mt-3">
+                <div className="flex gap-2 justify-center">
+                    <p className="text-base04">Artwork by</p>
+                    <CreditLink
+                        contributor={contributors[art.artist as keyof typeof contributors]}
+                    />
+                </div>
+                <ArtPicker artist={art.artist} index={artIndex} setIndex={setArtIndex} />
+            </div>
         </section>
     );
 };

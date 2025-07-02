@@ -236,8 +236,6 @@ const TrackControls: React.FC = () => {
         await beatPulseInterpolate(100, 0, 600);
     };
 
-    const musicInfo = contributors.soundtomb;
-
     let playButtonIcon = paused ? faPlay : faPause;
     if (!currentTrackLoaded) playButtonIcon = faEllipsis;
 

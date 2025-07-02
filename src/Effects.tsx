@@ -78,6 +78,17 @@ const Effects: React.FC = () => {
                     }}>distortion</p>
                 </div>
             </div>
+            { effects.radio &&
+                <Drag onPositionUpdate={updateRadioPosition}>
+                    <div style={{
+                        alignSelf: 'end',
+                        transform: 'translateY(calc(-0.2 * var(--beat-pulse)))'
+                    }}>
+                        <FontAwesomeIcon icon={faRadio} color={'grey'} size='xl'/>
+                    </div>
+                </Drag>
+
+            }
         </div>
     );
 };

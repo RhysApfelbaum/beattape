@@ -44,7 +44,26 @@ const ArtPicker: React.FC<{
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}>Change artwork</Button>
+            { !open &&
+                <button
+                    className="
+                    rounded-[3px]
+                    cursor-pointer
+                    flex gap-1 items-center
+                    transition-all
+                    hover:animate-pulse
+                    pl-5
+                    group
+                    "
+                    title="Change artwork"
+                    onClick={() => setOpen(true)}
+                    
+                >
+                        <div className="bg-base0A w-3 h-3 rounded group-hover:bg-base09 transition-all"/>
+                        <div className="bg-base05 w-3 h-3 rounded group-hover:bg-base06 transition-all"/>
+                        <div className="bg-base0F w-3 h-3 rounded group-hover:bg-base0E transition-all"/>
+                    </button>
+            }
             <Modal open={open} onClose={() => setOpen(false)}>
                 <h2>Select Artwork</h2>
                 <Swiper
