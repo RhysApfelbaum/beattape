@@ -25,6 +25,13 @@ const Drag: React.FC<{
             y: window.innerHeight / 2 - positionRef.current.y,
         });
 
+        const setPosition = () => {
+            const { x, y } = positionRef.current;
+
+            element.style.left = `${x}px`;
+            element.style.top = `${y}px`;
+        };
+
         const handleMouseDown = (e: MouseEvent) => {
             e.preventDefault();
             document.addEventListener('mousemove', handleMouseMove);
@@ -41,7 +48,8 @@ const Drag: React.FC<{
                 x: window.innerWidth / 2 - positionRef.current.x,
                 y: window.innerHeight / 2 - positionRef.current.y,
             });
-        };
+
+        }
 
         const handleTouchMove = (e: TouchEvent) => {
             e.preventDefault();
@@ -65,20 +73,12 @@ const Drag: React.FC<{
             });
         };
 
-        const setPosition = () => {
-            const { x, y } = positionRef.current;
-
-            element.style.left = `${x}px`;
-            element.style.top = `${y}px`;
-        };
 
         setPosition();
 
         const handleTouchStart = (e: TouchEvent) => {
             e.preventDefault();
-            document.addEventListener('touchmove', handleTouchMove, {
-                passive: false,
-            });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd);
             document.addEventListener('touchcancel', handleTouchEnd);
         };
@@ -93,6 +93,8 @@ const Drag: React.FC<{
             movePosition(e.movementX, e.movementY);
         };
 
+        setPosition();
+
         const handleMouseUp = () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
@@ -105,6 +107,7 @@ const Drag: React.FC<{
             element.removeEventListener('mousedown', handleMouseDown);
         };
     }, [onPositionUpdate]);
+
 
     return (
         <div>

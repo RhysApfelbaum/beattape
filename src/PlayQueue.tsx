@@ -61,6 +61,8 @@ const PlayQueue: React.FC = () => {
 
     const ref = useRef<HTMLDivElement>(null);
 
+    const ref = useRef<HTMLDivElement>(null);
+
     const fillNextTracks = () => {
         const nextTracks = getNextTracks(playQueue);
         const newTrackItems: TrackItem[] = [];
