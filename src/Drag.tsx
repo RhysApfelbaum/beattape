@@ -25,6 +25,13 @@ const Drag: React.FC<{
             y: window.innerHeight / 2 - positionRef.current.y,
         });
 
+        const setPosition = () => {
+            const { x, y } = positionRef.current;
+
+            element.style.left = `${x}px`;
+            element.style.top = `${y}px`;
+        };
+
         const handleMouseDown = (e: MouseEvent) => {
             e.preventDefault();
             document.addEventListener('mousemove', handleMouseMove);
@@ -66,12 +73,6 @@ const Drag: React.FC<{
             });
         };
 
-        const setPosition = () => {
-            const { x, y } = positionRef.current;
-
-            element.style.left = `${x}px`;
-            element.style.top = `${y}px`;
-        };
 
         setPosition();
 
@@ -92,55 +93,7 @@ const Drag: React.FC<{
             movePosition(e.movementX, e.movementY);
         };
 
-        const handleTouchMove = (e: TouchEvent) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const viewportX = touch.clientX;
-            const viewportY = touch.clientY;
-
-            // Update positionRef.current to absolute viewport coords
-            positionRef.current = {
-                x: viewportX,
-                y: viewportY,
-            };
-
-            element.style.left = `${viewportX}px`;
-            element.style.top = `${viewportY}px`;
-
-            // Notify parent with position relative to center of viewport
-            onPositionUpdate({
-                x: window.innerWidth / 2 - viewportX,
-                y: window.innerHeight / 2 - viewportY,
-            });
-        };
-
-        const setPosition = () => {
-            const { x, y } = positionRef.current;
-
-            element.style.left = `${x}px`;
-            element.style.top = `${y}px`;
-        };
-
         setPosition();
-
-        const handleTouchStart = (e: TouchEvent) => {
-            e.preventDefault();
-            document.addEventListener('touchmove', handleTouchMove, {
-                passive: false,
-            });
-            document.addEventListener('touchend', handleTouchEnd);
-            document.addEventListener('touchcancel', handleTouchEnd);
-        };
-
-        const handleTouchEnd = () => {
-            document.removeEventListener('touchmove', handleTouchMove);
-            document.removeEventListener('touchend', handleTouchEnd);
-            document.removeEventListener('touchcancel', handleTouchEnd);
-        };
-
-        const handleMouseMove = (e: MouseEvent) => {
-            movePosition(e.movementX, e.movementY);
-        };
 
         const handleMouseUp = () => {
             document.removeEventListener('mousemove', handleMouseMove);
