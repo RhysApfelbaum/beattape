@@ -1,13 +1,12 @@
 import { FMOD } from './system';
 import { PromiseStatus } from './promiseStatus';
 
-
 const DEFAULT_SOUND_INFO = {
     sampleRate: 44100,
     numChannels: 2,
     bytesPerSample: 2,
-    bufferThreshold: 20
-}
+    bufferThreshold: 20,
+};
 
 export interface RemoteSoundData {
     url: string;
@@ -16,7 +15,6 @@ export interface RemoteSoundData {
     fetch: () => Promise<void>;
     release: () => void;
 }
-
 
 export class FMODMountedFile implements RemoteSoundData {
     url: string;
@@ -43,7 +41,7 @@ export class FMODMountedFile implements RemoteSoundData {
         }
 
         try {
-            const response = await fetch(this.url)
+            const response = await fetch(this.url);
             const buffer = await response.arrayBuffer();
             const responseData = new Uint8Array(buffer);
             this.length = buffer.byteLength;
@@ -51,7 +49,14 @@ export class FMODMountedFile implements RemoteSoundData {
             console.log(this.filename);
 
             // Write buffer to local file using this completely undocumented emscripten function :)
-            FMOD.FS_createDataFile('/', this.filename, responseData, canRead, canWrite, canOwn);
+            FMOD.FS_createDataFile(
+                '/',
+                this.filename,
+                responseData,
+                canRead,
+                canWrite,
+                canOwn,
+            );
             this.fetchStatus.resolve();
         } catch (error) {
             console.error(error);

@@ -6,18 +6,16 @@ import { faRadio } from '@fortawesome/free-solid-svg-icons';
 import Drag, { PositionUpdater } from './Drag';
 import { usePlayQueue } from './PlayQueueProvider';
 
-
 const Effects: React.FC = () => {
     const fmod = useFMOD();
 
-    const [ playQueue, _ ] = usePlayQueue();
+    const [playQueue, _] = usePlayQueue();
 
-    const [ effects, setEffects ] = useState({
+    const [effects, setEffects] = useState({
         radio: false,
         pitchWobble: false,
-        distortion: false
+        distortion: false,
     });
-
 
     const toggleRadio = (pressed: boolean) => {
         fmod.events.tapeStop.oneShot();
@@ -49,9 +47,9 @@ const Effects: React.FC = () => {
         setEffects({ ...effects, distortion: pressed });
     };
 
-    const updateRadioPosition: PositionUpdater = position => {
-        const pan = -2 * position.x / window.innerWidth;
-        const distance = .5 + (-position.y / window.innerHeight);
+    const updateRadioPosition: PositionUpdater = (position) => {
+        const pan = (-2 * position.x) / window.innerWidth;
+        const distance = 0.5 + -position.y / window.innerHeight;
         fmod.events.radio.setParameter('RadioPan', pan, false);
         fmod.events.radio.setParameter('RadioNearness', distance, false);
     };
@@ -60,35 +58,56 @@ const Effects: React.FC = () => {
         <div className="flex flex-col items-center justify-center h-[200px]">
             <div>
                 <div className="flex flex-row m-4">
-                    <Toggle action={toggleRadio}/>
-                    <p className='mx-4' style={{
-                        color: effects.radio ? 'white' : 'grey'
-                    }}>small radio</p>
+                    <Toggle action={toggleRadio} />
+                    <p
+                        className="mx-4"
+                        style={{
+                            color: effects.radio ? 'white' : 'grey',
+                        }}
+                    >
+                        small radio
+                    </p>
                 </div>
                 <div className="flex flex-row m-4">
-                    <Toggle action={toggleWobble}/>
-                    <p className='mx-4' style={{
-                        color: effects.pitchWobble ? 'white' : 'grey'
-                    }}>pitch wobble</p>
+                    <Toggle action={toggleWobble} />
+                    <p
+                        className="mx-4"
+                        style={{
+                            color: effects.pitchWobble ? 'white' : 'grey',
+                        }}
+                    >
+                        pitch wobble
+                    </p>
                 </div>
                 <div className="flex flex-row m-4">
-                    <Toggle action={toggleDist}/>
-                    <p className='mx-4' style={{
-                        color: effects.distortion ? 'white' : 'grey'
-                    }}>distortion</p>
+                    <Toggle action={toggleDist} />
+                    <p
+                        className="mx-4"
+                        style={{
+                            color: effects.distortion ? 'white' : 'grey',
+                        }}
+                    >
+                        distortion
+                    </p>
                 </div>
             </div>
-            { effects.radio &&
+            {effects.radio && (
                 <Drag onPositionUpdate={updateRadioPosition}>
-                    <div style={{
-                        alignSelf: 'end',
-                        transform: 'translateY(calc(-0.2 * var(--beat-pulse)))'
-                    }}>
-                        <FontAwesomeIcon icon={faRadio} color={'grey'} size='xl'/>
+                    <div
+                        style={{
+                            alignSelf: 'end',
+                            transform:
+                                'translateY(calc(-0.2 * var(--beat-pulse)))',
+                        }}
+                    >
+                        <FontAwesomeIcon
+                            icon={faRadio}
+                            color={'grey'}
+                            size="xl"
+                        />
                     </div>
                 </Drag>
-
-            }
+            )}
         </div>
     );
 };

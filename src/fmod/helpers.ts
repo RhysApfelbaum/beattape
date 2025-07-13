@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-export function assertNotNull<T>(value: T, message = 'Failed non-null assertion'): asserts value is NonNullable<T> {
+export function assertNotNull<T>(
+    value: T,
+    message = 'Failed non-null assertion',
+): asserts value is NonNullable<T> {
     if (value === null) {
         throw new Error(message);
     }
@@ -16,10 +19,9 @@ export function assertEqual<T>(a: T, b: T) {
     }
 }
 
-
 export const useIsMobile = (breakpoint: number = 768) => {
     const [isMobile, setIsMobile] = useState(() =>
-        typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+        typeof window !== 'undefined' ? window.innerWidth < breakpoint : false,
     );
 
     useEffect(() => {
@@ -32,4 +34,4 @@ export const useIsMobile = (breakpoint: number = 768) => {
     }, [breakpoint]);
 
     return isMobile;
-}
+};

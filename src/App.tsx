@@ -19,8 +19,7 @@ import Palette from './Palette';
 const App: React.FC = () => {
     const fmod = useFMOD();
 
-
-    const [ awaitingGesture, setAwaitingGesture ] = useState(true);
+    const [awaitingGesture, setAwaitingGesture] = useState(true);
 
     setTheme(themes.catppuccinMocha);
 
@@ -28,9 +27,9 @@ const App: React.FC = () => {
 
     const pageReady = fmod.ready && !awaitingGesture;
 
-    const updateRadioPosition: PositionUpdater = position => {
-        const pan = -2 * position.x / window.innerWidth;
-        const distance = .5 + (-position.y / window.innerHeight);
+    const updateRadioPosition: PositionUpdater = (position) => {
+        const pan = (-2 * position.x) / window.innerWidth;
+        const distance = 0.5 + -position.y / window.innerHeight;
         fmod.events.radio.setParameter('RadioPan', pan, false);
         fmod.events.radio.setParameter('RadioNearness', distance, false);
     };
@@ -40,11 +39,11 @@ const App: React.FC = () => {
     // App is unable to load if FMOD isn't loade
     const mainPage = (
         <PlayQueueProvider>
-            <main className='flex flex-col items-center mx-2 mt-2 md:mx-40'>
+            <main className="flex flex-col items-center mx-2 mt-2 md:mx-40">
                 <Art />
                 <SliderSwiper />
             </main>
-            <footer className='fixed bottom-0 md:right-[50vw] md:translate-x-[50%] md:w-fit w-full flex flex-col justify-center items-center z-[60]'>
+            <footer className="fixed bottom-0 md:right-[50vw] md:translate-x-[50%] md:w-fit w-full flex flex-col justify-center items-center z-[60]">
                 {/* <PlayQueue /> */}
                 <TrackControls />
             </footer>
@@ -53,7 +52,7 @@ const App: React.FC = () => {
 
     return (
         <AnimatePresence mode="wait">
-            { pageReady ? mainPage : <LoadingPage key="loading"/> }
+            {pageReady ? mainPage : <LoadingPage key="loading" />}
         </AnimatePresence>
     );
 };

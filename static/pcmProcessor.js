@@ -11,8 +11,10 @@ class PCMProcessor extends AudioWorkletProcessor {
 
             for (let i = 0; i < length; i++) {
                 // Clamp float sample to [-1, 1] and convert to 16-bit PCM
-                int16Buffer[i * 2] = Math.max(-1, Math.min(1, left[i])) * 0x7FFF;
-                int16Buffer[i * 2 + 1] = Math.max(-1, Math.min(1, right[i])) * 0x7FFF;
+                int16Buffer[i * 2] =
+                    Math.max(-1, Math.min(1, left[i])) * 0x7fff;
+                int16Buffer[i * 2 + 1] =
+                    Math.max(-1, Math.min(1, right[i])) * 0x7fff;
             }
 
             this.port.postMessage(int16Buffer.buffer);
@@ -21,7 +23,7 @@ class PCMProcessor extends AudioWorkletProcessor {
             const mono = input[0];
             const int16Buffer = new Int16Array(mono.length);
             for (let i = 0; i < mono.length; i++) {
-                int16Buffer[i] = Math.max(-1, Math.min(1, mono[i])) * 0x7FFF;
+                int16Buffer[i] = Math.max(-1, Math.min(1, mono[i])) * 0x7fff;
             }
             this.port.postMessage(int16Buffer);
         }

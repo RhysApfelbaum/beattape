@@ -3,4 +3,4 @@ export interface SliderState {
     brightness: number;
     chops: number;
     vocals: number;
-};
+}

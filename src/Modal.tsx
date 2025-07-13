@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-
+import React, { useState } from 'react';
 
 const Modal: React.FC<{
-    open: boolean,
-    onClose: () => void,
-    children: React.ReactNode
+    open: boolean;
+    onClose: () => void;
+    children: React.ReactNode;
 }> = ({ open, onClose, children }) => {
-
-    if (!open)
-        return null;
+    if (!open) return null;
 
     return (
         <div>
-            <div className="
+            <div
+                className="
                 border border-brightLight
                 rounded-md
                 p-2.5
@@ -24,22 +22,23 @@ const Modal: React.FC<{
                 max-w-[80%]
                 "
             >
-                { children }
+                {children}
             </div>
 
-            <button className="
+            <button
+                className="
                 fixed
                 inset-0
                 z-[99]
                 "
                 style={{
                     backdropFilter: 'blur(10px)',
-                    backgroundColor: 'rgba( 0, 0, 0, 0.2 )'
+                    backgroundColor: 'rgba( 0, 0, 0, 0.2 )',
                 }}
                 onClick={onClose}
             />
         </div>
-    )
-}
+    );
+};
 
 export default Modal;

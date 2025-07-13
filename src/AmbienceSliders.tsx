@@ -4,14 +4,13 @@ import Slider from './components/Slider';
 import { useFMOD } from './FMODProvider';
 import Toggle from './Toggle';
 
-
 const AmbienceSliders: React.FC = () => {
     const fmod = useFMOD();
 
-    const [ ambience, setAmbience ] = useState({
+    const [ambience, setAmbience] = useState({
         rain: false,
         vinyl: false,
-        birds: false
+        birds: false,
     });
 
     const updateRain = (value: number) => {
@@ -58,30 +57,30 @@ const AmbienceSliders: React.FC = () => {
     };
 
     return (
-        <div className='flex w-full items-center '>
+        <div className="flex w-full items-center ">
             <div className="w-[33%] flex flex-col items-center">
                 <Slider
                     update={updateRain}
                     label="rain"
-                    activation={ ambience.rain ? '100%' : '0%'}
+                    activation={ambience.rain ? '100%' : '0%'}
                 />
-                <Toggle action={toggleRain}/>
+                <Toggle action={toggleRain} />
             </div>
             <div className="w-[33%] flex flex-col items-center">
                 <Slider
                     update={updateVinyl}
                     label="vinyl crackle"
-                    activation={ ambience.vinyl ? '100%' : '0%'}
+                    activation={ambience.vinyl ? '100%' : '0%'}
                 />
-                <Toggle action={toggleVinyl}/>
+                <Toggle action={toggleVinyl} />
             </div>
             <div className="w-[33%] flex flex-col items-center">
                 <Slider
                     update={updateBirds}
                     label="birds chirping"
-                    activation={ ambience.birds ? '100%' : '0%'}
+                    activation={ambience.birds ? '100%' : '0%'}
                 />
-                <Toggle action={toggleBirds}/>
+                <Toggle action={toggleBirds} />
             </div>
         </div>
     );

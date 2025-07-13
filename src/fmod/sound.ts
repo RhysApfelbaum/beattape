@@ -1,12 +1,14 @@
-import { MPEGDecoderWebWorker } from "mpg123-decoder";
-import { RingBuffer, RingBufferReadResult, Sink } from "./buffering";
-import { gesture, onUserGesture } from "./gesture";
-import { FMODMountedFile  } from "./mountedFile";
-import { Pointer } from "./pointer";
-import { RemoteFMODStatus } from "./remoteFMODStatus";
-import { FMOD } from "./system";
-import { assertEqual, assertNotNull, unreachable } from "./helpers";
-import { PromiseStatus } from "./promiseStatus";
+import { MPEGDecoderWebWorker } from 'mpg123-decoder';
+import { RingBuffer, RingBufferReadResult, Sink } from './buffering';
+import { gesture, onUserGesture } from './gesture';
+import { FMODMountedFile } from './mountedFile';
+import { Pointer } from './pointer';
+import { RemoteFMODStatus } from './remoteFMODStatus';
+import { FMOD } from './system';
+import { assertEqual, assertNotNull, unreachable } from './helpers';
+import { PromiseStatus } from './promiseStatus';
+
+import { OggVorbisDecoderWebWorker } from '@wasm-audio-decoders/ogg-vorbis';
 
 const DEFAULT_SOUND_INFO = {
     sampleRate: 48000,
@@ -14,9 +16,8 @@ const DEFAULT_SOUND_INFO = {
     bytesPerSample: 2,
     get bytesPerSecond() {
         return this.bytesPerSample * this.sampleRate * this.numChannels;
-    }
-    
-}
+    },
+};
 
 export interface RemoteSound {
     handle: any;
@@ -28,12 +29,11 @@ export interface RemoteSound {
     release: () => void;
 }
 
-
 export class StreamedSound implements RemoteSound {
     private fileBuffer: RingBuffer;
     private decodeBuffer: RingBuffer;
     private startBuffer: RingBuffer;
-    private decoder: MPEGDecoderWebWorker | null;
+    private decoder: OggVorbisDecoderWebWorker | null;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition: number;
     private decodePosition: number;
@@ -49,7 +49,6 @@ export class StreamedSound implements RemoteSound {
     private static DECODE_CHUNK_SIZE = 4096;
     private static DECODE_BUFFER_SECONDS = 10;
 
-
     url: string;
     handle: any;
     start: number;
@@ -58,7 +57,6 @@ export class StreamedSound implements RemoteSound {
     stop: () => void;
     restart: () => void;
 
-
     constructor(
         url: string,
         start: number,
@@ -66,7 +64,7 @@ export class StreamedSound implements RemoteSound {
         length: number,
         sampleRate: number,
         onStop = () => {},
-        onRestart = () => {}
+        onRestart = () => {},
     ) {
         this.start = start;
         this.end = end;
@@ -91,10 +89,11 @@ export class StreamedSound implements RemoteSound {
         this.readCallbackLastCalled = 0;
         this.timelinePosition = 0;
 
-        this.decodeChunk = async chunk => {
+        this.decodeChunk = async (chunk) => {
             assertNotNull(this.decoder);
-            const { channelData, samplesDecoded, errors } = await this.decoder.decode(chunk);
-            const [ left, right ] = channelData;
+            const { channelData, samplesDecoded, errors } =
+                await this.decoder.decode(chunk);
+            const [left, right] = channelData;
 
             // Discard samples that overshoot the theoretical limit
             const sampleCount = this.soundInfo.sampleRate * this.length;
@@ -109,11 +108,13 @@ export class StreamedSound implements RemoteSound {
             // TODO Maybe there's a clever way to sort out the floats
             for (let i = 0; i < length; i++) {
                 // Clamp float sample to [-1, 1] and convert to 16-bit PCM
-                int16Buffer[i * 2] = Math.max(-1, Math.min(1, left[i])) * 0x7FFF;
-                int16Buffer[i * 2 + 1] = Math.max(-1, Math.min(1, right[i])) * 0x7FFF;
+                int16Buffer[i * 2] =
+                    Math.max(-1, Math.min(1, left[i])) * 0x7fff;
+                int16Buffer[i * 2 + 1] =
+                    Math.max(-1, Math.min(1, right[i])) * 0x7fff;
             }
             return new Uint8Array(int16Buffer.buffer);
-        }
+        };
     }
 
     underflow() {
@@ -126,7 +127,9 @@ export class StreamedSound implements RemoteSound {
 
         assertNotNull(this.decoder); // Sanity check
         if (!response.ok) {
-            throw new Error(`Failed to fetch ${this.url}: ${response.status} ${response.statusText}`);
+            throw new Error(
+                `Failed to fetch ${this.url}: ${response.status} ${response.statusText}`,
+            );
         }
 
         if (!response.body) {
@@ -134,12 +137,13 @@ export class StreamedSound implements RemoteSound {
         }
 
         if (response.type === 'error') {
-
         }
 
         const lengthHeader = response.headers.get('Content-Length');
         if (!lengthHeader) {
-            throw new Error(`No Content-Length header in response from ${this.url}`);
+            throw new Error(
+                `No Content-Length header in response from ${this.url}`,
+            );
         }
 
         const fileLength = Number(lengthHeader);
@@ -170,10 +174,13 @@ export class StreamedSound implements RemoteSound {
         this.decodingStatus.reset();
         while (this.decoding) {
             const buffer = atStart ? this.startBuffer : this.decodeBuffer;
-            const { leftover } = await this.fileBuffer.pipe(buffer, StreamedSound.DECODE_CHUNK_SIZE, this.decodeChunk);
+            const { leftover } = await this.fileBuffer.pipe(
+                buffer,
+                StreamedSound.DECODE_CHUNK_SIZE,
+                this.decodeChunk,
+            );
 
             if (buffer.isFull()) {
-
                 // Sanity check. The decode buffer should never be completely full
                 if (atStart) {
                     atStart = false;
@@ -196,14 +203,18 @@ export class StreamedSound implements RemoteSound {
     }
 
     updateTime(seconds: number) {
-        this.timelinePosition = (seconds - this.start) * this.soundInfo.bytesPerSecond;
+        this.timelinePosition =
+            (seconds - this.start) * this.soundInfo.bytesPerSecond;
     }
 
     async fetch() {
-        this.decoder = new MPEGDecoderWebWorker();
+        this.decoder = new OggVorbisDecoderWebWorker();
         await this.decoder.ready;
 
-        this.decodeBuffer.allocate(this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS, this.soundInfo.bytesPerSecond * 2);
+        this.decodeBuffer.allocate(
+            this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS,
+            this.soundInfo.bytesPerSecond * 2,
+        );
         this.startBuffer.allocate(this.startThreshold, this.startThreshold);
 
         // Start downloading the file
@@ -219,10 +230,8 @@ export class StreamedSound implements RemoteSound {
 
     private readPCMFromStart(heapPointer: number, requestedBytes: number) {
         const { wrap, view, wrappedView, underflow } = this.startBuffer.read(
-            Math.min(requestedBytes, this.startBuffer.capacity)
+            Math.min(requestedBytes, this.startBuffer.capacity),
         );
-
-
 
         if (underflow) {
             console.error(this.url, 'underflow');
@@ -244,9 +253,8 @@ export class StreamedSound implements RemoteSound {
     }
 
     private readPCM(heapPointer: number, requestedBytes: number) {
-
         const { wrap, view, wrappedView, underflow } = this.decodeBuffer.read(
-            Math.min(requestedBytes, this.decodeBuffer.capacity)
+            Math.min(requestedBytes, this.decodeBuffer.capacity),
         );
 
         if (underflow) {
@@ -258,15 +266,16 @@ export class StreamedSound implements RemoteSound {
 
         FMOD.HEAPU8.set(view, heapPointer);
 
-        this.decodeBufferStartPosition = this.decodeBufferStartPosition + view.length;
+        this.decodeBufferStartPosition =
+            this.decodeBufferStartPosition + view.length;
 
         if (wrap) {
             FMOD.HEAPU8.set(wrappedView, heapPointer + view.length);
-            this.decodeBufferStartPosition += wrappedView.length
+            this.decodeBufferStartPosition += wrappedView.length;
         }
 
-        this.decodeBufferStartPosition %= this.soundInfo.bytesPerSecond * this.length;
-
+        this.decodeBufferStartPosition %=
+            this.soundInfo.bytesPerSecond * this.length;
     }
 
     async forceSeekDecodeBuffer(position: number) {
@@ -275,13 +284,15 @@ export class StreamedSound implements RemoteSound {
         // // All reads are sync
         const { numChannels, bytesPerSample } = this.soundInfo;
 
-        
         // Completely rebuild the decoder, as this may cause errors
         assertNotNull(this.decoder);
         await this.decoder.free();
         this.fileBuffer.unsafeSeek(0);
-        this.decoder = new MPEGDecoderWebWorker();
+        this.decoder = new OggVorbisDecoderWebWorker();
         await this.decoder.ready;
+
+        // Causes mp3 decoding errors
+        await this.decoder.reset();
 
         this.decodePosition = 0;
 
@@ -292,7 +303,7 @@ export class StreamedSound implements RemoteSound {
             const result = await this.fileBuffer.pipe(
                 sink,
                 StreamedSound.DECODE_CHUNK_SIZE,
-                this.decodeChunk
+                this.decodeChunk,
             );
             leftover = result.leftover;
         }
@@ -303,9 +314,7 @@ export class StreamedSound implements RemoteSound {
 
         this.decodeBufferStartPosition = position;
         this.startDecoding(false);
-
     }
-
 
     async load() {
         assertNotNull(this.fileBuffer, 'file buffer is not initialised');
@@ -325,10 +334,13 @@ export class StreamedSound implements RemoteSound {
             _sound: any,
             _subsound: any,
             position: number,
-            _postype: any
+            _postype: any,
         ) => {
             const { sampleRate } = this.soundInfo;
-            const bytePosition = position * this.soundInfo.bytesPerSample * this.soundInfo.numChannels;
+            const bytePosition =
+                position *
+                this.soundInfo.bytesPerSample *
+                this.soundInfo.numChannels;
             this.seek(bytePosition);
             return FMOD.OK;
         };
@@ -343,23 +355,29 @@ export class StreamedSound implements RemoteSound {
             this.advanceSeekPosition(datalen);
             return FMOD.OK;
         };
-        FMOD.Result = FMOD.Core.createStream('', FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME, info, sound);
+        FMOD.Result = FMOD.Core.createStream(
+            '',
+            FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME,
+            info,
+            sound,
+        );
         this.handle = sound.deref();
         if (this.handle === undefined) {
             throw new Error('handle is undefined ' + this.url);
         }
-    };
+    }
 
     getPositionMilliseconds() {
         const { sampleRate, bytesPerSample, numChannels } = this.soundInfo;
         const sampleSecond = sampleRate * bytesPerSample * numChannels;
-        return 1000 * this.seekPosition / sampleSecond;
+        return (1000 * this.seekPosition) / sampleSecond;
     }
 
     private advanceSeekPosition(bytes: number) {
         const { sampleRate, bytesPerSample, numChannels } = this.soundInfo;
         const sampleSecond = sampleRate * bytesPerSample * numChannels;
-        this.seekPosition = (this.seekPosition + bytes) % (sampleSecond * this.length);
+        this.seekPosition =
+            (this.seekPosition + bytes) % (sampleSecond * this.length);
     }
 
     async seek(position: number) {
@@ -369,13 +387,12 @@ export class StreamedSound implements RemoteSound {
 
             this.seekPosition = position;
 
-            if (this.decodeBuffer.fresh)
-                return;
+            if (this.decodeBuffer.fresh) return;
 
             await this.forceSeekDecodeBuffer(this.startThreshold);
         } else if (
             position >= this.seekPosition &&
-            position < (this.seekPosition + this.decodeBuffer.bytesAvailable)
+            position < this.seekPosition + this.decodeBuffer.bytesAvailable
         ) {
             this.decodeBuffer.read(position - this.seekPosition);
             this.seekPosition = position;
@@ -401,11 +418,11 @@ export class StreamedSound implements RemoteSound {
             await this.decoder.free();
             this.decoder = null;
         }
-    };
+    }
 
     release() {
         // this.handle.release();
-    };
+    }
 }
 
 export class StaticSound implements RemoteSound {
@@ -414,7 +431,13 @@ export class StaticSound implements RemoteSound {
     public start: number;
     public end: number;
 
-    constructor(remotePath: string, filename: string, start: number, end: number, stream = false) {
+    constructor(
+        remotePath: string,
+        filename: string,
+        start: number,
+        end: number,
+        stream = false,
+    ) {
         this.source = new FMODMountedFile(remotePath, filename);
         this.handle = null;
         this.start = start;
@@ -428,7 +451,6 @@ export class StaticSound implements RemoteSound {
     get isLoaded() {
         return this.handle !== null;
     }
-
 
     load() {
         if (!this.source.fetchStatus.isResolved) {
@@ -446,7 +468,12 @@ export class StaticSound implements RemoteSound {
         // info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
         const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
 
-        FMOD.Result = FMOD.Core.createSound('/' + this.source.filename, mode, info, sound);
+        FMOD.Result = FMOD.Core.createSound(
+            '/' + this.source.filename,
+            mode,
+            info,
+            sound,
+        );
         this.handle = sound.deref();
         return true;
     }
@@ -463,4 +490,3 @@ export class StaticSound implements RemoteSound {
         this.source.release();
     }
 }
-
