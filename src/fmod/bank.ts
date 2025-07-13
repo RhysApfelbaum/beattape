@@ -3,10 +3,8 @@ import { Pointer } from './pointer';
 import { RemoteFMODStatus } from './remoteFMODStatus';
 import { FMODMountedFile } from './mountedFile';
 
-
-
 export class Bank {
-    file: FMODMountedFile
+    file: FMODMountedFile;
     private handle: any;
     private error: Error | null;
 
@@ -17,20 +15,22 @@ export class Bank {
     }
 
     getStatus(): RemoteFMODStatus {
-        if (this.error !== null) return {
-            status: 'error',
-            error: this.error
-        };
+        if (this.error !== null)
+            return {
+                status: 'error',
+                error: this.error,
+            };
 
-        if (this.handle === null) return {
-            status: 'unloaded',
-            error: null
-        }
+        if (this.handle === null)
+            return {
+                status: 'unloaded',
+                error: null,
+            };
 
         return {
             status: this.file.fetchStatus.isSettled ? 'fetched' : 'loaded',
-            error: null
-        }
+            error: null,
+        };
     }
 
     isLoaded() {
@@ -52,7 +52,11 @@ export class Bank {
         try {
             await this.file.fetchStatus;
             console.log(`/${this.file.filename}.bank`);
-            FMOD.Result = FMOD.Studio.loadBankFile(`/${this.file.filename}`, FMOD.STUDIO_LOAD_BANK_NORMAL, outval);
+            FMOD.Result = FMOD.Studio.loadBankFile(
+                `/${this.file.filename}`,
+                FMOD.STUDIO_LOAD_BANK_NORMAL,
+                outval,
+            );
             this.handle = outval.deref();
         } catch (error) {
             this.error = error as Error;
@@ -62,7 +66,9 @@ export class Bank {
     unload() {
         const { status } = this.getStatus();
         if (status !== 'loaded') {
-            this.error = new Error(`Tried to unload ${this.file.filename} - only loaded banks can be unloaded.`);
+            this.error = new Error(
+                `Tried to unload ${this.file.filename} - only loaded banks can be unloaded.`,
+            );
             return;
         }
 

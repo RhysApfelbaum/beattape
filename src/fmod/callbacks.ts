@@ -1,6 +1,10 @@
 import { FMOD } from './system';
 
-export type FMODCallback = (type: number, event: any, parameters: any) => number;
+export type FMODCallback = (
+    type: number,
+    event: any,
+    parameters: any,
+) => number;
 
 export const beatAnimation: FMODCallback = (type, event, parameters) => {
     let anim: CSSAnimation;
@@ -15,4 +19,4 @@ export const beatAnimation: FMODCallback = (type, event, parameters) => {
     anim.cancel();
     anim.play();
     return FMOD.OK;
-}
+};

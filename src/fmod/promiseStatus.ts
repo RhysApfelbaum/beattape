@@ -11,9 +11,8 @@ export class PromiseStatus {
 
     private createNewPromise() {
         return new Promise<void>((resolve, reject) => {
-            this.resolve = value => {
-                if (this.status !== 'unsettled')
-                    return;
+            this.resolve = (value) => {
+                if (this.status !== 'unsettled') return;
                 this.status = 'resolved';
                 resolve(value);
             };
@@ -42,14 +41,23 @@ export class PromiseStatus {
     }
 
     then<TResult1 = void, TResult2 = never>(
-        onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-        onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+        onfulfilled?:
+            | ((value: void) => TResult1 | PromiseLike<TResult1>)
+            | undefined
+            | null,
+        onrejected?:
+            | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+            | undefined
+            | null,
     ): Promise<TResult1 | TResult2> {
         return this.promise.then(onfulfilled, onrejected);
     }
 
     catch<TResult = never>(
-        onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+        onrejected?:
+            | ((reason: any) => TResult | PromiseLike<TResult>)
+            | undefined
+            | null,
     ): Promise<void | TResult> {
         return this.promise.catch(onrejected);
     }

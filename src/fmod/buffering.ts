@@ -1,23 +1,25 @@
-import { assertNotNull, unreachable } from "./helpers";
-import { PromiseStatus } from "./promiseStatus";
+import { assertNotNull, unreachable } from './helpers';
+import { PromiseStatus } from './promiseStatus';
 
-
-export type RingBufferReadResult = {
-    view: Uint8Array,
-    wrappedView: null,
-    underflow: false,
-    wrap: false
-} | {
-    view: null,
-    wrappedView: null,
-    underflow: true,
-    wrap: false
-} | {
-    view: Uint8Array,
-    wrappedView: Uint8Array,
-    underflow: false,
-    wrap: true
-};
+export type RingBufferReadResult =
+    | {
+          view: Uint8Array;
+          wrappedView: null;
+          underflow: false;
+          wrap: false;
+      }
+    | {
+          view: null;
+          wrappedView: null;
+          underflow: true;
+          wrap: false;
+      }
+    | {
+          view: Uint8Array;
+          wrappedView: Uint8Array;
+          underflow: false;
+          wrap: true;
+      };
 
 export class Sink {
     private capacity: number;
@@ -45,7 +47,7 @@ export class Sink {
 }
 
 export class RingBuffer {
-    private buffer: ArrayBuffer | null; 
+    private buffer: ArrayBuffer | null;
     private size: number;
     private readIndex: number;
     private writeIndex: number;
@@ -89,8 +91,8 @@ export class RingBuffer {
             size: this.size,
             readIndex: this.readIndex,
             writeIndex: this.writeIndex,
-            percent: this.size * 100 / this.capacity
-        }
+            percent: (this.size * 100) / this.capacity,
+        };
     }
 
     isFull() {
@@ -114,11 +116,10 @@ export class RingBuffer {
     async write(chunk: Uint8Array) {
         assertNotNull(this.buffer);
 
-        await Promise.race([ this.locked, this.canWrite ]);
+        await Promise.race([this.locked, this.canWrite]);
 
         // Completely discard the write
-        if (this.locked.isResolved)
-            return new Uint8Array();
+        if (this.locked.isResolved) return new Uint8Array();
 
         const writeView = new Uint8Array(this.buffer);
         const capacity = this.capacity;
@@ -132,11 +133,9 @@ export class RingBuffer {
         const firstPartSize = Math.min(chunk.length, remaining);
         const secondPartSize = chunk.length - firstPartSize;
 
-
         // Write first part
         try {
             writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
-
         } catch (error) {
             console.log(this.getStatus());
             console.error(error);
@@ -178,7 +177,10 @@ export class RingBuffer {
         }
 
         // Resolve canRead if enough data
-        if (!this.canRead.isResolved && (this.loopFull || this.size >= this.hotThreshold)) {
+        if (
+            !this.canRead.isResolved &&
+            (this.loopFull || this.size >= this.hotThreshold)
+        ) {
             this.canRead.resolve();
         }
 
@@ -194,21 +196,28 @@ export class RingBuffer {
         const viewSize = Math.min(bytes, this.capacity - this.readIndex);
         const wrapSize = bytes - viewSize;
 
-
-
-        const result: RingBufferReadResult = (wrapSize > 0)
-            ? {
-                view: new Uint8Array(this.buffer, this.readIndex, viewSize),
-                wrappedView: new Uint8Array(this.buffer, 0, wrapSize),
-                underflow: false,
-                wrap: true
-            }
-            : {
-                view: new Uint8Array(this.buffer, this.readIndex, viewSize),
-                wrappedView: null,
-                underflow: false,
-                wrap: false
-            }
+        const result: RingBufferReadResult =
+            wrapSize > 0
+                ? {
+                      view: new Uint8Array(
+                          this.buffer,
+                          this.readIndex,
+                          viewSize,
+                      ),
+                      wrappedView: new Uint8Array(this.buffer, 0, wrapSize),
+                      underflow: false,
+                      wrap: true,
+                  }
+                : {
+                      view: new Uint8Array(
+                          this.buffer,
+                          this.readIndex,
+                          viewSize,
+                      ),
+                      wrappedView: null,
+                      underflow: false,
+                      wrap: false,
+                  };
 
         if (this.loopFull || this.isFull()) {
             this.readIndex = (this.readIndex + bytes) % this.capacity;
@@ -220,8 +229,8 @@ export class RingBuffer {
                 view: null,
                 wrappedView: null,
                 wrap: false,
-                underflow: true
-            }
+                underflow: true,
+            };
         }
 
         this.fresh = false;
@@ -259,17 +268,17 @@ export class RingBuffer {
     flush() {
         this.readIndex = 0;
         this.writeIndex = 0;
-        this.size = 0;
+        this.size = 0;
         this.canWrite.resolve();
         this.canRead.reset();
-    }
+    }
 
     allocate(bytes: number, hotThreshold: number) {
         this.buffer = new ArrayBuffer(bytes);
         this.capacity = bytes;
         this.fullThreshold = this.capacity * 0.8;
         this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
-        this.emptyThreshold = this.capacity * 0.00;
+        this.emptyThreshold = this.capacity * 0.0;
     }
 
     free() {
@@ -280,10 +289,11 @@ export class RingBuffer {
         target: RingBuffer | Sink,
         requestedBytes: number,
         process = async (view: Uint8Array) => view,
-        processedOffset = 0
+        processedOffset = 0,
     ) {
         await this.canRead;
-        const { view, wrappedView, wrap, underflow } = this.read(requestedBytes);
+        const { view, wrappedView, wrap, underflow } =
+            this.read(requestedBytes);
         if (underflow) {
             unreachable();
         }
@@ -294,31 +304,39 @@ export class RingBuffer {
         let totalLength = processedView.length;
 
         const processedOffsetInWrap = processedView.length < processedOffset;
- 
+
         let leftover = new Uint8Array();
 
         if (!processedOffsetInWrap) {
             leftover = await target.write(
                 processedView.subarray(
-                    processedOffsetInWrap ? 0 : processedOffset
-                )
+                    processedOffsetInWrap ? 0 : processedOffset,
+                ),
             );
         }
 
         if (leftover.length > 0 || !wrap) {
-            return { leftover: leftover, bytesWritten: totalLength - leftover.length, bytesRead: bytesRead };
+            return {
+                leftover: leftover,
+                bytesWritten: totalLength - leftover.length,
+                bytesRead: bytesRead,
+            };
         }
 
         bytesRead += wrappedView.length;
 
         // view was fully written and we have a wrappedView to write
         const processedWrapped = await process(wrappedView);
-        const processedWrapOffset = processedOffsetInWrap ? (processedOffset - processedView.length) : 0;
+        const processedWrapOffset = processedOffsetInWrap
+            ? processedOffset - processedView.length
+            : 0;
         totalLength += processedWrapped.length;
         return {
-            leftover: await target.write(processedWrapped.subarray(processedWrapOffset)),
+            leftover: await target.write(
+                processedWrapped.subarray(processedWrapOffset),
+            ),
             bytesWritten: totalLength - leftover.length,
-            bytesRead: bytesRead
+            bytesRead: bytesRead,
         };
     }
 }

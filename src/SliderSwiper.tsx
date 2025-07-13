@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Controller, Navigation } from "swiper/modules";
+import React, { useState } from 'react';
+import { Controller, Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import TrackSliders from "./TrackSliders";
+import TrackSliders from './TrackSliders';
 
-import AmbienceSliders from "./AmbienceSliders";
-import Effects from "./Effects";
+import AmbienceSliders from './AmbienceSliders';
+import Effects from './Effects';
 
 const SliderSwiper: React.FC = () => {
     const [headerSwiper, setHeaderSwiper] = useState<any>(null);
@@ -14,7 +14,7 @@ const SliderSwiper: React.FC = () => {
             <Swiper
                 slidesPerView="auto"
                 onSwiper={setHeaderSwiper}
-                modules={[ Controller ]}
+                modules={[Controller]}
                 controller={{ control: mainSwiper }}
                 height={200}
             >
@@ -37,17 +37,17 @@ const SliderSwiper: React.FC = () => {
                 onSwiper={setMainSwiper}
             >
                 <SwiperSlide>
-                        <TrackSliders />
+                    <TrackSliders />
                 </SwiperSlide>
                 <SwiperSlide>
-                        <AmbienceSliders />
+                    <AmbienceSliders />
                 </SwiperSlide>
                 <SwiperSlide>
-                        <Effects />
+                    <Effects />
                 </SwiperSlide>
             </Swiper>
         </div>
     );
-}
+};
 
 export default SliderSwiper;

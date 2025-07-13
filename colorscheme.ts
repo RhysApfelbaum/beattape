@@ -6,12 +6,14 @@ const hexToRgb = (hex: string): RGB => {
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
     return [r, g, b];
-}
+};
 
 type RGB = [number, number, number];
 
 const rgbToHex = (rgb: RGB) => {
-    const [ red, green, blue ] = rgb.map(color => color.toString(16).padStart(2, '0'));
+    const [red, green, blue] = rgb.map((color) =>
+        color.toString(16).padStart(2, '0'),
+    );
     return `#` + red + green + blue;
 };
 
@@ -22,9 +24,11 @@ const colorDistance = (color1: RGB, color2: RGB) => {
     return (r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2;
 };
 
-const { data: imageBuffer, info } = await sharp('./static/art/images/wintertime_chillin.webp')
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+const { data: imageBuffer, info } = await sharp(
+    './static/art/images/wintertime_chillin.webp',
+)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
 const referenceColors = {
     brightLight: '#FDE89D',
@@ -45,10 +49,10 @@ const referenceDistances = {
     grey: 7094,
     background: 4541,
     darkTint: 29,
-    dark: 4304
+    dark: 4304,
 };
 
-const referenceMean: RGB = [ 88, 66, 56 ];
+const referenceMean: RGB = [88, 66, 56];
 
 const meanColor = (imageBuffer: Buffer): RGB => {
     let totalR = 0;
@@ -65,12 +69,14 @@ const meanColor = (imageBuffer: Buffer): RGB => {
     return [
         Math.round(totalR / numPixels),
         Math.round(totalG / numPixels),
-        Math.round(totalB / numPixels)
+        Math.round(totalB / numPixels),
     ];
 };
 
-Object.keys(referenceColors).forEach(key => {
-    const color = hexToRgb(referenceColors[key as keyof typeof referenceColors]);
+Object.keys(referenceColors).forEach((key) => {
+    const color = hexToRgb(
+        referenceColors[key as keyof typeof referenceColors],
+    );
     // console.log(color, colorDistance(referenceMean, color))
 });
 
@@ -84,7 +90,9 @@ const nearestDistance = (imageBuffer: Buffer, distance: number): RGB => {
             imageBuffer[i + 1],
             imageBuffer[i + 2],
         ];
-        const distanceDifference = Math.abs(colorDistance(color, mean) - distance);
+        const distanceDifference = Math.abs(
+            colorDistance(color, mean) - distance,
+        );
         if (distanceDifference < lowestDistanceDifference) {
             lowestDistanceDifference = distanceDifference;
             result = color;
@@ -111,7 +119,6 @@ const nearestColor = (imageBuffer: Buffer, reference: RGB): RGB => {
     return result;
 };
 
-
 const generateTheme = (imageBuffer: Buffer) => {
     const result = {
         brightLight: '#FDE89D',
@@ -132,17 +139,19 @@ const generateTheme = (imageBuffer: Buffer) => {
         grey: 7094,
         background: 4541,
         darkTint: 29,
-        dark: 4304
+        dark: 4304,
     };
 
     // hexToRgb(result[key as keyof typeof result])
-    Object.keys(result).forEach(key => {
-        result[key as keyof typeof result] = rgbToHex(nearestColor(
-            imageBuffer,
-            hexToRgb(result[key as keyof typeof result])
-        ));
+    Object.keys(result).forEach((key) => {
+        result[key as keyof typeof result] = rgbToHex(
+            nearestColor(
+                imageBuffer,
+                hexToRgb(result[key as keyof typeof result]),
+            ),
+        );
     });
     return result;
 };
 
-console.log(generateTheme(imageBuffer))
+console.log(generateTheme(imageBuffer));

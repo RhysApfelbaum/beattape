@@ -6,15 +6,15 @@ const server = Bun.serve({
     port: 3000,
     routes: {
         '/': index,
-        '/*': async req => {
+        '/*': async (req) => {
             const url = new URL(req.url);
             return new Response(Bun.file(`./static${url.pathname}`), {
-                headers: { 'Access-Control-Allow-Origin': '*' }
+                headers: { 'Access-Control-Allow-Origin': '*' },
             });
-        }
+        },
     },
 
-    error: error => {
+    error: (error) => {
         let status = 500;
 
         if (error?.code === 'ENOENT') {
@@ -28,24 +28,24 @@ const server = Bun.serve({
                 message: error.message,
                 code: error.code,
                 errno: error.errno,
-                stack: error.stack
+                stack: error.stack,
             },
             {
                 status,
-                headers: { 'Content-Type': 'application/json' }
-            }
+                headers: { 'Content-Type': 'application/json' },
+            },
         );
     },
 
     tls: {
         cert: Bun.file('./test_certificates/cert.pem'),
-        key: Bun.file('./test_certificates/key.pem')
+        key: Bun.file('./test_certificates/key.pem'),
     },
 
     development: {
         console: false,
-        hmr: true
+        hmr: true,
     },
 });
 
-console.log(`Started beattape dev server on https://127.0.0.1:${server.port}`)
+console.log(`Started beattape dev server on https://127.0.0.1:${server.port}`);

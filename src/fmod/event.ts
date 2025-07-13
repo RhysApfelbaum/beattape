@@ -40,7 +40,12 @@ export class EventInstance {
         this.instance = outval.deref();
     }
 
-    get playbackState(): 'playing' | 'sustaining' | 'stopped' | 'starting' | 'stopping' {
+    get playbackState():
+        | 'playing'
+        | 'sustaining'
+        | 'stopped'
+        | 'starting'
+        | 'stopping' {
         const outval = new Pointer<number>();
         this.instance.getPlaybackState(outval);
         switch (outval.deref()) {
@@ -86,7 +91,10 @@ export class EventInstance {
         FMOD.Result = this.instance.setParameterByName(name, value, immediate);
     }
 
-    setCallback(callbackMask: number, callback: (type: number, event: any, parameters: any) => number) {
+    setCallback(
+        callbackMask: number,
+        callback: (type: number, event: any, parameters: any) => number,
+    ) {
         FMOD.Result = this.instance.setCallback(callback, callbackMask);
     }
 
@@ -99,7 +107,7 @@ export class EventInstance {
 
     // Unloads the instance once playing has stopped
     unload() {
-        FMOD.Result = this.instance.release() ;
+        FMOD.Result = this.instance.release();
         this.instance = null;
     }
 

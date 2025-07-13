@@ -1,4 +1,4 @@
-import { StaticSound, StreamedSound } from "./sound";
+import { StaticSound, StreamedSound } from './sound';
 
 export interface SoundInfo {
     path: string;
@@ -23,40 +23,40 @@ export class SoundLoader {
     addSoundInfo(soundInfo: any) {
         soundInfo.forEach((item: any) => {
             const path = pathToTrackURL(item.path);
-            const stream = new StreamedSound(path, item.start, item.end, item.length, item.sampleRate);
+            const stream = new StreamedSound(
+                path,
+                item.start,
+                item.end,
+                item.length,
+                item.sampleRate,
+            );
             this.sounds.push(stream);
-            this.sounds.sort((a, b) => a.start - b.start );
+            this.sounds.sort((a, b) => a.start - b.start);
         });
     }
 
     testUnderflow() {
-        this.sounds.forEach(sound => {
-            if (sound.isLoaded)
-                sound.underflow();
-        })
+        this.sounds.forEach((sound) => {
+            if (sound.isLoaded) sound.underflow();
+        });
     }
 
     async load(time = 0, offset = 10) {
-        this.sounds.map(sound => {
+        this.sounds.map((sound) => {
             if (sound.isLoaded) {
                 // sound.updateTime(0)
                 // sound.updateDecoderPosition(time);
-            } 
-        })
+            }
+        });
 
         if (time < this.threshold) return;
-        const promises = this.sounds.map(sound => {
-
-            if (
-                sound.start > time + offset ||
-                sound.start < this.threshold
-            ) {
+        const promises = this.sounds.map((sound) => {
+            if (sound.start > time + offset || sound.start < this.threshold) {
                 if (sound.end < this.threshold && sound.isLoaded) {
                     sound.unload();
                 }
                 return null;
             }
-
 
             if (this.fetched.includes(sound)) {
                 return null;
@@ -72,15 +72,17 @@ export class SoundLoader {
     }
 
     async unload() {
-        await Promise.all(this.sounds.map(sound => {
-            if (sound.isLoaded) {
-                return sound.unload();
-            }
-        }));
+        await Promise.all(
+            this.sounds.map((sound) => {
+                if (sound.isLoaded) {
+                    return sound.unload();
+                }
+            }),
+        );
     }
 
     getSound(path: string) {
-        let newPath = path;
+        let newPath = path.replace('mp3', 'ogg');
         for (const sound of this.sounds) {
             if (sound.url === pathToTrackURL(newPath)) {
                 return sound;
@@ -99,5 +101,4 @@ export class SoundLoader {
         }
         return 1000;
     }
-
 }

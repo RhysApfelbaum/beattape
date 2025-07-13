@@ -3,8 +3,7 @@ import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 
 const TrackSliders: React.FC = () => {
-
-    const [ playQueue, setPlayQueue ] = usePlayQueue();
+    const [playQueue, setPlayQueue] = usePlayQueue();
 
     const updateGrit = (value: number) => {
         // if (!playQueue.currentTrack.isLoaded) return;
@@ -28,8 +27,8 @@ const TrackSliders: React.FC = () => {
             ...playQueue,
             sliderState: {
                 ...playQueue.sliderState,
-                grit: value
-            }
+                grit: value,
+            },
         });
     };
 
@@ -38,8 +37,8 @@ const TrackSliders: React.FC = () => {
             ...playQueue,
             sliderState: {
                 ...playQueue.sliderState,
-                brightness: value
-            }
+                brightness: value,
+            },
         });
     };
 
@@ -48,8 +47,8 @@ const TrackSliders: React.FC = () => {
             ...playQueue,
             sliderState: {
                 ...playQueue.sliderState,
-                chops: value
-            }
+                chops: value,
+            },
         });
     };
 
@@ -58,40 +57,40 @@ const TrackSliders: React.FC = () => {
             ...playQueue,
             sliderState: {
                 ...playQueue.sliderState,
-                vocals: value
-            }
+                vocals: value,
+            },
         });
     };
 
     return (
         <div className="flex m-5">
-            <Slider 
+            <Slider
                 update={updateGrit}
                 label="grit"
                 activation="var(--grit)"
                 onMouseUp={updateSliderStateGrit}
-                className='w-[25%]'
+                className="w-[25%]"
             />
             <Slider
                 update={updateBrightness}
                 label="brightness"
                 activation="var(--brightness)"
                 onMouseUp={updateSliderStateBrightness}
-                className='w-[25%]'
+                className="w-[25%]"
             />
             <Slider
                 update={updateChops}
                 label="chops"
                 activation="var(--chops)"
                 onMouseUp={updateSliderStateChops}
-                className='w-[25%]'
+                className="w-[25%]"
             />
             <Slider
                 update={updateVocals}
                 label="vocals"
                 activation="var(--vocals)"
                 onMouseUp={updateSliderStateVocals}
-                className='w-[25%]'
+                className="w-[25%]"
             />
         </div>
     );

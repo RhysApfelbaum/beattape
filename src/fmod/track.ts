@@ -5,7 +5,6 @@ import { SoundInfo, SoundLoader } from './soundLoader';
 import soundSchema from '../soundSchema.json';
 
 export class Track {
-
     public name: string;
     public displayName: string;
     public averageSliderState: SliderState;
@@ -14,7 +13,11 @@ export class Track {
     public changed = false;
     public sounds: SoundLoader;
 
-    constructor(name: string, displayName: string, averageSliderState: SliderState) {
+    constructor(
+        name: string,
+        displayName: string,
+        averageSliderState: SliderState,
+    ) {
         this.name = name;
         this.displayName = displayName;
         this.bank = new Bank(this.name, `./fmod_banks/${this.name}.bank`);
@@ -26,7 +29,11 @@ export class Track {
 
     // A simple check to see whether the bank and the event have been loaded
     get isLoaded() {
-        return (this.event != null) && (this.bank != null) && (this.bank.getStatus().status === 'loaded');
+        return (
+            this.event != null &&
+            this.bank != null &&
+            this.bank.getStatus().status === 'loaded'
+        );
     }
 
     // Requires no FMOD functions

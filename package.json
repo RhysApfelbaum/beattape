@@ -18,6 +18,7 @@
     "@styled/typescript-styled-plugin": "^1.0.1",
     "@types/styled-components": "^5.1.34",
     "@types/webaudioapi": "^0.0.27",
+    "@wasm-audio-decoders/ogg-vorbis": "^0.1.18",
     "all": "^0.0.0",
     "bun-html-live-reload": "^1.0.4",
     "bun-plugin-html": "^2.0.0",
@@ -27,6 +28,7 @@
     "framer-motion": "^12.20.1",
     "http-server": "^14.1.1",
     "mpg123-decoder": "^1.0.1",
+    "prettier": "^3.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "style-it": "^2.1.4",
@@ -38,6 +40,7 @@
     "clean": "rm -rf ./dist/*",
     "build": "bun build.ts",
     "watch": "bun build.ts --watch",
+    "format": "bunx prettier --write ./**/*.{ts,tsx,js,jsx,json,md}",
     "up": "bun serve.ts"
   }
 }

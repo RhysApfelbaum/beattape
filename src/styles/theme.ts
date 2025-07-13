@@ -17,15 +17,20 @@ export const theme = {
     base0F: '',
 };
 
-Object.keys(theme).forEach(key => {
-    theme[key as keyof typeof theme] = getComputedStyle(document.documentElement)
-        .getPropertyValue(`--color-${key}`);
+Object.keys(theme).forEach((key) => {
+    theme[key as keyof typeof theme] = getComputedStyle(
+        document.documentElement,
+    ).getPropertyValue(`--color-${key}`);
 });
 
 export const setTheme = (newTheme: typeof theme) => {
-    Object.keys(newTheme).forEach(key => {
-        document.documentElement.style.setProperty(`--color-${key}`, newTheme[key as keyof typeof newTheme]);
-        theme[key as keyof typeof theme] = newTheme[key as keyof typeof newTheme];
+    Object.keys(newTheme).forEach((key) => {
+        document.documentElement.style.setProperty(
+            `--color-${key}`,
+            newTheme[key as keyof typeof newTheme],
+        );
+        theme[key as keyof typeof theme] =
+            newTheme[key as keyof typeof newTheme];
     });
 };
 
@@ -37,9 +42,10 @@ export const hexToRgb = (hex: string): RGB => {
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
     return [r, g, b];
-}
+};
 
-export const isLight = (color: RGB) => color[0] + color[1] + color[2] > 255 * 1.5;
+export const isLight = (color: RGB) =>
+    color[0] + color[1] + color[2] > 255 * 1.5;
 
 export const themes: Record<string, typeof theme> = {
     catppuccinMocha: {
@@ -59,5 +65,5 @@ export const themes: Record<string, typeof theme> = {
         base0D: '#89b4fa',
         base0E: '#cba6f7',
         base0F: '#f2cdcd',
-    }
-}
+    },
+};

@@ -11,12 +11,11 @@ import { useIsMobile } from './fmod/helpers';
 type Contributor = typeof contributors.soundtomb;
 
 const ArtPicker: React.FC<{
-    artist: string
-    index: number,
-    setIndex: React.Dispatch<SetStateAction<number>>
+    artist: string;
+    index: number;
+    setIndex: React.Dispatch<SetStateAction<number>>;
 }> = ({ artist, index, setIndex }) => {
-
-    const [ open, setOpen ] = useState(false);
+    const [open, setOpen] = useState(false);
     const artistInfo = contributors[artist as keyof typeof contributors];
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const mobile = useIsMobile();
@@ -44,7 +43,7 @@ const ArtPicker: React.FC<{
 
     return (
         <>
-            { !open &&
+            {!open && (
                 <button
                     className="
                     rounded-[3px]
@@ -57,13 +56,12 @@ const ArtPicker: React.FC<{
                     "
                     title="Change artwork"
                     onClick={() => setOpen(true)}
-                    
                 >
-                        <div className="bg-base0A w-3 h-3 rounded group-hover:bg-base09 transition-all"/>
-                        <div className="bg-base05 w-3 h-3 rounded group-hover:bg-base06 transition-all"/>
-                        <div className="bg-base0F w-3 h-3 rounded group-hover:bg-base0E transition-all"/>
-                    </button>
-            }
+                    <div className="bg-base0A w-3 h-3 rounded group-hover:bg-base09 transition-all" />
+                    <div className="bg-base05 w-3 h-3 rounded group-hover:bg-base06 transition-all" />
+                    <div className="bg-base0F w-3 h-3 rounded group-hover:bg-base0E transition-all" />
+                </button>
+            )}
             <Modal open={open} onClose={() => setOpen(false)}>
                 <h2>Select Artwork</h2>
                 <Swiper
@@ -71,22 +69,22 @@ const ArtPicker: React.FC<{
                     slidesPerView={mobile ? 1 : 5}
                     navigation
                     className="px-10"
-                    onSlideChange={swiper => {
+                    onSlideChange={(swiper) => {
                         if (mobile) {
                             setIndex(swiper.activeIndex);
                         }
                     }}
-                    onSwiper={swiper => {
+                    onSwiper={(swiper) => {
                         if (mobile) {
-                            swiper.slideTo(index)
+                            swiper.slideTo(index);
                         }
                     }}
                 >
-                    {
-                        artData.map((art, index) => (
-                            <SwiperSlide key={index}>
-                                <div className="flex justify-center">
-                                    <button className="
+                    {artData.map((art, index) => (
+                        <SwiperSlide key={index}>
+                            <div className="flex justify-center">
+                                <button
+                                    className="
                                         bg-transparent
                                         border-0
                                         text-inherit
@@ -101,20 +99,20 @@ const ArtPicker: React.FC<{
                                         hover:text-darkTint
                                         hover:font-bold
                                         "
-                                        onClick={() => handleSelect(index)}
-                                    >
-                                        <img className="
+                                    onClick={() => handleSelect(index)}
+                                >
+                                    <img
+                                        className="
                                             rounded-lg
                                             border
                                             border-brightLight
                                             "
-                                            src={art.thumbnailUrl}
-                                        />
-                                    </button>
-                                </div>
-                            </SwiperSlide>
-                        ))
-                    }
+                                        src={art.thumbnailUrl}
+                                    />
+                                </button>
+                            </div>
+                        </SwiperSlide>
+                    ))}
                 </Swiper>
             </Modal>
         </>

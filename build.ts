@@ -10,19 +10,19 @@ const build = async () => {
     console.log('Building...');
 
     const result = await Bun.build({
-        entrypoints: [ './src/index.html' ],
+        entrypoints: ['./src/index.html'],
         sourcemap: 'linked',
         outdir: outputDirectory,
         plugins: [tailwind],
         target: 'browser',
-        minify: false,
+        minify: true,
     });
 
     if (result.success) {
         console.log('Build successful! Outputs:');
-        result.outputs.map(output => console.log(output.path));
+        result.outputs.map((output) => console.log(output.path));
     } else {
-        result.logs.map(message => console.error(message));
+        result.logs.map((message) => console.error(message));
     }
 };
 
