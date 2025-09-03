@@ -188,7 +188,7 @@ export class StreamedSound implements RemoteSound {
                 }
 
                 if (leftover.length > 0) {
-                    await this.decodeBuffer.write(leftover);
+                    await this.decodeBuffer.forceWrite(leftover);
                 }
             }
         }
@@ -215,17 +215,21 @@ export class StreamedSound implements RemoteSound {
             this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS,
             this.soundInfo.bytesPerSecond * 2,
         );
+
         this.startBuffer.allocate(this.startThreshold, this.startThreshold);
+        console.log('start buffer allocated');
 
         // Start downloading the file
         this.download();
+
+        await Promise.all([this.fileBuffer.allocated, this.startBuffer.allocated, this.decodeBuffer.allocated]);
 
         // Start the decoding producer
         this.startDecoding(true);
     }
 
     get isLoaded() {
-        return this.handle !== null;
+        return this.handle !== null && this.handle !== undefined;
     }
 
     private readPCMFromStart(heapPointer: number, requestedBytes: number) {
@@ -286,12 +290,12 @@ export class StreamedSound implements RemoteSound {
 
         // Completely rebuild the decoder, as this may cause errors
         assertNotNull(this.decoder);
-        await this.decoder.free();
+        // await this.decoder.free();
         this.fileBuffer.unsafeSeek(0);
-        this.decoder = new OggVorbisDecoderWebWorker();
-        await this.decoder.ready;
+        // this.decoder = new OggVorbisDecoderWebWorker();
+        // await this.decoder.ready;
 
-        // Causes mp3 decoding errors
+        // Causes decoding errors
         await this.decoder.reset();
 
         this.decodePosition = 0;
@@ -410,10 +414,12 @@ export class StreamedSound implements RemoteSound {
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
+        console.log('unloading', this.url);
         this.handle.release();
         this.handle = null;
         this.startBuffer.free();
         this.fileBuffer.free();
+        this.decodeBuffer.free();
         if (this.decoder !== null) {
             await this.decoder.free();
             this.decoder = null;
@@ -449,7 +455,8 @@ export class StaticSound implements RemoteSound {
     }
 
     get isLoaded() {
-        return this.handle !== null;
+        console.log('LOADED CHECK', typeof this.handle);
+        return this.handle !== null && this.handle !== undefined;
     }
 
     load() {

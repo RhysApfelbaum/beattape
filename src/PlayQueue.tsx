@@ -50,7 +50,7 @@ const TrackRow: React.FC<{
 };
 
 const PlayQueue: React.FC = () => {
-    const [playQueue, setPlayQueue] = usePlayQueue();
+    const [playQueue, dispatch] = usePlayQueue();
     const [collapsed, setCollapsed] = useState(true);
 
     type TrackItem = { track: Track; changed: boolean };
@@ -61,53 +61,54 @@ const PlayQueue: React.FC = () => {
 
     const ref = useRef<HTMLDivElement>(null);
 
-    const ref = useRef<HTMLDivElement>(null);
 
-    const fillNextTracks = () => {
-        const nextTracks = getNextTracks(playQueue);
-        const newTrackItems: TrackItem[] = [];
-        if (trackItems.length === 0) {
-            // If there are no track items to display, it's the first time loading the page.
-            nextTracks.map((track) =>
-                newTrackItems.push({ track: track, changed: false }),
-            );
-        } else {
-            // Otherwise compare track by track, and mark the different ones as changed
-            for (let i = 0; i < nextTracks.length; i++) {
-                newTrackItems.push({
-                    track: nextTracks[i],
-                    changed: nextTracks[i] !== trackItems[i].track,
-                });
-            }
-        }
-        setPlayQueue({ ...playQueue, nextTracks: nextTracks });
-        setTrackItems(newTrackItems);
-    };
+    // useEffect(() => dispatch({ type: 'UPDATE' }), []);
 
-    useEffect(() => {
-        if (
-            playQueue.sliderState.grit === sliderState.grit &&
-            playQueue.sliderState.brightness === sliderState.brightness &&
-            playQueue.sliderState.chops === sliderState.chops &&
-            playQueue.sliderState.vocals === sliderState.vocals
-        ) {
-            const newTrackItems: TrackItem[] = [];
-            playQueue.nextTracks.map((track) => {
-                if (newTrackItems.length < playQueue.tracklist.length) {
-                    newTrackItems.push({ track: track, changed: false });
-                }
-            });
+    // const fillNextTracks = () => {
+    //     const nextTracks = getNextTracks(playQueue);
+    //     const newTrackItems: TrackItem[] = [];
+    //     if (trackItems.length === 0) {
+    //         // If there are no track items to display, it's the first time loading the page.
+    //         nextTracks.map((track) =>
+    //             newTrackItems.push({ track: track, changed: false }),
+    //         );
+    //     } else {
+    //         // Otherwise compare track by track, and mark the different ones as changed
+    //         for (let i = 0; i < nextTracks.length; i++) {
+    //             newTrackItems.push({
+    //                 track: nextTracks[i],
+    //                 changed: nextTracks[i] !== trackItems[i].track,
+    //             });
+    //         }
+    //     }
+    //     dispatch({ type: 'SET_NEXT_TRACKS', nextTracks: nextTracks});
+    //     setTrackItems(newTrackItems);
+    // };
 
-            for (let i = 0; i < trackItems.length; i++) {
-                if (trackItems[i].track !== playQueue.nextTracks[i]) {
-                    setTrackItems(newTrackItems);
-                    break;
-                }
-            }
-        } else setSliderState(playQueue.sliderState);
-    }, [playQueue]);
-
-    useEffect(fillNextTracks, [sliderState]);
+    // useEffect(() => {
+    //     if (
+    //         playQueue.sliderState.grit === sliderState.grit &&
+    //         playQueue.sliderState.brightness === sliderState.brightness &&
+    //         playQueue.sliderState.chops === sliderState.chops &&
+    //         playQueue.sliderState.vocals === sliderState.vocals
+    //     ) {
+    //         const newTrackItems: TrackItem[] = [];
+    //         playQueue.nextTracks.map((track) => {
+    //             if (newTrackItems.length < playQueue.tracklist.length) {
+    //                 newTrackItems.push({ track: track, changed: false });
+    //             }
+    //         });
+    //
+    //         for (let i = 0; i < trackItems.length; i++) {
+    //             if (trackItems[i].track !== playQueue.nextTracks[i]) {
+    //                 setTrackItems(newTrackItems);
+    //                 break;
+    //             }
+    //         }
+    //     } else setSliderState(playQueue.sliderState);
+    // }, [playQueue]);
+    //
+    // useEffect(fillNextTracks, [sliderState]);
 
     return (
         <div

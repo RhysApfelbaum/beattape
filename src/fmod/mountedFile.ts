@@ -37,7 +37,7 @@ export class FMODMountedFile implements RemoteSoundData {
         const canOwn = false;
 
         if (this.fetchStatus.isResolved) {
-            console.error(`${this.filename} has already been fetched`);
+            throw new Error(`${this.filename} has already been fetched`);
         }
 
         try {

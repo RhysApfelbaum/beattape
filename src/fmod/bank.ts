@@ -21,66 +21,65 @@ export class Bank {
                 error: this.error,
             };
 
-        if (this.handle === null)
+        if (!this.file.fetchStatus.isResolved) {
             return {
                 status: 'unloaded',
                 error: null,
             };
+        }
+
+        if (this.handle === null)
+            return {
+                status: 'fetched',
+                error: null,
+            };
 
         return {
-            status: this.file.fetchStatus.isSettled ? 'fetched' : 'loaded',
+            status: 'loaded',
             error: null,
         };
     }
 
-    isLoaded() {
+    get isLoaded() {
         const { status } = this.getStatus();
         return status === 'loaded';
     }
 
     async fetch() {
-        try {
-            await this.file.fetch();
-        } catch (error) {
-            this.error = error as Error;
+        const { status } = this.getStatus();
+        if (status === 'loaded' || status === 'fetched') {
+            return;
         }
+        await this.file.fetch();
     }
 
     // TODO: Change the string formatting of this file so that the .bank is included
     async load() {
         const outval = new Pointer<any>();
-        try {
-            await this.file.fetchStatus;
-            console.log(`/${this.file.filename}.bank`);
-            FMOD.Result = FMOD.Studio.loadBankFile(
-                `/${this.file.filename}`,
-                FMOD.STUDIO_LOAD_BANK_NORMAL,
-                outval,
-            );
-            this.handle = outval.deref();
-        } catch (error) {
-            this.error = error as Error;
-        }
+        await this.file.fetchStatus;
+        console.log(`/${this.file.filename}.bank`);
+        FMOD.Result = FMOD.Studio.loadBankFile(
+            `/${this.file.filename}`,
+            FMOD.STUDIO_LOAD_BANK_NORMAL,
+            outval,
+        );
+        this.handle = outval.deref();
     }
 
     unload() {
         const { status } = this.getStatus();
         if (status !== 'loaded') {
-            this.error = new Error(
+            throw new Error(
                 `Tried to unload ${this.file.filename} - only loaded banks can be unloaded.`,
             );
-            return;
         }
 
-        try {
-            FMOD.Result = this.handle.unload();
-            this.handle = null;
-        } catch (error) {
-            this.error = error as Error;
-        }
+        console.error('unloading bank ' + this.file.url);
+        FMOD.Result = this.handle.unload();
+        this.handle = null;
     }
 
     unmount() {
-        this.file.unmount();
+        // this.file.unmount();
     }
 }

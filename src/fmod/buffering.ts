@@ -61,6 +61,7 @@ export class RingBuffer {
     loop: boolean;
     canRead: PromiseStatus;
     canWrite: PromiseStatus;
+    allocated: PromiseStatus;
     fresh: boolean;
 
     constructor(loop: boolean) {
@@ -75,6 +76,7 @@ export class RingBuffer {
         this.canRead = new PromiseStatus();
         this.canWrite = new PromiseStatus();
         this.locked = new PromiseStatus();
+        this.allocated = new PromiseStatus();
         this.canWrite.resolve();
         this.loop = loop;
         this.loopFull = false;
@@ -82,7 +84,7 @@ export class RingBuffer {
     }
 
     get bytesAvailable() {
-        return this.size;
+        return this.capacity - this.size;
     }
 
     getStatus() {
@@ -113,8 +115,17 @@ export class RingBuffer {
         this.locked.reset();
     }
 
+    
+    async forceWrite(chunk: Uint8Array) {
+        let leftover = chunk;
+        while (leftover.length > 0) {
+            leftover = await this.write(leftover);
+            console.log(leftover.length);
+        }
+    }
+
     async write(chunk: Uint8Array) {
-        assertNotNull(this.buffer);
+        assertNotNull(this.buffer, 'Tried to write to unallocated buffer');
 
         await Promise.race([this.locked, this.canWrite]);
 
@@ -128,6 +139,9 @@ export class RingBuffer {
         if (this.loop && this.loopFull) {
             return chunk;
         }
+
+        const trimmedChunk = chunk.subarray(0, this.bytesAvailable);
+        const leftover = chunk.subarray(this.bytesAvailable);
 
         const remaining = capacity - this.writeIndex;
         const firstPartSize = Math.min(chunk.length, remaining);
@@ -145,13 +159,13 @@ export class RingBuffer {
 
         // Looping mode: stop at end of buffer, discard second part
         if (this.loop) {
-            if (this.writeIndex + chunk.length >= capacity) {
+            if (this.writeIndex + trimmedChunk.length >= capacity) {
                 this.loopFull = true;
                 this.writeIndex = 0;
                 this.size = capacity;
                 this.canWrite.reset();
                 if (!this.canRead.isResolved) this.canRead.resolve();
-                return chunk.subarray(firstPartSize); // discard second half
+                return trimmedChunk.subarray(firstPartSize); // discard second half
             } else {
                 this.writeIndex += firstPartSize;
                 this.size += firstPartSize;
@@ -161,7 +175,7 @@ export class RingBuffer {
         // Non-looping: wrap around and write second part
         else {
             if (secondPartSize > 0) {
-                writeView.set(chunk.subarray(firstPartSize), 0);
+                writeView.set(trimmedChunk.subarray(firstPartSize), 0);
                 this.writeIndex = secondPartSize;
                 totalWritten += secondPartSize;
             } else {
@@ -184,7 +198,7 @@ export class RingBuffer {
             this.canRead.resolve();
         }
 
-        return new Uint8Array(); // nothing left over
+        return leftover;
     }
 
     read(requestedBytes: number): RingBufferReadResult {
@@ -279,10 +293,12 @@ export class RingBuffer {
         this.fullThreshold = this.capacity * 0.8;
         this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
         this.emptyThreshold = this.capacity * 0.0;
+        this.allocated.resolve();
     }
 
     free() {
         this.buffer = null;
+        this.allocated.reset();
     }
 
     async pipe(

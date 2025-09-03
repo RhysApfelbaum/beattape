@@ -15,7 +15,7 @@ export class EventInstance {
     }
 
     get isLoaded(): boolean {
-        if (this.instance === null) return false;
+        if (this.instance === null || this.instance === undefined) return false;
         const outval = new Pointer<number>();
         FMOD.Result = this.description.getSampleLoadingState(outval);
         if (outval.deref() !== FMOD.STUDIO_LOADING_STATE_LOADED) {

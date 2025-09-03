@@ -1,20 +1,32 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  pkgs-unstable = import inputs.nixpkgs-unstable { system = pkgs.stdenv.system; };
-in 
-{
+  pkgs-unstable =
+    import inputs.nixpkgs-unstable { system = pkgs.stdenv.system; };
+in {
   # https://devenv.sh/basics/
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [ git tailwindcss-language-server ffmpeg ];
+  packages = with pkgs; [
+    git
+    tailwindcss-language-server
+    ffmpeg
+    emscripten
+    python3
+    gettext
+    wget
+    libtool
+    automake
+    autoconf
+  ];
 
   # https://devenv.sh/languages/
   languages.javascript = {
     enable = true;
     bun.enable = true;
     bun.package = pkgs-unstable.bun;
+    npm.enable = true;
   };
 
   # https://devenv.sh/processes/

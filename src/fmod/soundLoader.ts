@@ -42,15 +42,8 @@ export class SoundLoader {
     }
 
     async load(time = 0, offset = 10) {
-        this.sounds.map((sound) => {
-            if (sound.isLoaded) {
-                // sound.updateTime(0)
-                // sound.updateDecoderPosition(time);
-            }
-        });
-
         if (time < this.threshold) return;
-        const promises = this.sounds.map((sound) => {
+        const promises = this.sounds.map(async (sound) => {
             if (sound.start > time + offset || sound.start < this.threshold) {
                 if (sound.end < this.threshold && sound.isLoaded) {
                     sound.unload();
@@ -62,9 +55,11 @@ export class SoundLoader {
                 return null;
             }
 
+            await sound.fetch();
+            console.log('fetching', sound.url);
             this.fetched.push(sound);
-            sound.fetch();
-            return sound.load();
+
+            await sound.load();
         });
         this.threshold = time + offset / 2;
 
@@ -72,8 +67,10 @@ export class SoundLoader {
     }
 
     async unload() {
+        this.fetched = [];
+        this.threshold = 0;
         await Promise.all(
-            this.sounds.map((sound) => {
+            this.sounds.map(sound => {
                 if (sound.isLoaded) {
                     return sound.unload();
                 }

@@ -36,7 +36,7 @@ const App: React.FC = () => {
 
     const radioShowing = true;
 
-    // App is unable to load if FMOD isn't loade
+    // App is unable to load if FMOD isn't loaded
     const mainPage = (
         <PlayQueueProvider>
             <main className="flex flex-col items-center mx-2 mt-2 md:mx-40">
@@ -44,7 +44,6 @@ const App: React.FC = () => {
                 <SliderSwiper />
             </main>
             <footer className="fixed bottom-0 md:right-[50vw] md:translate-x-[50%] md:w-fit w-full flex flex-col justify-center items-center z-[60]">
-                {/* <PlayQueue /> */}
                 <TrackControls />
             </footer>
         </PlayQueueProvider>
