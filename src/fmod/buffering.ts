@@ -1,27 +1,13 @@
 import { assertNotNull, unreachable } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
-export type RingBufferReadResult =
-    | {
-          view: Uint8Array;
-          wrappedView: null;
-          underflow: false;
-          wrap: false;
-      }
-    | {
-          view: null;
-          wrappedView: null;
-          underflow: true;
-          wrap: false;
-      }
-    | {
-          view: Uint8Array;
-          wrappedView: Uint8Array;
-          underflow: false;
-          wrap: true;
-      };
 
-export class Sink {
+
+interface WritableBuffer {
+    write: (chunk: Uint8Array) => Promise<Uint8Array> | Uint8Array;
+}
+
+export class Sink implements WritableBuffer {
     private capacity: number;
     private size: number;
 
@@ -46,171 +32,120 @@ export class Sink {
     }
 }
 
-export class RingBuffer {
-    private buffer: ArrayBuffer | null;
-    private size: number;
-    private readIndex: number;
-    private writeIndex: number;
-    private fullThreshold: number;
-    private hotThreshold: number;
-    private emptyThreshold: number;
-    private loopFull: boolean;
-    private locked: PromiseStatus;
-
+class WrappedBufferView {
+    buffer: ArrayBuffer | null;
     capacity: number;
-    loop: boolean;
-    canRead: PromiseStatus;
-    canWrite: PromiseStatus;
-    allocated: PromiseStatus;
-    fresh: boolean;
+    readIndex: number;
+    writeIndex: number;
+    private full: boolean;
 
-    constructor(loop: boolean) {
+    destructiveRead: boolean;
+
+    constructor() {
+        this.buffer = null;
         this.capacity = 0;
-        this.size = 0;
         this.readIndex = 0;
         this.writeIndex = 0;
-        this.fullThreshold = 0;
-        this.hotThreshold = 0;
-        this.emptyThreshold = 0;
-        this.buffer = null;
-        this.canRead = new PromiseStatus();
-        this.canWrite = new PromiseStatus();
-        this.locked = new PromiseStatus();
-        this.allocated = new PromiseStatus();
-        this.canWrite.resolve();
-        this.loop = loop;
-        this.loopFull = false;
-        this.fresh = true;
+        this.full = false;
+        this.destructiveRead = false;
     }
 
-    get bytesAvailable() {
+    get size() {
+        if (this.full)
+            return this.capacity;
+
+        if (!this.destructiveRead)
+            return this.writeIndex;
+
+        return (this.writeIndex - this.readIndex + this.capacity) % this.capacity;
+    }
+
+    get bytesFree() {
         return this.capacity - this.size;
     }
 
-    getStatus() {
+    forceFull() {
+        this.full = true;
+    }
+
+    get status() {
         return {
             capacity: this.capacity,
             size: this.size,
+            bytesFree: this.bytesFree,
             readIndex: this.readIndex,
             writeIndex: this.writeIndex,
             percent: (this.size * 100) / this.capacity,
+            full: this.full,
         };
     }
 
-    isFull() {
-        return this.size >= this.capacity;
+    allocate(capacity: number) {
+        if (this.buffer !== null) {
+            throw new Error('Tried allocate a buffer that has already been allocated');
+        }
+        this.buffer = new ArrayBuffer(capacity);
+        this.capacity = capacity;
     }
 
-    isEmpty() {
-        return this.size === 0;
+    free() {
+        if (this.buffer === null) {
+            throw new Error('Tried to free an unallocated buffer');
+        }
+        this.buffer = null;
+        this.readIndex = 0;
+        this.writeIndex = 0;
+        this.full = false;
+        this.capacity = 0;
     }
 
-    // Cancel any new or pending writes
-    lock() {
-        this.locked.resolve();
+    write(chunk: Uint8Array) {
+        assertNotNull(this.buffer, 'Buffer not allocated');
+
+        const view = new Uint8Array(this.buffer, this.writeIndex);
+
+        const remaining = Math.min(this.capacity - this.writeIndex, this.bytesFree);
+        const writeSize = Math.min(chunk.length, remaining);
+        const leftoverSize = chunk.length - writeSize;
+
+        view.set(chunk.subarray(0, writeSize));
+
+        if (this.size + writeSize >= this.capacity) {
+            this.full = true;
+        }
+
+        this.writeIndex = (this.writeIndex + writeSize) % this.capacity;
+
+
+        if (leftoverSize > 0) {
+            return {
+                wrapped: true,
+                leftover: chunk.subarray(writeSize)
+            };
+        }
+
+
+        return {
+            wrapped: false,
+            leftover: new Uint8Array()
+        };
     }
 
-    // Allow new writes
-    unlock() {
-        this.locked.reset();
+    flush() {
+        this.readIndex = 0;
+        this.writeIndex = 0;
+        this.full = false;
     }
 
-    
-    async forceWrite(chunk: Uint8Array) {
-        let leftover = chunk;
-        while (leftover.length > 0) {
-            leftover = await this.write(leftover);
-            console.log(leftover.length);
-        }
-    }
-
-    async write(chunk: Uint8Array) {
-        assertNotNull(this.buffer, 'Tried to write to unallocated buffer');
-
-        await Promise.race([this.locked, this.canWrite]);
-
-        // Completely discard the write
-        if (this.locked.isResolved) return new Uint8Array();
-
-        const writeView = new Uint8Array(this.buffer);
-        const capacity = this.capacity;
-
-        // Case 1: Looping mode and already full — reject all writes
-        if (this.loop && this.loopFull) {
-            return chunk;
-        }
-
-        const trimmedChunk = chunk.subarray(0, this.bytesAvailable);
-        const leftover = chunk.subarray(this.bytesAvailable);
-
-        const remaining = capacity - this.writeIndex;
-        const firstPartSize = Math.min(chunk.length, remaining);
-        const secondPartSize = chunk.length - firstPartSize;
-
-        // Write first part
-        try {
-            writeView.set(chunk.subarray(0, firstPartSize), this.writeIndex);
-        } catch (error) {
-            console.log(this.getStatus());
-            console.error(error);
-        }
-
-        let totalWritten = firstPartSize;
-
-        // Looping mode: stop at end of buffer, discard second part
-        if (this.loop) {
-            if (this.writeIndex + trimmedChunk.length >= capacity) {
-                this.loopFull = true;
-                this.writeIndex = 0;
-                this.size = capacity;
-                this.canWrite.reset();
-                if (!this.canRead.isResolved) this.canRead.resolve();
-                return trimmedChunk.subarray(firstPartSize); // discard second half
-            } else {
-                this.writeIndex += firstPartSize;
-                this.size += firstPartSize;
-            }
-        }
-
-        // Non-looping: wrap around and write second part
-        else {
-            if (secondPartSize > 0) {
-                writeView.set(trimmedChunk.subarray(firstPartSize), 0);
-                this.writeIndex = secondPartSize;
-                totalWritten += secondPartSize;
-            } else {
-                this.writeIndex = (this.writeIndex + firstPartSize) % capacity;
-            }
-
-            this.size = Math.min(this.size + totalWritten, capacity);
-
-            // Backpressure: full?
-            if (this.size >= this.fullThreshold) {
-                this.canWrite.reset();
-            }
-        }
-
-        // Resolve canRead if enough data
-        if (
-            !this.canRead.isResolved &&
-            (this.loopFull || this.size >= this.hotThreshold)
-        ) {
-            this.canRead.resolve();
-        }
-
-        return leftover;
-    }
-
-    read(requestedBytes: number): RingBufferReadResult {
-        assertNotNull(this.buffer);
-        this.fresh = false;
+    read(requestedBytes: number): ReadResult {
+        assertNotNull(this.buffer, 'Buffer not allocated');
 
         const bytes = Math.min(requestedBytes, this.capacity);
 
         const viewSize = Math.min(bytes, this.capacity - this.readIndex);
         const wrapSize = bytes - viewSize;
 
-        const result: RingBufferReadResult =
+        const result: ReadResult =
             wrapSize > 0
                 ? {
                       view: new Uint8Array(
@@ -233,12 +168,7 @@ export class RingBuffer {
                       wrap: false,
                   };
 
-        if (this.loopFull || this.isFull()) {
-            this.readIndex = (this.readIndex + bytes) % this.capacity;
-            this.fresh = false;
-            return result;
-        } else if (this.size < bytes) {
-            this.canRead.reset();
+        if (this.size < bytes) {
             return {
                 view: null,
                 wrappedView: null,
@@ -247,62 +177,108 @@ export class RingBuffer {
             };
         }
 
-        this.fresh = false;
-        this.readIndex = (this.readIndex + bytes) % this.capacity;
-
-        if (!this.loopFull) {
-            this.size -= bytes;
+        if (this.destructiveRead) {
+            this.full = false;
         }
 
-        if (this.size < this.fullThreshold) {
-            this.canWrite.resolve();
+        this.readIndex = (this.readIndex + bytes) % this.capacity;
+        return result;
+    }
+
+}
+
+
+export class LoopBuffer {
+    protected view: WrappedBufferView;
+    protected locked: PromiseStatus;
+    private hotThreshold: number;
+    private wrapped: boolean;
+
+    canRead: PromiseStatus;
+    fresh: boolean;
+
+    constructor() {
+        this.view = new WrappedBufferView();
+        this.canRead = new PromiseStatus();
+        this.locked = new PromiseStatus();
+        this.hotThreshold = 0;
+        this.fresh = true;
+        this.wrapped = false;
+    }
+
+    isFull() {
+        return this.status.full;
+    }
+
+    lock() {
+        this.locked.resolve();
+    }
+
+    unlock() {
+        this.locked.reset();
+    }
+
+    get status() {
+        return this.view.status;
+    }
+
+    flush() {
+        this.canRead.reset();
+        this.view.flush();
+    }
+
+    allocate(capacity: number) {
+        this.view.allocate(capacity);
+        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, capacity);
+        this.unlock();
+    }
+
+    free() {
+        this.view.free();
+        this.hotThreshold = 0;
+        this.lock();
+    }
+
+    read(requestedBytes: number) {
+        this.fresh = false;
+        const result = this.view.read(requestedBytes);
+
+        if (result.underflow) {
+            this.canRead.reset();
         }
 
         return result;
     }
 
-    // HACK this is wildly unsafe
-    relativeSeek(offset: number) {
-        console.log(offset, this.size, this.capacity);
-        if (offset > this.size) {
-            return false;
+    async write(chunk: Uint8Array) {
+        if (this.locked.isResolved) {
+            return new Uint8Array();
         }
-        if (-offset >= this.capacity - this.size) {
-            return false;
+
+        const { leftover, wrapped } = this.view.write(chunk);
+
+        // if (wrapped && !this.view.destructiveRead) {
+        //     this.view.forceFull();
+        // }
+
+        // Resolve canRead if enough data
+        if (
+            !this.canRead.isResolved &&
+            (this.view.size >= this.hotThreshold)
+        ) {
+            this.canRead.resolve();
         }
-        this.readIndex = (this.readIndex + offset) % this.capacity;
-        this.size -= offset;
-        return true;
+
+        return leftover;
     }
 
     unsafeSeek(index: number) {
-        this.readIndex = index;
-    }
-
-    flush() {
-        this.readIndex = 0;
-        this.writeIndex = 0;
-        this.size = 0;
-        this.canWrite.resolve();
-        this.canRead.reset();
-    }
-
-    allocate(bytes: number, hotThreshold: number) {
-        this.buffer = new ArrayBuffer(bytes);
-        this.capacity = bytes;
-        this.fullThreshold = this.capacity * 0.8;
-        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, this.capacity);
-        this.emptyThreshold = this.capacity * 0.0;
-        this.allocated.resolve();
-    }
-
-    free() {
-        this.buffer = null;
-        this.allocated.reset();
+        assertNotNull(this.view.buffer, 'Buffer not allocated');
+        this.view.readIndex = index;
     }
 
     async pipe(
-        target: RingBuffer | Sink,
+        target: WritableBuffer,
         requestedBytes: number,
         process = async (view: Uint8Array) => view,
         processedOffset = 0,
@@ -356,3 +332,80 @@ export class RingBuffer {
         };
     }
 }
+
+export class RingBuffer extends LoopBuffer {
+    canWrite: PromiseStatus;
+    private fullThreshold;
+
+    constructor() {
+        super();
+        this.fullThreshold = 0;
+        this.canWrite = new PromiseStatus();
+
+        // It's now possible to overwrite bytes that have been read
+        this.view.destructiveRead = true;
+    }
+
+    allocate(capacity: number) {
+        this.fullThreshold = capacity * 0.8;
+        this.canWrite.resolve();
+        super.allocate(capacity);
+    }
+
+    free() {
+        this.canWrite.reset();
+    }
+
+    async write(chunk: Uint8Array) {
+        let leftover = chunk;
+
+        while (leftover.length > 0) {
+            await Promise.race([this.canWrite, this.locked]);
+
+            // If the buffer was locked, abort the write
+            if (this.locked.isResolved) {
+                return new Uint8Array();
+            }
+
+            leftover = await super.write(leftover);
+            if (this.status.full) {
+                this.canWrite.reset();
+            }
+        }
+
+        return new Uint8Array();
+    }
+
+    read(requestedBytes: number) {
+        const result = super.read(requestedBytes);
+        if (this.view.size < this.fullThreshold) {
+            this.canWrite.resolve();
+        }
+        return result;
+    }
+
+    flush() {
+        super.flush();
+        this.canWrite.resolve();
+    }
+}
+
+export type ReadResult =
+    | {
+          view: Uint8Array;
+          wrappedView: null;
+          underflow: false;
+          wrap: false;
+      }
+    | {
+          view: null;
+          wrappedView: null;
+          underflow: true;
+          wrap: false;
+      }
+    | {
+          view: Uint8Array;
+          wrappedView: Uint8Array;
+          underflow: false;
+          wrap: true;
+      };

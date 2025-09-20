@@ -1,11 +1,8 @@
-import { MPEGDecoderWebWorker } from 'mpg123-decoder';
-import { RingBuffer, RingBufferReadResult, Sink } from './buffering';
-import { gesture, onUserGesture } from './gesture';
+import { LoopBuffer, RingBuffer, Sink } from './buffering';
 import { FMODMountedFile } from './mountedFile';
 import { Pointer } from './pointer';
-import { RemoteFMODStatus } from './remoteFMODStatus';
 import { FMOD } from './system';
-import { assertEqual, assertNotNull, unreachable } from './helpers';
+import { assertNotNull } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
 import { OggVorbisDecoderWebWorker } from '@wasm-audio-decoders/ogg-vorbis';
@@ -30,9 +27,9 @@ export interface RemoteSound {
 }
 
 export class StreamedSound implements RemoteSound {
-    private fileBuffer: RingBuffer;
+    private fileBuffer: LoopBuffer;
+    private startBuffer: LoopBuffer;
     private decodeBuffer: RingBuffer;
-    private startBuffer: RingBuffer;
     private decoder: OggVorbisDecoderWebWorker | null;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition: number;
@@ -74,9 +71,9 @@ export class StreamedSound implements RemoteSound {
         this.soundInfo = DEFAULT_SOUND_INFO;
         this.soundInfo.sampleRate = Math.round(sampleRate);
         this.length = length;
-        this.fileBuffer = new RingBuffer(true);
-        this.startBuffer = new RingBuffer(true);
-        this.decodeBuffer = new RingBuffer(false);
+        this.fileBuffer = new LoopBuffer();
+        this.startBuffer = new LoopBuffer();
+        this.decodeBuffer = new RingBuffer();
         this.startThreshold = this.soundInfo.bytesPerSecond * 4;
 
         this.decodePosition = 0; // Measured in SAMPLES
@@ -152,7 +149,7 @@ export class StreamedSound implements RemoteSound {
             throw new Error(`Invalid Content-Length value: "${lengthHeader}"`);
         }
 
-        this.fileBuffer.allocate(fileLength, StreamedSound.DECODE_CHUNK_SIZE);
+        this.fileBuffer.allocate(fileLength);
 
         const reader = response.body.getReader({ mode: 'byob' });
 
@@ -169,6 +166,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     private async startDecoding(start: boolean) {
+        // console.log('starting to decode', this.fileBuffer.status);
         let atStart = start;
         this.decoding = true;
         this.decodingStatus.reset();
@@ -179,17 +177,16 @@ export class StreamedSound implements RemoteSound {
                 StreamedSound.DECODE_CHUNK_SIZE,
                 this.decodeChunk,
             );
+            if (this.url.includes('deep_kick')) {
+                console.log('writing', buffer.status, leftover.length, atStart); 
+            }
 
-            if (buffer.isFull()) {
-                // Sanity check. The decode buffer should never be completely full
+            if (leftover.length > 0) {
                 if (atStart) {
                     atStart = false;
                     this.startBuffer.lock();
                 }
-
-                if (leftover.length > 0) {
-                    await this.decodeBuffer.forceWrite(leftover);
-                }
+                await this.decodeBuffer.write(leftover);
             }
         }
         this.decodingStatus.resolve();
@@ -209,20 +206,18 @@ export class StreamedSound implements RemoteSound {
 
     async fetch() {
         this.decoder = new OggVorbisDecoderWebWorker();
-        await this.decoder.ready;
 
         this.decodeBuffer.allocate(
-            this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS,
-            this.soundInfo.bytesPerSecond * 2,
+            this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS
         );
 
-        this.startBuffer.allocate(this.startThreshold, this.startThreshold);
-        console.log('start buffer allocated');
+        this.startBuffer.allocate(this.startThreshold);
 
         // Start downloading the file
         this.download();
 
-        await Promise.all([this.fileBuffer.allocated, this.startBuffer.allocated, this.decodeBuffer.allocated]);
+        await Promise.all([this.fileBuffer.canRead, this.decoder.ready]);
+
 
         // Start the decoding producer
         this.startDecoding(true);
@@ -233,12 +228,13 @@ export class StreamedSound implements RemoteSound {
     }
 
     private readPCMFromStart(heapPointer: number, requestedBytes: number) {
+        const { capacity } = this.startBuffer.status;
         const { wrap, view, wrappedView, underflow } = this.startBuffer.read(
-            Math.min(requestedBytes, this.startBuffer.capacity),
+            Math.min(requestedBytes, capacity),
         );
 
         if (underflow) {
-            console.error(this.url, 'underflow');
+            console.error(this.url, 'start underflow');
             this.stop();
             this.startBuffer.canRead.then(() => this.restart());
             return;
@@ -257,8 +253,12 @@ export class StreamedSound implements RemoteSound {
     }
 
     private readPCM(heapPointer: number, requestedBytes: number) {
+        if (this.url.includes('deep_kick')) {
+            console.log('reading', this.decodeBuffer.status); 
+        }
+        const { capacity } = this.decodeBuffer.status;
         const { wrap, view, wrappedView, underflow } = this.decodeBuffer.read(
-            Math.min(requestedBytes, this.decodeBuffer.capacity),
+            Math.min(requestedBytes, capacity),
         );
 
         if (underflow) {
@@ -285,17 +285,12 @@ export class StreamedSound implements RemoteSound {
     async forceSeekDecodeBuffer(position: number) {
         await this.stopDecoding();
 
-        // // All reads are sync
-        const { numChannels, bytesPerSample } = this.soundInfo;
-
-        // Completely rebuild the decoder, as this may cause errors
         assertNotNull(this.decoder);
-        // await this.decoder.free();
-        this.fileBuffer.unsafeSeek(0);
-        // this.decoder = new OggVorbisDecoderWebWorker();
-        // await this.decoder.ready;
 
-        // Causes decoding errors
+        // Restart the file buffer
+        this.fileBuffer.unsafeSeek(0);
+
+        // Reset the decoder to process a new audio stream
         await this.decoder.reset();
 
         this.decodePosition = 0;
@@ -340,16 +335,15 @@ export class StreamedSound implements RemoteSound {
             position: number,
             _postype: any,
         ) => {
-            const { sampleRate } = this.soundInfo;
-            const bytePosition =
-                position *
-                this.soundInfo.bytesPerSample *
-                this.soundInfo.numChannels;
+            const { bytesPerSample, numChannels } = this.soundInfo;
+            const bytePosition = position * bytesPerSample * numChannels;
             this.seek(bytePosition);
             return FMOD.OK;
         };
 
         info.pcmreadcallback = (sound: any, data: number, datalen: number) => {
+
+
             if (this.seekPosition < this.startThreshold) {
                 this.readPCMFromStart(data, datalen);
             } else {
@@ -385,6 +379,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     async seek(position: number) {
+        console.log('seeking', position);
         if (position < this.startThreshold) {
             // The seek is inside the start buffer, so it can be done immediately
             this.startBuffer.unsafeSeek(position);
@@ -396,7 +391,7 @@ export class StreamedSound implements RemoteSound {
             await this.forceSeekDecodeBuffer(this.startThreshold);
         } else if (
             position >= this.seekPosition &&
-            position < this.seekPosition + this.decodeBuffer.bytesAvailable
+            position < this.seekPosition + this.decodeBuffer.status.bytesFree
         ) {
             this.decodeBuffer.read(position - this.seekPosition);
             this.seekPosition = position;
