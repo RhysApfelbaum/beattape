@@ -181,7 +181,7 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
         case 'SET_LOADING': {
             return {
                 ...state,
-                loading: false
+                loading: action.value
             }
         }
     }

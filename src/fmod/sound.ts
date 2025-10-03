@@ -40,6 +40,8 @@ export class StreamedSound implements RemoteSound {
     private readCallbackLastCalled: number;
     private timelinePosition: number;
 
+    private seeking: PromiseStatus;
+
     private decoding: boolean;
     private decodingStatus: PromiseStatus;
 
@@ -71,12 +73,22 @@ export class StreamedSound implements RemoteSound {
         this.soundInfo = DEFAULT_SOUND_INFO;
         this.soundInfo.sampleRate = Math.round(sampleRate);
         this.length = length;
-        this.fileBuffer = new LoopBuffer();
-        this.startBuffer = new LoopBuffer();
-        this.decodeBuffer = new RingBuffer();
+
+        this.fileBuffer = new LoopBuffer({
+            hotThreshold: StreamedSound.DECODE_CHUNK_SIZE * 4
+        });
+
+        // Wait for 2 seconds of decoded audio before reading
+        const decodedHot = this.soundInfo.bytesPerSecond * 2;
+
+        this.startBuffer = new LoopBuffer({ hotThreshold: decodedHot });
+        this.decodeBuffer = new RingBuffer({ hotThreshold: decodedHot });
+
+
+        // Always keep the first 4 seconds of decoded audio in memory
         this.startThreshold = this.soundInfo.bytesPerSecond * 4;
 
-        this.decodePosition = 0; // Measured in SAMPLES
+        this.decodePosition = 0; // Measured in SAMPLES!!!!!
         this.seekPosition = 0;
         this.decodeBufferStartPosition = this.startThreshold;
         this.decoder = null;
@@ -86,16 +98,27 @@ export class StreamedSound implements RemoteSound {
         this.readCallbackLastCalled = 0;
         this.timelinePosition = 0;
 
-        this.decodeChunk = async (chunk) => {
+        this.seeking = new PromiseStatus();
+
+        this.decodeChunk = async chunk => {
             assertNotNull(this.decoder);
             const { channelData, samplesDecoded, errors } =
                 await this.decoder.decode(chunk);
             const [left, right] = channelData;
 
+            if (errors.length > 0 || samplesDecoded < 0) {
+                this.stop();
+                throw new Error(`Decoding error. samplesDecoded: ${samplesDecoded}, errors: ${JSON.stringify(errors) ?? 'none'}, channelData: ${JSON.stringify(channelData) ?? 'none'}`);
+            }
+
             // Discard samples that overshoot the theoretical limit
             const sampleCount = this.soundInfo.sampleRate * this.length;
             const remainingSamples = sampleCount - this.decodePosition;
             const length = Math.min(samplesDecoded, remainingSamples);
+
+            if (length === 0) {
+                // console.log(channelData);
+            }
 
             this.decodePosition = (this.decodePosition + length) % sampleCount;
 
@@ -163,10 +186,10 @@ export class StreamedSound implements RemoteSound {
             await this.fileBuffer.write(value);
             chunkBuffer = value.buffer as ArrayBuffer;
         }
+        console.log(this.fileBuffer.status);
     }
 
     private async startDecoding(start: boolean) {
-        // console.log('starting to decode', this.fileBuffer.status);
         let atStart = start;
         this.decoding = true;
         this.decodingStatus.reset();
@@ -175,10 +198,10 @@ export class StreamedSound implements RemoteSound {
             const { leftover } = await this.fileBuffer.pipe(
                 buffer,
                 StreamedSound.DECODE_CHUNK_SIZE,
-                this.decodeChunk,
+                { process: this.decodeChunk }
             );
             if (this.url.includes('deep_kick')) {
-                console.log('writing', buffer.status, leftover.length, atStart); 
+                // console.log('writing', buffer.status, leftover.length, atStart); 
             }
 
             if (leftover.length > 0) {
@@ -254,7 +277,7 @@ export class StreamedSound implements RemoteSound {
 
     private readPCM(heapPointer: number, requestedBytes: number) {
         if (this.url.includes('deep_kick')) {
-            console.log('reading', this.decodeBuffer.status); 
+            // console.log('reading', this.decodeBuffer.status); 
         }
         const { capacity } = this.decodeBuffer.status;
         const { wrap, view, wrappedView, underflow } = this.decodeBuffer.read(
@@ -283,6 +306,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     async forceSeekDecodeBuffer(position: number) {
+        console.log('force seeking', this.url);
         await this.stopDecoding();
 
         assertNotNull(this.decoder);
@@ -298,14 +322,19 @@ export class StreamedSound implements RemoteSound {
         this.decodeBuffer.flush();
         const sink = new Sink(position);
         let leftover = new Uint8Array();
-        while (!sink.isFull()) {
+        console.log(this.fileBuffer.status);
+        console.log(this.url, 'starting sink');
+        while (!sink.isFull() && !this.seeking.isResolved) {
             const result = await this.fileBuffer.pipe(
                 sink,
                 StreamedSound.DECODE_CHUNK_SIZE,
-                this.decodeChunk,
+                { process: this.decodeChunk, debug: false, }
             );
             leftover = result.leftover;
         }
+
+        console.log(this.url, 'ending sink');
+        console.log(this.fileBuffer.status);
 
         if (leftover.length > 0) {
             await this.decodeBuffer.write(leftover);
@@ -379,19 +408,24 @@ export class StreamedSound implements RemoteSound {
     }
 
     async seek(position: number) {
-        console.log('seeking', position);
+        this.seeking.reset();
+        console.log(this.url, 'seeking', position);
         if (position < this.startThreshold) {
             // The seek is inside the start buffer, so it can be done immediately
             this.startBuffer.unsafeSeek(position);
 
             this.seekPosition = position;
 
-            if (this.decodeBuffer.fresh) return;
+            const length = this.soundInfo.bytesPerSecond * this.length;
+
+            if (this.decodeBuffer.fresh || length <= this.startThreshold)
+                return;
 
             await this.forceSeekDecodeBuffer(this.startThreshold);
+            console.log(this.url, 'finished seeking');
         } else if (
             position >= this.seekPosition &&
-            position < this.seekPosition + this.decodeBuffer.status.bytesFree
+            position < this.seekPosition + this.decodeBuffer.status.size
         ) {
             this.decodeBuffer.read(position - this.seekPosition);
             this.seekPosition = position;
@@ -403,6 +437,8 @@ export class StreamedSound implements RemoteSound {
             this.seekPosition = position;
             this.restart();
         }
+
+        this.seeking.resolve();
     }
 
     async unload() {
@@ -480,15 +516,15 @@ export class StaticSound implements RemoteSound {
         return true;
     }
 
-    async unload() {
+    async unload() {bytesFree
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
-        this.handle.release();
+        this.handle.bytesFreerelease();
         this.handle = null;
     }
-
+bytesFree
     release() {
-        this.source.release();
+        this.source.bytesFreerelease();
     }
 }

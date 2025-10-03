@@ -1,3 +1,4 @@
+import { makeOptions } from '../utilities/options';
 import { assertNotNull, unreachable } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
@@ -20,6 +21,8 @@ export class Sink implements WritableBuffer {
         const remaining = this.capacity - this.size;
         const writeSize = Math.min(remaining, chunk.length);
         this.size += writeSize;
+
+        console.log(`chunk length: ${chunk.length}; sink size: ${this.size}; write size: ${writeSize}`);
 
         if (writeSize < chunk.length) {
             return chunk.subarray(writeSize);
@@ -54,18 +57,18 @@ class WrappedBufferView {
         if (this.full)
             return this.capacity;
 
-        if (!this.destructiveRead)
-            return this.writeIndex;
-
+        // if (!this.destructiveRead)
+        //     return this.writeIndex;
+        //
         return (this.writeIndex - this.readIndex + this.capacity) % this.capacity;
-    }
-
-    get bytesFree() {
-        return this.capacity - this.size;
     }
 
     forceFull() {
         this.full = true;
+    }
+
+    get bytesFree() {
+        return this.capacity - this.size;
     }
 
     get status() {
@@ -116,8 +119,7 @@ class WrappedBufferView {
 
         this.writeIndex = (this.writeIndex + writeSize) % this.capacity;
 
-
-        if (leftoverSize > 0) {
+        if (leftoverSize > 0 || writeSize === remaining) {
             return {
                 wrapped: true,
                 leftover: chunk.subarray(writeSize)
@@ -192,18 +194,22 @@ export class LoopBuffer {
     protected view: WrappedBufferView;
     protected locked: PromiseStatus;
     private hotThreshold: number;
-    private wrapped: boolean;
+
+    static defaultPipeOptions = {
+        process: async (view: Uint8Array) => view,
+        processedOffset: 0,
+        debug: false,
+    }
 
     canRead: PromiseStatus;
     fresh: boolean;
 
-    constructor() {
+    constructor(options: { hotThreshold: number }) {
         this.view = new WrappedBufferView();
         this.canRead = new PromiseStatus();
         this.locked = new PromiseStatus();
-        this.hotThreshold = 0;
+        this.hotThreshold = options.hotThreshold;
         this.fresh = true;
-        this.wrapped = false;
     }
 
     isFull() {
@@ -229,13 +235,12 @@ export class LoopBuffer {
 
     allocate(capacity: number) {
         this.view.allocate(capacity);
-        this.hotThreshold = Math.min(48000 * 2 * 2 * 2, capacity);
+        this.hotThreshold = Math.min(this.hotThreshold, capacity);
         this.unlock();
     }
 
     free() {
         this.view.free();
-        this.hotThreshold = 0;
         this.lock();
     }
 
@@ -255,17 +260,21 @@ export class LoopBuffer {
             return new Uint8Array();
         }
 
+        const preWrite = this.status;
+
         const { leftover, wrapped } = this.view.write(chunk);
 
-        // if (wrapped && !this.view.destructiveRead) {
-        //     this.view.forceFull();
-        // }
+        if (wrapped && !this.view.destructiveRead) {
+            this.view.forceFull();
+            console.log('wrapped', preWrite, chunk.length, this.status);
+        }
 
         // Resolve canRead if enough data
         if (
             !this.canRead.isResolved &&
             (this.view.size >= this.hotThreshold)
         ) {
+            console.log('resolving canRead');
             this.canRead.resolve();
         }
 
@@ -280,13 +289,17 @@ export class LoopBuffer {
     async pipe(
         target: WritableBuffer,
         requestedBytes: number,
-        process = async (view: Uint8Array) => view,
-        processedOffset = 0,
+        options: Partial<typeof LoopBuffer.defaultPipeOptions> = {}
     ) {
         await this.canRead;
+        const { process, processedOffset, debug } = {
+            ...LoopBuffer.defaultPipeOptions,
+            ...options,
+        };
         const { view, wrappedView, wrap, underflow } =
             this.read(requestedBytes);
         if (underflow) {
+            console.log(this.status);
             unreachable();
         }
 
@@ -307,6 +320,11 @@ export class LoopBuffer {
             );
         }
 
+        if (debug) {
+            console.log('processed data', processedView);
+            console.log(this.status);
+        }
+
         if (leftover.length > 0 || !wrap) {
             return {
                 leftover: leftover,
@@ -316,6 +334,7 @@ export class LoopBuffer {
         }
 
         bytesRead += wrappedView.length;
+
 
         // view was fully written and we have a wrappedView to write
         const processedWrapped = await process(wrappedView);
@@ -337,8 +356,8 @@ export class RingBuffer extends LoopBuffer {
     canWrite: PromiseStatus;
     private fullThreshold;
 
-    constructor() {
-        super();
+    constructor(options: { hotThreshold: number }) {
+        super(options);
         this.fullThreshold = 0;
         this.canWrite = new PromiseStatus();
 
