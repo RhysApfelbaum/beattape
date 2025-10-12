@@ -40,7 +40,7 @@ export class StreamedSound implements RemoteSound {
     private readCallbackLastCalled: number;
     private timelinePosition: number;
 
-    private seeking: PromiseStatus;
+    private currentSeekAbort: AbortController;
 
     private decoding: boolean;
     private decodingStatus: PromiseStatus;
@@ -98,7 +98,7 @@ export class StreamedSound implements RemoteSound {
         this.readCallbackLastCalled = 0;
         this.timelinePosition = 0;
 
-        this.seeking = new PromiseStatus();
+        this.currentSeekAbort = new AbortController();
 
         this.decodeChunk = async chunk => {
             assertNotNull(this.decoder);
@@ -186,7 +186,7 @@ export class StreamedSound implements RemoteSound {
             await this.fileBuffer.write(value);
             chunkBuffer = value.buffer as ArrayBuffer;
         }
-        console.log(this.fileBuffer.status);
+        console.debug(this.fileBuffer.status);
     }
 
     private async startDecoding(start: boolean) {
@@ -306,7 +306,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     async forceSeekDecodeBuffer(position: number) {
-        console.log('force seeking', this.url);
+        // console.debug('force seeking', this.url);
         await this.stopDecoding();
 
         assertNotNull(this.decoder);
@@ -322,19 +322,28 @@ export class StreamedSound implements RemoteSound {
         this.decodeBuffer.flush();
         const sink = new Sink(position);
         let leftover = new Uint8Array();
-        console.log(this.fileBuffer.status);
-        console.log(this.url, 'starting sink');
-        while (!sink.isFull() && !this.seeking.isResolved) {
+        // console.debug(this.fileBuffer.status);
+        console.debug(this.url, 'starting sink', this.fileBuffer.status);
+        while (!sink.isFull()) {
+
+            if (this.currentSeekAbort.signal.aborted) {
+                // console.debug('seek cancelled', this.fileBuffer.status);
+                this.fileBuffer.unsafeSeek(0);
+                return;
+            }
+
             const result = await this.fileBuffer.pipe(
                 sink,
                 StreamedSound.DECODE_CHUNK_SIZE,
                 { process: this.decodeChunk, debug: false, }
             );
+
+
             leftover = result.leftover;
         }
 
-        console.log(this.url, 'ending sink');
-        console.log(this.fileBuffer.status);
+        console.debug(this.url, 'ending sink');
+        // console.debug(this.fileBuffer.status);
 
         if (leftover.length > 0) {
             await this.decodeBuffer.write(leftover);
@@ -366,6 +375,8 @@ export class StreamedSound implements RemoteSound {
         ) => {
             const { bytesPerSample, numChannels } = this.soundInfo;
             const bytePosition = position * bytesPerSample * numChannels;
+
+            console.debug('seeking', this.url, position, this.currentSeekAbort.signal.aborted);
             this.seek(bytePosition);
             return FMOD.OK;
         };
@@ -408,8 +419,11 @@ export class StreamedSound implements RemoteSound {
     }
 
     async seek(position: number) {
-        this.seeking.reset();
-        console.log(this.url, 'seeking', position);
+        this.currentSeekAbort.abort();
+
+        this.currentSeekAbort = new AbortController();
+
+        // console.debug(this.url, 'seeking', position);
         if (position < this.startThreshold) {
             // The seek is inside the start buffer, so it can be done immediately
             this.startBuffer.unsafeSeek(position);
@@ -422,7 +436,7 @@ export class StreamedSound implements RemoteSound {
                 return;
 
             await this.forceSeekDecodeBuffer(this.startThreshold);
-            console.log(this.url, 'finished seeking');
+            // console.debug(this.url, 'finished seeking');
         } else if (
             position >= this.seekPosition &&
             position < this.seekPosition + this.decodeBuffer.status.size
@@ -437,15 +451,13 @@ export class StreamedSound implements RemoteSound {
             this.seekPosition = position;
             this.restart();
         }
-
-        this.seeking.resolve();
     }
 
     async unload() {
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
-        console.log('unloading', this.url);
+        console.debug('unloading', this.url);
         this.handle.release();
         this.handle = null;
         this.startBuffer.free();
@@ -486,7 +498,7 @@ export class StaticSound implements RemoteSound {
     }
 
     get isLoaded() {
-        console.log('LOADED CHECK', typeof this.handle);
+        console.debug('LOADED CHECK', typeof this.handle);
         return this.handle !== null && this.handle !== undefined;
     }
 
@@ -516,15 +528,14 @@ export class StaticSound implements RemoteSound {
         return true;
     }
 
-    async unload() {bytesFree
+    async unload() {
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
         this.handle.bytesFreerelease();
         this.handle = null;
     }
-bytesFree
     release() {
-        this.source.bytesFreerelease();
+        this.source.release();
     }
 }

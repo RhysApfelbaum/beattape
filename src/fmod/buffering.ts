@@ -57,9 +57,9 @@ class WrappedBufferView {
         if (this.full)
             return this.capacity;
 
-        // if (!this.destructiveRead)
-        //     return this.writeIndex;
-        //
+        if (!this.destructiveRead)
+            return this.writeIndex;
+
         return (this.writeIndex - this.readIndex + this.capacity) % this.capacity;
     }
 
@@ -266,7 +266,7 @@ export class LoopBuffer {
 
         if (wrapped && !this.view.destructiveRead) {
             this.view.forceFull();
-            console.log('wrapped', preWrite, chunk.length, this.status);
+            // console.log('wrapped', preWrite, chunk.length, this.status);
         }
 
         // Resolve canRead if enough data
