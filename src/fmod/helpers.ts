@@ -35,3 +35,7 @@ export const useIsMobile = (breakpoint: number = 768) => {
 
     return isMobile;
 };
+
+export const resolveOnAbort = (signal: AbortSignal) => new Promise<void>(resolve => {
+    signal.addEventListener('abort', () => void resolve(), { once: true })
+});

@@ -1,5 +1,5 @@
 import { makeOptions } from '../utilities/options';
-import { assertNotNull, unreachable } from './helpers';
+import { assertNotNull, resolveOnAbort, unreachable } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
 
@@ -199,6 +199,7 @@ export class LoopBuffer {
         process: async (view: Uint8Array) => view,
         processedOffset: 0,
         debug: false,
+        signal: new AbortController().signal
     }
 
     canRead: PromiseStatus;
@@ -291,11 +292,24 @@ export class LoopBuffer {
         requestedBytes: number,
         options: Partial<typeof LoopBuffer.defaultPipeOptions> = {}
     ) {
-        await this.canRead;
-        const { process, processedOffset, debug } = {
+        const { process, processedOffset, debug, signal } = {
             ...LoopBuffer.defaultPipeOptions,
             ...options,
         };
+
+        await Promise.race([
+            this.canRead,
+            resolveOnAbort(signal)
+        ]);
+
+        if (signal.aborted) {
+            return {
+                leftover: new Uint8Array(),
+                bytesWritten: 0,
+                bytesRead: 0,
+            };
+        }
+
         const { view, wrappedView, wrap, underflow } =
             this.read(requestedBytes);
         if (underflow) {

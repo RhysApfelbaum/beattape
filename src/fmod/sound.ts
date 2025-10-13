@@ -41,6 +41,7 @@ export class StreamedSound implements RemoteSound {
     private timelinePosition: number;
 
     private currentSeekAbort: AbortController;
+    private currentSeek: Promise<void>;
 
     private decoding: boolean;
     private decodingStatus: PromiseStatus;
@@ -99,6 +100,7 @@ export class StreamedSound implements RemoteSound {
         this.timelinePosition = 0;
 
         this.currentSeekAbort = new AbortController();
+        this.currentSeek = Promise.resolve();
 
         this.decodeChunk = async chunk => {
             assertNotNull(this.decoder);
@@ -325,18 +327,21 @@ export class StreamedSound implements RemoteSound {
         // console.debug(this.fileBuffer.status);
         console.debug(this.url, 'starting sink', this.fileBuffer.status);
         while (!sink.isFull()) {
+            const result = await this.fileBuffer.pipe(
+                sink,
+                StreamedSound.DECODE_CHUNK_SIZE,
+                {
+                    process: this.decodeChunk,
+                    debug: false,
+                    signal: this.currentSeekAbort.signal
+                }
+            );
 
             if (this.currentSeekAbort.signal.aborted) {
                 // console.debug('seek cancelled', this.fileBuffer.status);
                 this.fileBuffer.unsafeSeek(0);
                 return;
             }
-
-            const result = await this.fileBuffer.pipe(
-                sink,
-                StreamedSound.DECODE_CHUNK_SIZE,
-                { process: this.decodeChunk, debug: false, }
-            );
 
 
             leftover = result.leftover;
@@ -376,7 +381,14 @@ export class StreamedSound implements RemoteSound {
             const { bytesPerSample, numChannels } = this.soundInfo;
             const bytePosition = position * bytesPerSample * numChannels;
 
-            console.debug('seeking', this.url, position, this.currentSeekAbort.signal.aborted);
+            // this.currentSeekAbort.abort();
+            // console.log('starting seek');
+            // this.currentSeek.then(_ => {
+            //     this.currentSeek = this.seek(bytePosition);
+            //     console.debug('seeking', this.url, position, this.currentSeekAbort.signal.aborted);
+            //     this.currentSeekAbort = new AbortController();
+            // });
+
             this.seek(bytePosition);
             return FMOD.OK;
         };
@@ -420,8 +432,8 @@ export class StreamedSound implements RemoteSound {
 
     async seek(position: number) {
         this.currentSeekAbort.abort();
-
         this.currentSeekAbort = new AbortController();
+        
 
         // console.debug(this.url, 'seeking', position);
         if (position < this.startThreshold) {
@@ -435,7 +447,10 @@ export class StreamedSound implements RemoteSound {
             if (this.decodeBuffer.fresh || length <= this.startThreshold)
                 return;
 
-            await this.forceSeekDecodeBuffer(this.startThreshold);
+            await this.currentSeek;
+            this.currentSeek = this.forceSeekDecodeBuffer(this.startThreshold);
+
+            // await this.forceSeekDecodeBuffer(this.startThreshold);
             // console.debug(this.url, 'finished seeking');
         } else if (
             position >= this.seekPosition &&
@@ -446,7 +461,9 @@ export class StreamedSound implements RemoteSound {
         } else {
             this.stop();
 
-            await this.forceSeekDecodeBuffer(this.startThreshold);
+            await this.currentSeek;
+            this.currentSeek = this.forceSeekDecodeBuffer(this.startThreshold);
+            await this.currentSeek;
             await this.decodeBuffer.canRead;
             this.seekPosition = position;
             this.restart();
