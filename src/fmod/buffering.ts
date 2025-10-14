@@ -256,7 +256,7 @@ export class LoopBuffer {
         return result;
     }
 
-    async write(chunk: Uint8Array) {
+    async write(chunk: Uint8Array, signal: AbortSignal | null = null) {
         if (this.locked.isResolved) {
             return new Uint8Array();
         }
@@ -275,7 +275,6 @@ export class LoopBuffer {
             !this.canRead.isResolved &&
             (this.view.size >= this.hotThreshold)
         ) {
-            console.log('resolving canRead');
             this.canRead.resolve();
         }
 
@@ -389,7 +388,7 @@ export class RingBuffer extends LoopBuffer {
         this.canWrite.reset();
     }
 
-    async write(chunk: Uint8Array) {
+    async write(chunk: Uint8Array, signal: AbortSignal | null = null) {
         let leftover = chunk;
 
         while (leftover.length > 0) {

@@ -56,7 +56,6 @@ export class SoundLoader {
             }
 
             await sound.fetch();
-            console.log('fetching', sound.url);
             this.fetched.push(sound);
 
             await sound.load();
