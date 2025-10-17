@@ -22,8 +22,6 @@ export class Sink implements WritableBuffer {
         const writeSize = Math.min(remaining, chunk.length);
         this.size += writeSize;
 
-        console.log(`chunk length: ${chunk.length}; sink size: ${this.size}; write size: ${writeSize}`);
-
         if (writeSize < chunk.length) {
             return chunk.subarray(writeSize);
         }

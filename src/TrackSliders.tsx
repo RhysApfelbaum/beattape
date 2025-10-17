@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePlayQueue } from './PlayQueueProvider';
 import Slider from './components/Slider';
 
 const TrackSliders: React.FC = () => {
     const [playQueue, dispatch] = usePlayQueue();
+
+    // useEffect(() => {
+    //     updateGrit(playQueue.sliderState.grit);
+    //     updateBrightness(playQueue.sliderState.brightness);
+    //     updateChops(playQueue.sliderState.chops);
+    //     updateVocals(playQueue.sliderState.vocals);
+    //
+    //     dispatch({
+    //         type: 'SET_SLIDER_STATE',
+    //         sliderState: playQueue.sliderState
+    //     })
+    // }, []);
 
     const updateGrit = (value: number) => {
         if (!playQueue.currentTrack.isLoaded) return;
@@ -21,6 +33,7 @@ const TrackSliders: React.FC = () => {
         if (!playQueue.currentTrack.isLoaded) return;
         playQueue.currentTrack.event.setParameter('Vocals', value, false);
     };
+
 
     const updateSliderStateGrit = (value: number) => {
         dispatch({ type: 'SET_SLIDER_STATE', sliderState: {

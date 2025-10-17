@@ -209,6 +209,14 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
         await track.load();
         setLoading(false);
 
+        {
+            const { grit, brightness, chops, vocals } = playQueue.sliderState;
+            playQueue.currentTrack.event.setParameter('Grit', grit, false);
+            playQueue.currentTrack.event.setParameter('Brightness', brightness, false);
+            playQueue.currentTrack.event.setParameter('Chops', chops, false);
+            playQueue.currentTrack.event.setParameter('Vocals', vocals, false);
+        }
+
         track.event.setPaused(state.paused);
         track.event.setCallback(
             FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
@@ -308,6 +316,13 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
 
     useEffect(() => {
         // TODO
+        console.log('slider state updated');
+        if (state.currentTrack.isLoaded) {
+            state.currentTrack.event.setParameter('Grit', state.sliderState.grit, true);
+            state.currentTrack.event.setParameter('Brightness', state.sliderState.brightness, true);
+            state.currentTrack.event.setParameter('Chops', state.sliderState.chops, true);
+            state.currentTrack.event.setParameter('Vocals', state.sliderState.vocals, true);
+        }
     }, [state.sliderState])
 
     return (
