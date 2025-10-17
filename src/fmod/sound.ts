@@ -74,18 +74,27 @@ export class StreamedSound implements RemoteSound {
         this.length = length;
 
         this.fileBuffer = new LoopBuffer({
-            hotThreshold: StreamedSound.DECODE_CHUNK_SIZE * 2
+            hotThreshold: StreamedSound.DECODE_CHUNK_SIZE * 2,
+            id: this.url,
+            debug: true
         });
 
         // Wait for 2 seconds of decoded audio before reading
         const decodedHot = this.soundInfo.bytesPerSecond * 2;
 
-        this.startBuffer = new LoopBuffer({ hotThreshold: decodedHot });
+        // Always keep the first 4 seconds of decoded audio in memory
+        this.startThreshold = this.soundInfo.bytesPerSecond * 4;
+
+
+        this.startBuffer = new LoopBuffer({
+            hotThreshold: Math.min(
+                decodedHot,
+                this.soundInfo.bytesPerSecond * this.length
+            )
+        });
         this.decodeBuffer = new RingBuffer({ hotThreshold: decodedHot });
 
 
-        // Always keep the first 4 seconds of decoded audio in memory
-        this.startThreshold = this.soundInfo.bytesPerSecond * 4;
 
         this.decodePosition = 0; // Measured in SAMPLES!!!!!
         this.seekPosition = 0;
@@ -399,7 +408,7 @@ export class StreamedSound implements RemoteSound {
             } else {
                 this.readPCM(data, datalen);
             }
-            this.readCallbackLastCalled = this.seekPosition;
+            // this.readCallbackLastCalled = this.seekPosition;
             this.advanceSeekPosition(datalen);
             return FMOD.OK;
         };

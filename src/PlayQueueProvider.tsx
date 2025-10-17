@@ -248,6 +248,7 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
                     };
                     sound.restart = () => {
                         if (track.event.getPaused()) {
+                            console.debug('restarting after underflow');
                             track.event.setPaused(false);
                             setLoading(false);
                         }

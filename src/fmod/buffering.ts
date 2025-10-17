@@ -57,9 +57,6 @@ class WrappedBufferView {
         if (this.full)
             return this.capacity;
 
-        if (!this.destructiveRead)
-            return this.writeIndex;
-
         return (this.writeIndex - this.readIndex + this.capacity) % this.capacity;
     }
 
@@ -193,7 +190,10 @@ class WrappedBufferView {
 export class LoopBuffer {
     protected view: WrappedBufferView;
     protected locked: PromiseStatus;
+
     private hotThreshold: number;
+    private id: string;
+    private debug: boolean;
 
     static defaultPipeOptions = {
         process: async (view: Uint8Array) => view,
@@ -202,14 +202,34 @@ export class LoopBuffer {
         signal: new AbortController().signal
     }
 
+    static defaultOptions = {
+        hotThreshold: 0,
+        id: '',
+        debug: false
+    }
+
     canRead: PromiseStatus;
     fresh: boolean;
 
-    constructor(options: { hotThreshold: number }) {
+    constructor(
+        options: Partial<typeof LoopBuffer.defaultOptions> = LoopBuffer.defaultOptions
+    ) {
+        const { hotThreshold, debug, id } = {
+            ...LoopBuffer.defaultOptions,
+            ...options
+        };
         this.view = new WrappedBufferView();
         this.canRead = new PromiseStatus();
         this.locked = new PromiseStatus();
-        this.hotThreshold = options.hotThreshold;
+        this.hotThreshold = hotThreshold;
+        this.debug = debug;
+
+        if (id) {
+            this.id = id;
+        } else {
+            this.id = Math.random().toString(36).slice(2);
+        }
+
         this.fresh = true;
     }
 
@@ -249,8 +269,12 @@ export class LoopBuffer {
         this.fresh = false;
         const result = this.view.read(requestedBytes);
 
-        if (result.underflow) {
+        if (result.underflow || this.status.size < this.hotThreshold) {
             this.canRead.reset();
+        }
+
+        if (this.debug) {
+            console.debug('read', requestedBytes, this.id, this.status);
         }
 
         return result;
@@ -267,7 +291,11 @@ export class LoopBuffer {
 
         if (wrapped && !this.view.destructiveRead) {
             this.view.forceFull();
-            // console.log('wrapped', preWrite, chunk.length, this.status);
+            console.debug('wrapped', preWrite, chunk.length, this.id, this.status);
+        }
+
+        if (this.debug) {
+            console.debug('write', chunk.length, this.id, this.status);
         }
 
         // Resolve canRead if enough data
@@ -276,6 +304,7 @@ export class LoopBuffer {
             (this.view.size >= this.hotThreshold)
         ) {
             this.canRead.resolve();
+            console.debug('resolving canRead', this.status);
         }
 
         return leftover;
@@ -301,6 +330,7 @@ export class LoopBuffer {
             resolveOnAbort(signal)
         ]);
 
+
         if (signal.aborted) {
             return {
                 leftover: new Uint8Array(),
@@ -309,9 +339,13 @@ export class LoopBuffer {
             };
         }
 
+        const debugCanReadResolved = this.canRead.isResolved;
+
         const { view, wrappedView, wrap, underflow } =
             this.read(requestedBytes);
         if (underflow) {
+            console.log('canRead is resolved:', debugCanReadResolved);
+            console.log(signal);
             console.log(this.status);
             unreachable();
         }
