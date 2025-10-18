@@ -4,8 +4,7 @@ import artData from './art.json';
 import ArtPicker from './ArtPicker';
 import CreditLink from './CreditLink';
 import contributors from './contributors.json';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import Info from './Info';
 
 const Art: React.FC = () => {
     const [artIndex, setArtIndex] = useState(
@@ -25,17 +24,11 @@ const Art: React.FC = () => {
                     <p className="text-base04">Artwork by</p>
                     <CreditLink
                         contributor={
-                            contributors[
-                                art.artist as keyof typeof contributors
-                            ]
+                            contributors[art.artist as keyof typeof contributors]
                         }
                     />
                 </div>
-                <FontAwesomeIcon
-                    icon={faQuestionCircle}
-                    className=""
-                    color="var(--base)"
-                />
+                <Info />
                 <ArtPicker
                     artist={art.artist}
                     index={artIndex}
