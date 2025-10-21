@@ -5,13 +5,10 @@ import ArtPicker from './ArtPicker';
 import CreditLink from './CreditLink';
 import contributors from './contributors.json';
 import Info from './Info';
+import { useTheme } from './ThemeProvider';
 
 const Art: React.FC = () => {
-    const [artIndex, setArtIndex] = useState(
-        Math.floor(Math.random() * (Object.keys(artData).length - 2)),
-    );
-
-    const art = artData[artIndex];
+    const { art } = useTheme();
 
     return (
         <section className="py-5 mb-10">
@@ -29,11 +26,7 @@ const Art: React.FC = () => {
                     />
                 </div>
                 <Info />
-                <ArtPicker
-                    artist={art.artist}
-                    index={artIndex}
-                    setIndex={setArtIndex}
-                />
+                <ArtPicker />
             </div>
         </section>
     );

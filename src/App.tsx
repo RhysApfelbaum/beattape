@@ -9,19 +9,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRadio } from '@fortawesome/free-solid-svg-icons';
 
 import './index.css';
-import { setTheme, themes } from './styles/theme';
 import LoadingPage from './LoadingPage';
 import { gesture } from './fmod/gesture';
 import Art from './Art';
-import PlayQueue from './PlayQueue';
-import Palette from './Palette';
+
 
 const App: React.FC = () => {
     const fmod = useFMOD();
 
     const [awaitingGesture, setAwaitingGesture] = useState(true);
-
-    setTheme(themes.catppuccinMocha);
 
     gesture.then(() => setAwaitingGesture(false));
 

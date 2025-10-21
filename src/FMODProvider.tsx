@@ -81,7 +81,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({
 
     if (ref.current) {
         ref.current.style.setProperty('--thumb-color', '#ff0000');
-        ref.current.style.setProperty('--beat-pulse', '0%');
+        // ref.current.style.setProperty('--beat-pulse', '0%');
     }
 
     return (

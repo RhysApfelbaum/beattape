@@ -12,16 +12,17 @@ import {
 
 import contributors from './contributors.json';
 
-import { theme } from './styles/theme';
 import CreditLink from './CreditLink';
 import Button from './Button';
 import TapeReel from './TapeReel';
+import { useTheme } from './ThemeProvider';
 
 // This is probably the worst part of the entire project. This code is awful.
 
 const TrackControls: React.FC = () => {
     const [playQueue, dispatch] = usePlayQueue();
 
+    const { theme } = useTheme()
 
     const fmod = useFMOD();
 
@@ -65,7 +66,7 @@ const TrackControls: React.FC = () => {
                 <Button onClick={prevTrack}>
                     <FontAwesomeIcon
                         icon={faBackwardFast}
-                        color={theme.base03}
+                        color={theme.palette.base03}
                         className="m-3"
                         size="xl"
                     />
@@ -82,7 +83,7 @@ const TrackControls: React.FC = () => {
                     <FontAwesomeIcon
                         icon={faFastForward}
                         className="m-3"
-                        color={theme.base03}
+                        color={theme.palette.base03}
                         size="xl"
                     />
                 </Button>

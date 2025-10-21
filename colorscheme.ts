@@ -154,4 +154,3 @@ const generateTheme = (imageBuffer: Buffer) => {
     return result;
 };
 
-console.log(generateTheme(imageBuffer));

@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { FMODProvider } from './FMODProvider';
 import App from './App';
+import { ThemeProvider } from './ThemeProvider';
 
 const rootElement = document.getElementById('root');
 
@@ -12,6 +13,8 @@ if (!rootElement) {
 const root = createRoot(rootElement);
 root.render(
     <FMODProvider>
-        <App />
+        <ThemeProvider>
+            <App />
+        </ThemeProvider>
     </FMODProvider>,
 );

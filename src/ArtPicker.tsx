@@ -7,18 +7,19 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import Modal from './Modal';
 import { useIsMobile } from './fmod/helpers';
 import Palette from './Palette';
-import { theme, themes } from './styles/theme';
+import themes from './styles/themes.json';
+import { useTheme } from './ThemeProvider';
 
 type Contributor = typeof contributors.soundtomb;
 
-const ArtPicker: React.FC<{
-    artist: string;
-    index: number;
-    setIndex: React.Dispatch<SetStateAction<number>>;
-}> = ({ artist, index, setIndex }) => {
+const ArtPicker: React.FC = () => {
+
+    const { theme, art, themeKey, artKey, setThemeKey, setArtKey } = useTheme();
     const [open, setOpen] = useState(false);
-    const artistInfo = contributors[artist as keyof typeof contributors];
+    const artistInfo = contributors[art.artist as keyof typeof contributors];
     const [imagesLoaded, setImagesLoaded] = useState(false);
+
+
     const mobile = useIsMobile(1000);
 
     const preloadImages = async () => {
@@ -38,8 +39,8 @@ const ArtPicker: React.FC<{
     }, []);
 
     const handleSelect = (idx: number) => {
-        setIndex(idx);
-        setOpen(false);
+        setArtKey(idx)
+        // setOpen(false);
     };
 
     return (
@@ -76,12 +77,12 @@ const ArtPicker: React.FC<{
                         className="px-10"
                         onSlideChange={(swiper) => {
                             if (mobile) {
-                                setIndex(swiper.activeIndex);
+                                handleSelect(swiper.activeIndex);
                             }
                         }}
                         onSwiper={(swiper) => {
                             if (mobile) {
-                                swiper.slideTo(index);
+                                swiper.slideTo(artKey);
                             }
                         }}
                     >
@@ -118,23 +119,43 @@ const ArtPicker: React.FC<{
                         ))}
                     </Swiper>
                     <label htmlFor="theme-select">Theme</label>
-                    <select id="theme-select">
+                    <select
+                        id="theme-select"
+                        value={themeKey}
+                        onChange={e => {
+                            if (e.target.value === 'auto') {
+                                setThemeKey('auto');
+                                return;
+                            }
+
+                            const index = Number.parseInt(e.target.value);
+                            if (Number.isNaN(index)) {
+                                throw new Error(`Invalid theme key: ${index}`);
+                            }
+                            setThemeKey(index);
+                        }}
+                        className="bg-base00"
+                    >
                         {
-                            Object.entries(themes).map(([name, theme]) =>
-                                <option value={name}>
-                                    {theme.displayName}
-                                </option>
+                            [
+                                <option value="auto">Match with art</option>
+                            ].concat(
+                                themes.map((theme, index) => (
+                                    <option value={index}>
+                                        {theme.name}
+                                    </option>
+                                ))
                             )
                         }
                     </select>
                     <div className="grid grid-cols-4 w-fit">
                         {
-                            Object.keys(theme).map(key =>
+                            Object.entries(theme.palette).map(([key, value]) =>
                                 <button
                                     key={key}
                                     className="w-8 h-8 rounded border m-1"
                                     style={{
-                                        backgroundColor: theme[key as keyof typeof theme]
+                                        backgroundColor: value
                                     }}
                                 >
                                 </button>
