@@ -76,7 +76,7 @@ export class StreamedSound implements RemoteSound {
         this.fileBuffer = new LoopBuffer({
             hotThreshold: StreamedSound.DECODE_CHUNK_SIZE * 2,
             id: this.url,
-            debug: true
+            debug: false
         });
 
         // Wait for 2 seconds of decoded audio before reading
@@ -390,7 +390,7 @@ export class StreamedSound implements RemoteSound {
             const { bytesPerSample, numChannels } = this.soundInfo;
             const bytePosition = position * bytesPerSample * numChannels;
 
-            console.debug(this.url, 'starting seek to', 0);
+            // console.debug(this.url, 'starting seek to', 0);
             this.currentSeekAbort.abort();
             this.seek(bytePosition).then(_ => {
                 this.currentSeekAbort = new AbortController();
@@ -400,25 +400,25 @@ export class StreamedSound implements RemoteSound {
             return FMOD.OK;
         };
 
-        info.pcmreadcallback = (sound: any, data: number, datalen: number) => {
-
-
+        info.pcmreadcallback = (_sound: any, data: number, datalen: number) => {
             if (this.seekPosition < this.startThreshold) {
                 this.readPCMFromStart(data, datalen);
             } else {
                 this.readPCM(data, datalen);
             }
-            // this.readCallbackLastCalled = this.seekPosition;
             this.advanceSeekPosition(datalen);
             return FMOD.OK;
         };
+
         FMOD.Result = FMOD.Core.createStream(
             '',
             FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME,
             info,
             sound,
         );
+
         this.handle = sound.deref();
+
         if (this.handle === undefined) {
             throw new Error('handle is undefined ' + this.url);
         }
@@ -475,15 +475,24 @@ export class StreamedSound implements RemoteSound {
     }
 
     async unload() {
-        if (!this.isLoaded) {
-            throw new Error('Tried to unload a sound that is not loaded.');
+        // console.debug('unloading', this.url);
+        if (this.isLoaded) {
+            this.handle.release();
+            this.handle = null;
         }
-        console.debug('unloading', this.url);
-        this.handle.release();
-        this.handle = null;
-        this.startBuffer.free();
-        this.fileBuffer.free();
-        this.decodeBuffer.free();
+
+        if (this.startBuffer.isAllocated) {
+            this.startBuffer.free();
+        }
+
+        if (this.fileBuffer.isAllocated) {
+            this.fileBuffer.free();
+        }
+
+        if (this.decodeBuffer.isAllocated) {
+            this.decodeBuffer.free();
+        }
+
         if (this.decoder !== null) {
             await this.decoder.free();
             this.decoder = null;
@@ -491,7 +500,7 @@ export class StreamedSound implements RemoteSound {
     }
 
     release() {
-        // this.handle.release();
+
     }
 }
 
@@ -553,9 +562,10 @@ export class StaticSound implements RemoteSound {
         if (!this.isLoaded) {
             throw new Error('Tried to unload a sound that is not loaded.');
         }
-        this.handle.bytesFreerelease();
+        this.handle.release();
         this.handle = null;
     }
+
     release() {
         this.source.release();
     }

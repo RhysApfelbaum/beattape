@@ -14,5 +14,9 @@
     "midjourney": {
         "name": "Midjourney",
         "link": "https://www.midjourney.com"
+    },
+    "fmod": {
+        "name": "FMOD",
+        "link": "https://www.fmod.com/"
     }
 }

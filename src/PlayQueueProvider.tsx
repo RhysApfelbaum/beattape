@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState, useReducer, useEffect } from 'react';
 import { Track } from './fmod/track';
-import tracklistData from './testTracklist.json';
+import tracklistData from './tracklist.json';
 import { SliderState } from './fmod/sliderState';
 import { useFMOD } from './FMODProvider';
 import { FMOD } from './fmod/system';
@@ -208,14 +208,13 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
     const startTrack = async (track: Track) => {
         await track.load();
         setLoading(false);
+        console.log(track);
 
-        {
-            const { grit, brightness, chops, vocals } = playQueue.sliderState;
-            playQueue.currentTrack.event.setParameter('Grit', grit, false);
-            playQueue.currentTrack.event.setParameter('Brightness', brightness, false);
-            playQueue.currentTrack.event.setParameter('Chops', chops, false);
-            playQueue.currentTrack.event.setParameter('Vocals', vocals, false);
-        }
+        const { grit, brightness, chops, vocals } = playQueue.sliderState;
+        track.event.setParameter('Grit', grit, false);
+        track.event.setParameter('Brightness', brightness, false);
+        track.event.setParameter('Chops', chops, false);
+        track.event.setParameter('Vocals', vocals, false);
 
         track.event.setPaused(state.paused);
         track.event.setCallback(
@@ -275,6 +274,8 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
     console.log(state);
 
     useEffect(() => {
+
+        const unloadingTracks: Promise<void>[] = [];
         for (const track of state.tracklist) {
             if (track.name === state.currentTrack.name) {
                 continue;
@@ -282,13 +283,17 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
             if (track.isLoaded) {
                 console.log('stopping and unloading', track.displayName);
                 track.event.stop(0);
-                track.unload();
+                unloadingTracks.push(track.unload());
             }
         }
 
-        if (!state.currentTrack.isLoaded) {
-            startTrack(state.currentTrack);
-        }
+        Promise.all(unloadingTracks).then(_ => {
+            console.log('done unloading')
+            if (!state.currentTrack.isLoaded) {
+                startTrack(state.currentTrack);
+            }
+        })
+
     }, [state.currentTrack]);
 
     useEffect(() => {
@@ -315,8 +320,6 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
     }, [state.paused])
 
     useEffect(() => {
-        // TODO
-        console.log('slider state updated');
         if (state.currentTrack.isLoaded) {
             state.currentTrack.event.setParameter('Grit', state.sliderState.grit, true);
             state.currentTrack.event.setParameter('Brightness', state.sliderState.brightness, true);

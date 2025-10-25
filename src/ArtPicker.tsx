@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import contributors from './contributors.json';
 import artData from './art.json';
 
@@ -6,7 +6,6 @@ import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import Modal from './Modal';
 import { useIsMobile } from './fmod/helpers';
-import Palette from './Palette';
 import themes from './styles/themes.json';
 import { useTheme } from './ThemeProvider';
 
@@ -40,7 +39,6 @@ const ArtPicker: React.FC = () => {
 
     const handleSelect = (idx: number) => {
         setArtKey(idx)
-        // setOpen(false);
     };
 
     return (
@@ -68,7 +66,7 @@ const ArtPicker: React.FC = () => {
                 open={open}
                 onClose={() => setOpen(false)}
             >
-                <section className="flex flex-col items-center">
+                <section className="flex flex-col items-center gap-3">
                     <h2>Select Artwork</h2>
                     <Swiper
                         modules={[Navigation]}
@@ -118,7 +116,8 @@ const ArtPicker: React.FC = () => {
                             </SwiperSlide>
                         ))}
                     </Swiper>
-                    <label htmlFor="theme-select">Theme</label>
+                    <div className="m-4" />
+                    <label htmlFor="theme-select"><h2>Select Colorscheme</h2></label>
                     <select
                         id="theme-select"
                         value={themeKey}
@@ -134,7 +133,7 @@ const ArtPicker: React.FC = () => {
                             }
                             setThemeKey(index);
                         }}
-                        className="bg-base00"
+                        className="bg-base00 text-base04 border-b-1 border-base04 hover:text-base06 hover:border-base06 transition-[border] transition-[text] ease"
                     >
                         {
                             [
@@ -148,12 +147,12 @@ const ArtPicker: React.FC = () => {
                             )
                         }
                     </select>
-                    <div className="grid grid-cols-4 w-fit">
+                    <div className="grid grid-cols-8 w-fit">
                         {
                             Object.entries(theme.palette).map(([key, value]) =>
                                 <button
                                     key={key}
-                                    className="w-8 h-8 rounded border m-1"
+                                    className="w-8 h-8 rounded border m-1 transition-colors ease"
                                     style={{
                                         backgroundColor: value
                                     }}

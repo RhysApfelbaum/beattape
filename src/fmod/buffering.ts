@@ -90,10 +90,8 @@ class WrappedBufferView {
         if (this.buffer === null) {
             throw new Error('Tried to free an unallocated buffer');
         }
+        this.flush();
         this.buffer = null;
-        this.readIndex = 0;
-        this.writeIndex = 0;
-        this.full = false;
         this.capacity = 0;
     }
 
@@ -235,6 +233,10 @@ export class LoopBuffer {
         return this.status.full;
     }
 
+    get isAllocated() {
+        return this.view.buffer !== null;
+    }
+
     lock() {
         this.locked.resolve();
     }
@@ -289,7 +291,9 @@ export class LoopBuffer {
 
         if (wrapped && !this.view.destructiveRead) {
             this.view.forceFull();
-            console.debug('wrapped', preWrite, chunk.length, this.id, this.status);
+            if (this.debug) {
+                console.debug('wrapped', preWrite, chunk.length, this.id, this.status);
+            }
         }
 
         if (this.debug) {
@@ -302,7 +306,9 @@ export class LoopBuffer {
             (this.view.size >= this.hotThreshold)
         ) {
             this.canRead.resolve();
-            console.debug('resolving canRead', this.status);
+            if (this.debug) {
+                console.debug('resolving canRead', this.status);
+            }
         }
 
         return leftover;
@@ -342,9 +348,8 @@ export class LoopBuffer {
         const { view, wrappedView, wrap, underflow } =
             this.read(requestedBytes);
         if (underflow) {
-            console.log('canRead is resolved:', debugCanReadResolved);
-            console.log(signal);
-            console.log(this.status);
+            console.error('canRead is resolved:', debugCanReadResolved);
+            console.error(this.status);
             unreachable();
         }
 

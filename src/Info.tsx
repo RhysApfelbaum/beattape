@@ -1,15 +1,10 @@
 
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import contributors from './contributors.json';
-import artData from './art.json';
-
-import { Navigation, Scrollbar } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
 import Modal from './Modal';
-import Button from './Button';
-import { useIsMobile } from './fmod/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import CreditLink from './CreditLink';
 
 type Contributor = typeof contributors.soundtomb;
 
@@ -19,7 +14,10 @@ const Info: React.FC = () => {
     return (
         <>
             {!open && (
-                <button onClick={_ => setOpen(true)}>
+                <button
+                    onClick={_ => setOpen(true)}
+                    className="cursor-pointer hover:animate-pulse transition-all"
+                >
                     <FontAwesomeIcon
                         icon={faQuestionCircle}
                         className=""
@@ -28,7 +26,15 @@ const Info: React.FC = () => {
                 </button>
             )}
             <Modal open={open} onClose={() => setOpen(false)}>
-                <h2>Welcome to beattape.net</h2>
+                <section className="flex-column gap-5 text-left">
+                    <i>Welcome to beattape.net!</i>
+
+                    <p>
+                        This website is
+                        powered by <CreditLink contributor={contributors.fmod} />
+                    </p>
+
+                </section>
             </Modal>
         </>
     );

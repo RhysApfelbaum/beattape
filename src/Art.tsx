@@ -25,8 +25,10 @@ const Art: React.FC = () => {
                         }
                     />
                 </div>
-                <Info />
-                <ArtPicker />
+                <div className="flex">
+                    <Info />
+                    <ArtPicker />
+                </div>
             </div>
         </section>
     );

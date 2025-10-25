@@ -66,10 +66,12 @@ export class SoundLoader {
     }
 
     async unload() {
+        console.log('unloading sounds');
         this.fetched = [];
         this.threshold = 0;
         await Promise.all(
             this.sounds.map(sound => {
+                console.log(sound.url, sound.isLoaded)
                 if (sound.isLoaded) {
                     return sound.unload();
                 }

@@ -16,6 +16,7 @@ import CreditLink from './CreditLink';
 import Button from './Button';
 import TapeReel from './TapeReel';
 import { useTheme } from './ThemeProvider';
+import PlayQueue from './PlayQueue';
 
 // This is probably the worst part of the entire project. This code is awful.
 
@@ -55,6 +56,7 @@ const TrackControls: React.FC = () => {
 
     return (
         <div className="flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded">
+            <PlayQueue />
             <div className="flex flex-col">
                 <p className="text-xl text-base05">
                     {playQueue.currentTrack.displayName}
