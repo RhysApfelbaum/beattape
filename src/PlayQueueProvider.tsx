@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useReducer, useEffect } from 'react';
 import { Track } from './fmod/track';
 import tracklistData from './tracklist.json';
 import { SliderState } from './fmod/sliderState';
@@ -6,6 +6,7 @@ import { useFMOD } from './FMODProvider';
 import { FMOD } from './fmod/system';
 import { beatPulse } from './beatPulse';
 import { EventInstance } from './fmod/event';
+import { dbg } from './fmod/helpers';
 
 const tracklist: Track[] = [];
 
@@ -115,7 +116,7 @@ type PlayQueueAction =
 
 
 function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue {
-    console.log(action);
+    dbg(action);
     switch (action.type) {
         case 'UPDATE': {
             const changedTracks: Track[] = [];
@@ -208,7 +209,7 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
     const startTrack = async (track: Track) => {
         await track.load();
         setLoading(false);
-        console.log(track);
+        dbg(track);
 
         const { grit, brightness, chops, vocals } = playQueue.sliderState;
         track.event.setParameter('Grit', grit, false);
@@ -239,11 +240,10 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
                     const sound = track.sounds.getSound(
                         parameters.name,
                     );
-                    console.log('found sound', sound.url);
+                    dbg('found sound', sound.url);
 
                     if (!sound.isLoaded) {
-                        console.log(typeof sound.handle);
-                        console.log(sound.handle);
+                        dbg(sound.handle);
                         throw new Error(`Sound not loaded: ${sound.url}`)
                     }
 
@@ -255,7 +255,7 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
                     };
                     sound.restart = () => {
                         if (track.event.getPaused()) {
-                            console.debug('restarting after underflow');
+                            dbg('restarting after underflow');
                             track.event.setPaused(false);
                             setLoading(false);
                         }
@@ -271,7 +271,7 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
         track.event.start();
     };
 
-    console.log(state);
+    dbg(state);
 
     useEffect(() => {
 
@@ -281,14 +281,14 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
                 continue;
             }
             if (track.isLoaded) {
-                console.log('stopping and unloading', track.displayName);
+                dbg('stopping and unloading', track.displayName);
                 track.event.stop(0);
                 unloadingTracks.push(track.unload());
             }
         }
 
         Promise.all(unloadingTracks).then(_ => {
-            console.log('done unloading')
+            dbg('done unloading')
             if (!state.currentTrack.isLoaded) {
                 startTrack(state.currentTrack);
             }

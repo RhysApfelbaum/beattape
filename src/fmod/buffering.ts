@@ -1,5 +1,5 @@
 import { makeOptions } from '../utilities/options';
-import { assertNotNull, resolveOnAbort, unreachable } from './helpers';
+import { assertNotNull, dbg, resolveOnAbort, unreachable } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
 
@@ -87,6 +87,7 @@ class WrappedBufferView {
     }
 
     free() {
+        dbg('freeing');
         if (this.buffer === null) {
             throw new Error('Tried to free an unallocated buffer');
         }
@@ -261,8 +262,9 @@ export class LoopBuffer {
     }
 
     free() {
-        this.view.free();
+        this.canRead.reset();
         this.lock();
+        this.view.free();
     }
 
     read(requestedBytes: number) {
@@ -423,6 +425,7 @@ export class RingBuffer extends LoopBuffer {
 
     free() {
         this.canWrite.reset();
+        super.free();
     }
 
     async write(chunk: Uint8Array, signal: AbortSignal | null = null) {

@@ -43,3 +43,9 @@ export const resolveOnAbort = (signal: AbortSignal) => new Promise<void>(resolve
         signal.addEventListener('abort', _ => void resolve(), { once: true })
     }
 });
+
+export const dbg = (message: any, ...optionalParams: any[]) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.debug(message, ...optionalParams);
+    }
+}
