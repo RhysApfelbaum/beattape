@@ -54,7 +54,7 @@ const ArtPicker: React.FC = () => {
                     pl-5
                     group
                     "
-                    title="Change artwork"
+                    title="Appearance"
                     onClick={() => setOpen(true)}
                 >
                     <div className="bg-base0A w-3 h-3 rounded group-hover:bg-base09 transition-all" />
