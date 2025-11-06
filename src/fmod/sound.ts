@@ -2,7 +2,7 @@ import { LoopBuffer, RingBuffer, Sink } from './buffering';
 import { FMODMountedFile } from './mountedFile';
 import { Pointer } from './pointer';
 import { FMOD } from './system';
-import { assertNotNull } from './helpers';
+import { assertNotNull, dbg } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
 import { OggVorbisDecoderWebWorker } from '@wasm-audio-decoders/ogg-vorbis';
@@ -235,6 +235,7 @@ export class StreamedSound implements RemoteSound {
     async fetch() {
         this.decoder = new OggVorbisDecoderWebWorker();
 
+        dbg('should be unallocated', this.decodeBuffer, this.decodeBuffer.isAllocated);
         this.decodeBuffer.allocate(
             this.soundInfo.bytesPerSecond * StreamedSound.DECODE_BUFFER_SECONDS
         );
@@ -475,7 +476,6 @@ export class StreamedSound implements RemoteSound {
     }
 
     async unload() {
-        // console.debug('unloading', this.url);
         if (this.isLoaded) {
             this.handle.release();
             this.handle = null;
@@ -497,6 +497,8 @@ export class StreamedSound implements RemoteSound {
             await this.decoder.free();
             this.decoder = null;
         }
+
+        dbg(this.decodeBuffer, 'should be unallocated after unloading', this.decodeBuffer.isAllocated);
     }
 
     release() {

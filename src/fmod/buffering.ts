@@ -1,5 +1,5 @@
 import { makeOptions } from '../utilities/options';
-import { assertNotNull, resolveOnAbort, unreachable } from './helpers';
+import { assertNotNull, dbg, resolveOnAbort, unreachable } from './helpers';
 import { PromiseStatus } from './promiseStatus';
 
 
@@ -87,6 +87,7 @@ class WrappedBufferView {
     }
 
     free() {
+        dbg('freeing');
         if (this.buffer === null) {
             throw new Error('Tried to free an unallocated buffer');
         }
