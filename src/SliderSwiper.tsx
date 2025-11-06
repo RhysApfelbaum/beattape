@@ -10,7 +10,7 @@ const SliderSwiper: React.FC = () => {
     const [headerSwiper, setHeaderSwiper] = useState<any>(null);
     const [mainSwiper, setMainSwiper] = useState<any>(null);
     return (
-        <div className="w-100">
+        <div className="w-full md:w-100">
             <Swiper
                 slidesPerView="auto"
                 onSwiper={setHeaderSwiper}

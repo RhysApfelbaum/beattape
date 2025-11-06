@@ -55,60 +55,29 @@ const PlayQueue: React.FC = () => {
 
     type TrackItem = { track: Track; changed: boolean };
     const [trackItems, setTrackItems] = useState<TrackItem[]>([]);
-    const [sliderState, setSliderState] = useState<SliderState>(
-        playQueue.sliderState,
-    );
+    // const [sliderState, setSliderState] = useState<SliderState>(
+    //     playQueue.sliderState,
+    // );
+
+    useEffect(() => {
+        const nextTrackItems = playQueue.nextTracks.map(track => ({
+            track: track,
+            changed: false
+        }));
+
+        if (trackItems.length === 0) {
+            setTrackItems(nextTrackItems);
+            return;
+        }
+
+        for (let i = 0; i < trackItems.length; i++) {
+            nextTrackItems[i].changed = nextTrackItems[i].track !== trackItems[i].track;
+        }
+
+        setTrackItems(nextTrackItems);
+    }, [playQueue.nextTracks])
 
     const ref = useRef<HTMLDivElement>(null);
-
-
-    // useEffect(() => dispatch({ type: 'UPDATE' }), []);
-
-    // const fillNextTracks = () => {
-    //     const nextTracks = getNextTracks(playQueue);
-    //     const newTrackItems: TrackItem[] = [];
-    //     if (trackItems.length === 0) {
-    //         // If there are no track items to display, it's the first time loading the page.
-    //         nextTracks.map((track) =>
-    //             newTrackItems.push({ track: track, changed: false }),
-    //         );
-    //     } else {
-    //         // Otherwise compare track by track, and mark the different ones as changed
-    //         for (let i = 0; i < nextTracks.length; i++) {
-    //             newTrackItems.push({
-    //                 track: nextTracks[i],
-    //                 changed: nextTracks[i] !== trackItems[i].track,
-    //             });
-    //         }
-    //     }
-    //     dispatch({ type: 'SET_NEXT_TRACKS', nextTracks: nextTracks});
-    //     setTrackItems(newTrackItems);
-    // };
-
-    // useEffect(() => {
-    //     if (
-    //         playQueue.sliderState.grit === sliderState.grit &&
-    //         playQueue.sliderState.brightness === sliderState.brightness &&
-    //         playQueue.sliderState.chops === sliderState.chops &&
-    //         playQueue.sliderState.vocals === sliderState.vocals
-    //     ) {
-    //         const newTrackItems: TrackItem[] = [];
-    //         playQueue.nextTracks.map((track) => {
-    //             if (newTrackItems.length < playQueue.tracklist.length) {
-    //                 newTrackItems.push({ track: track, changed: false });
-    //             }
-    //         });
-    //
-    //         for (let i = 0; i < trackItems.length; i++) {
-    //             if (trackItems[i].track !== playQueue.nextTracks[i]) {
-    //                 setTrackItems(newTrackItems);
-    //                 break;
-    //             }
-    //         }
-    //     } else setSliderState(playQueue.sliderState);
-    // }, [playQueue]);
-    //
-    // useEffect(fillNextTracks, [sliderState]);
 
     return (
         <div
