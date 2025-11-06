@@ -12,13 +12,13 @@ in {
     git
     tailwindcss-language-server
     ffmpeg
-    emscripten
+    # emscripten
     python3
-    gettext
-    wget
-    libtool
-    automake
-    autoconf
+    # gettext
+    # wget
+    # libtool
+    # automake
+    # autoconf
   ];
 
   # https://devenv.sh/languages/
