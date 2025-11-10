@@ -262,8 +262,9 @@ export class LoopBuffer {
     }
 
     free() {
-        this.view.free();
+        this.canRead.reset();
         this.lock();
+        this.view.free();
     }
 
     read(requestedBytes: number) {
@@ -424,6 +425,7 @@ export class RingBuffer extends LoopBuffer {
 
     free() {
         this.canWrite.reset();
+        super.free();
     }
 
     async write(chunk: Uint8Array, signal: AbortSignal | null = null) {
