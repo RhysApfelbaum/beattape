@@ -44,10 +44,7 @@ export class Track {
             this.bank.load()
         ]);
 
-        // Load the track event which is now available because of the newly loaded bank.
-        if (this.event.description === null) {
-            this.event.init();
-        }
+        this.event.init(); // must be called every time
         this.event.load();
 
         this.interval = setInterval(() => {

@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
 
+import loggingJSON from '../logging.json';
+
+
+const devMode = process.env.NODE_ENV === 'development';
+export const logging: typeof loggingJSON = {
+    debug: loggingJSON.debug && devMode,
+    fmodstudio: loggingJSON.fmodstudio && devMode
+};
+
+
 export function assertNotNull<T>(
     value: T,
     message = 'Failed non-null assertion',
@@ -44,8 +54,10 @@ export const resolveOnAbort = (signal: AbortSignal) => new Promise<void>(resolve
     }
 });
 
+
+
 export const dbg = (message: any, ...optionalParams: any[]) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (logging.debug) {
         console.debug(message, ...optionalParams);
     }
 }

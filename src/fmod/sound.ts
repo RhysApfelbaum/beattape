@@ -30,16 +30,16 @@ export class StreamedSound implements RemoteSound {
     private fileBuffer: LoopBuffer;
     private startBuffer: LoopBuffer;
     private decodeBuffer: RingBuffer;
-    private decoder: OggVorbisDecoderWebWorker | null;
+    private decoder!: OggVorbisDecoderWebWorker | null;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
-    private seekPosition: number;
-    private decodePosition: number;
-    private decodeBufferStartPosition: number;
+    private seekPosition!: number;
+    private decodePosition!: number;
+    private decodeBufferStartPosition!: number;
     private decodeChunk: (chunk: Uint8Array) => Promise<Uint8Array>;
     private startThreshold: number;
 
-    private currentSeekAbort: AbortController;
-    private currentSeek: Promise<void>;
+    private currentSeekAbort!: AbortController;
+    private currentSeek!: Promise<void>;
 
     private decoding: PromiseStatus;
     private decodingAbort: AbortController;
@@ -96,17 +96,10 @@ export class StreamedSound implements RemoteSound {
 
 
 
-        this.decodePosition = 0; // Measured in SAMPLES!!!!!
-        this.seekPosition = 0;
-        this.decodeBufferStartPosition = this.startThreshold;
-        this.decoder = null;
         this.decoding = new PromiseStatus();
         this.decoding.resolve();
-
         this.decodingAbort = new AbortController();
-
-        this.currentSeekAbort = new AbortController();
-        this.currentSeek = Promise.resolve();
+        this.reset();
 
         this.decodeChunk = async chunk => {
             assertNotNull(this.decoder);
@@ -143,6 +136,31 @@ export class StreamedSound implements RemoteSound {
             }
             return new Uint8Array(int16Buffer.buffer);
         };
+    }
+
+    private reset() {
+        // Reset positions
+        this.decodePosition = 0; // Measured in SAMPLES
+        this.seekPosition = 0;
+        this.decodeBufferStartPosition = this.startThreshold;
+
+        // Clean up any ongoing seek
+        this.currentSeekAbort = new AbortController();
+        this.currentSeek = Promise.resolve();
+
+        // Reset buffers
+        if (this.startBuffer.isAllocated) {
+            this.startBuffer.free();
+        }
+        if (this.fileBuffer.isAllocated) {
+            this.fileBuffer.free();
+        }
+        if (this.decodeBuffer.isAllocated) {
+            this.decodeBuffer.free();
+        }
+
+        // Reset the decoder
+        this.decoder = null;
     }
 
     underflow() {
@@ -484,24 +502,17 @@ export class StreamedSound implements RemoteSound {
             this.handle = null;
         }
 
-        if (this.startBuffer.isAllocated) {
-            this.startBuffer.free();
-        }
-
-        if (this.fileBuffer.isAllocated) {
-            this.fileBuffer.free();
-        }
-
-        if (this.decodeBuffer.isAllocated) {
-            this.decodeBuffer.free();
-        }
+        this.currentSeekAbort.abort();
+        await this.currentSeek;
 
         if (this.decoder !== null) {
             await this.decoder.free();
-            this.decoder = null;
         }
 
-        dbg(this.decodeBuffer, 'should be unallocated after unloading', this.decodeBuffer.isAllocated);
+        this.reset();
+
+
+        // dbg(this.decodeBuffer, 'should be unallocated after unloading', this.decodeBuffer.isAllocated);
     }
 
     release() {
