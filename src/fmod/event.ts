@@ -1,5 +1,6 @@
 import { FMOD } from './system';
 import { Pointer } from './pointer';
+import { dbg } from './helpers';
 
 // Supports a single instance
 export class EventInstance {
@@ -88,7 +89,6 @@ export class EventInstance {
     }
 
     setParameter(name: string, value: number, immediate: boolean) {
-        console.log('set parameter', this.instance);
         FMOD.Result = this.instance.setParameterByName(name, value, immediate);
     }
 
@@ -108,6 +108,7 @@ export class EventInstance {
 
     // Unloads the instance once playing has stopped
     unload() {
+        // alert('unloading event' + this.path);
         FMOD.Result = this.instance.release();
         this.instance = null;
     }

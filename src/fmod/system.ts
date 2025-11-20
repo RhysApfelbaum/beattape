@@ -5,6 +5,7 @@ import { Pointer } from './pointer';
 export const FMOD: any = {
     preRun: () => {},
     onSystemInitialized: () => {},
+
     async onRuntimeInitialized() {
         const outval = new Pointer<any>();
         const sampleRate = new Pointer<number>();
