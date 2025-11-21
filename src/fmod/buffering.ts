@@ -265,6 +265,7 @@ export class LoopBuffer {
         this.canRead.reset();
         this.lock();
         this.view.free();
+        this.fresh = true;
     }
 
     read(requestedBytes: number) {
@@ -276,7 +277,7 @@ export class LoopBuffer {
         }
 
         if (this.debug) {
-            console.debug('read', requestedBytes, this.id, this.status);
+            dbg('read', requestedBytes, this.id, this.status);
         }
 
         return result;
@@ -294,12 +295,12 @@ export class LoopBuffer {
         if (wrapped && !this.view.destructiveRead) {
             this.view.forceFull();
             if (this.debug) {
-                console.debug('wrapped', preWrite, chunk.length, this.id, this.status);
+                dbg('wrapped', preWrite, chunk.length, this.id, this.status);
             }
         }
 
         if (this.debug) {
-            console.debug('write', chunk.length, this.id, this.status);
+            dbg('write', chunk.length, this.id, this.status);
         }
 
         // Resolve canRead if enough data
@@ -309,7 +310,7 @@ export class LoopBuffer {
         ) {
             this.canRead.resolve();
             if (this.debug) {
-                console.debug('resolving canRead', this.status);
+                dbg('resolving canRead', this.status);
             }
         }
 
@@ -373,8 +374,8 @@ export class LoopBuffer {
         }
 
         if (debug) {
-            console.log('processed data', processedView);
-            console.log(this.status);
+            dbg('processed data', processedView);
+            dbg(this.status);
         }
 
         if (leftover.length > 0 || !wrap) {
