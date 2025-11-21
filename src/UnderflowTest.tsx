@@ -1,13 +1,14 @@
 import React from 'react';
 import Button from './Button';
 import { usePlayQueue } from './PlayQueueProvider';
+import { dbg } from './fmod/helpers';
 
 const Underflow: React.FC = () => {
     const [playQueue] = usePlayQueue();
     return (
         <Button
             onClick={() => {
-                console.log('trying to underflow');
+                dbg('trying to underflow');
                 playQueue.currentTrack.sounds.testUnderflow();
             }}
         >

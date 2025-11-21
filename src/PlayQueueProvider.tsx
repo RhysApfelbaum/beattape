@@ -61,7 +61,7 @@ const trackDistance = (playQueue: PlayQueue, track: Track): number => {
         playQueue.sliderState.chops - track.averageSliderState.chops,
     );
     result += Math.abs(
-        playQueue.sliderState.vocals - track.averageSliderState.vocals,
+        playQueue.sliderState.vocals - track.averageSliderState.vocals,playQueue
     );
     result /= 4;
 

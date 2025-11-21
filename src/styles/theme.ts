@@ -20,7 +20,6 @@ export type Theme = typeof themes[number];
 
 export const applyTheme = (theme: Theme) => {
     Object.entries(theme.palette).forEach(([colorName, hex]) => {
-        console.log(colorName, hex);
         document.documentElement.style.setProperty(
             `--color-${colorName}`,
             hex,

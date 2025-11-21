@@ -17,6 +17,7 @@ import Button from './Button';
 import TapeReel from './TapeReel';
 import { useTheme } from './ThemeProvider';
 import PlayQueue from './PlayQueue';
+import { dbg } from './fmod/helpers';
 
 // This is probably the worst part of the entire project. This code is awful.
 
@@ -49,7 +50,7 @@ const TrackControls: React.FC = () => {
 
     useEffect(() => dispatch({ type: 'UPDATE' }), []);
 
-    useEffect(() => console.log(playQueue), [playQueue]);
+    useEffect(() => dbg(playQueue), [playQueue]);
 
     let playButtonIcon = playQueue.paused ? faPlay : faPause;
     if (playQueue.loading) playButtonIcon = faEllipsis;

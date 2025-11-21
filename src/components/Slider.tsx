@@ -23,8 +23,6 @@ const Slider: React.FC<{
         onMouseUp(parseInt(target.value) / 100);
     };
 
-    console.log(activation);
-
     return (
         <div
             className={

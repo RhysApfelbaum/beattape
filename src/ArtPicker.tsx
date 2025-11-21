@@ -137,10 +137,10 @@ const ArtPicker: React.FC = () => {
                     >
                         {
                             [
-                                <option value="auto">Match with art</option>
+                                <option value="auto" key="auto">Match with art</option>
                             ].concat(
                                 themes.map((theme, index) => (
-                                    <option value={index}>
+                                    <option value={index} key={index}>
                                         {theme.name}
                                     </option>
                                 ))

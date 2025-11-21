@@ -33,8 +33,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             index = themeKey;
         }
 
-        console.log(index, artKey);
-        
         const newTheme = themes[index];
         setTheme(newTheme);
         applyTheme(newTheme);
