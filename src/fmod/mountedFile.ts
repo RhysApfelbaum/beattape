@@ -1,5 +1,6 @@
 import { FMOD } from './system';
 import { PromiseStatus } from './promiseStatus';
+import { dbg } from './helpers';
 
 const DEFAULT_SOUND_INFO = {
     sampleRate: 44100,
@@ -45,8 +46,6 @@ export class FMODMountedFile implements RemoteSoundData {
             const buffer = await response.arrayBuffer();
             const responseData = new Uint8Array(buffer);
             this.length = buffer.byteLength;
-
-            console.log(this.filename);
 
             // Write buffer to local file using this completely undocumented emscripten function :)
             FMOD.FS_createDataFile(

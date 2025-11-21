@@ -118,7 +118,6 @@ export class StreamedSound implements RemoteSound {
             const length = Math.min(samplesDecoded, remainingSamples);
 
             if (length === 0) {
-                // console.log(channelData);
             }
 
             this.decodePosition = (this.decodePosition + length) % sampleCount;
@@ -225,7 +224,6 @@ export class StreamedSound implements RemoteSound {
                 StreamedSound.DECODE_CHUNK_SIZE,
                 { process: this.decodeChunk, signal: this.decodingAbort.signal }
             );
-            // console.log(this.url, 'decoded chunk');
 
             if (leftover.length > 0) {
                 if (atStart) {
@@ -302,7 +300,6 @@ export class StreamedSound implements RemoteSound {
 
     private readPCM(heapPointer: number, requestedBytes: number) {
         if (this.url.includes('deep_kick')) {
-            // console.log('reading', this.decodeBuffer.status); 
         }
         const { capacity } = this.decodeBuffer.status;
         const { wrap, view, wrappedView, underflow } = this.decodeBuffer.read(
@@ -331,9 +328,8 @@ export class StreamedSound implements RemoteSound {
     }
 
     async forceSeekDecodeBuffer(position: number) {
-        dbg('force seeking', this.url);
+        dbg('force seeking', this.url, 'position:', position, this.startThreshold);
         await this.stopDecoding();
-        // this.stopDecoding();
         dbg('stopped decoding', this.url);
 
         assertNotNull(this.decoder);
@@ -348,10 +344,8 @@ export class StreamedSound implements RemoteSound {
         this.decodePosition = 0;
 
         this.decodeBuffer.flush();
-        console.log(this.url, 'flush', this.decodeBuffer.status);
         const sink = new Sink(position);
         let leftover = new Uint8Array();
-        // dbg(this.fileBuffer.status);
         dbg(this.url, 'starting sink', this.fileBuffer.status);
         while (!sink.isFull()) {
             const result = await this.fileBuffer.pipe(
@@ -409,7 +403,7 @@ export class StreamedSound implements RemoteSound {
             const { bytesPerSample, numChannels } = this.soundInfo;
             const bytePosition = position * bytesPerSample * numChannels;
 
-            // dbg(this.url, 'starting seek to', 0);
+            dbg(this.url, 'starting seek to', 0);
             this.currentSeekAbort.abort();
             this.seek(bytePosition).then(_ => {
                 this.currentSeekAbort = new AbortController();

@@ -108,7 +108,6 @@ export class EventInstance {
 
     // Unloads the instance once playing has stopped
     unload() {
-        // alert('unloading event' + this.path);
         FMOD.Result = this.instance.release();
         this.instance = null;
     }

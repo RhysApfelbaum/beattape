@@ -57,7 +57,6 @@ export class Bank {
     async load() {
         const outval = new Pointer<any>();
         await this.file.fetchStatus;
-        console.log(`/${this.file.filename}.bank`);
         FMOD.Result = FMOD.Studio.loadBankFile(
             `/${this.file.filename}`,
             FMOD.STUDIO_LOAD_BANK_NORMAL,
@@ -73,8 +72,6 @@ export class Bank {
                 `Tried to unload ${this.file.filename} - only loaded banks can be unloaded.`,
             );
         }
-
-        console.error('unloading bank ' + this.file.url);
         FMOD.Result = this.handle.unload();
         this.handle = null;
     }
