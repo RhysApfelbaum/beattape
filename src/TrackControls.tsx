@@ -18,6 +18,7 @@ import TapeReel from './TapeReel';
 import { useTheme } from './ThemeProvider';
 import PlayQueue from './PlayQueue';
 import { dbg } from './fmod/helpers';
+import OverflowMarquee from './components/OverflowMarquee';
 
 // This is probably the worst part of the entire project. This code is awful.
 
@@ -58,11 +59,51 @@ const TrackControls: React.FC = () => {
     return (
         <div className="flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded">
             <PlayQueue />
-            <div className="flex flex-col">
-                <p className="text-xl text-base05">
-                    {playQueue.currentTrack.displayName}
-                </p>
-                <CreditLink contributor={contributors.soundtomb} />
+            <div className="flex flex-row space-around">
+                <table className="w-90 table-fixed text-center">
+                    <thead>
+                        <tr>
+                            <th className="font-normal py-2 text-base03">
+                                prev
+                            </th>
+                            <th className="font-normal py-2 text-base03">
+                                now playing
+                            </th>
+                            <th className="font-normal py-2 text-base03">
+                                next
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <OverflowMarquee>
+                                    <p className="text-base04">
+                                        {playQueue.history[0]?.displayName || '---'}
+                                    </p>
+                                </OverflowMarquee>
+                            </td>
+                            <td>
+                                <div className="bg-base02 p-3 rounded">
+                                    <OverflowMarquee>
+                                        <p className="text-xl text-base05">
+                                            {playQueue.currentTrack.displayName}
+                                        </p>
+                                    </OverflowMarquee>
+                                    <CreditLink contributor={contributors.soundtomb} />
+
+                                </div>
+                            </td>
+                            <td>
+                                <OverflowMarquee>
+                                    <p className="text-base04">
+                                        {playQueue.nextTracks[0].displayName}
+                                    </p>
+                                </OverflowMarquee>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div className="m-5 flex flex-row items-center gap-3">
                 <TapeReel spinning={!playQueue.paused} className="w-10 h-10" />
