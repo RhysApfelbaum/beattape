@@ -4,6 +4,8 @@ import artData from './art.json';
 
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import "swiper/css";
+import "swiper/css/navigation";
 import Modal from './Modal';
 import { useIsMobile } from './fmod/helpers';
 import themes from './styles/themes.json';
@@ -71,18 +73,22 @@ const ArtPicker: React.FC = () => {
                     <Swiper
                         modules={[Navigation]}
                         slidesPerView={mobile ? 'auto' : 5 }
+                        observer={true}
+                        observeParents={true}
                         navigation
                         className="px-10"
                         onSlideChange={(swiper) => {
                             if (mobile) {
-                                handleSelect(swiper.activeIndex);
+                                handleSelect(swiper.realIndex);
                             }
                         }}
                         onSwiper={(swiper) => {
+                            swiper.update();
                             if (mobile) {
                                 swiper.slideTo(artKey);
                             }
                         }}
+                        key={mobile ? 'mobile' : 'desktop'}
                     >
                         {artData.map((art, index) => (
                             <SwiperSlide key={index}>
@@ -105,12 +111,21 @@ const ArtPicker: React.FC = () => {
                                         "
                                         onClick={() => handleSelect(index)}
                                     >
-                                        <img
-                                            className="
-                                            rounded-lg
-                                            "
-                                            src={art.thumbnailUrl}
-                                        />
+                                        {imagesLoaded ? (
+                                            <img
+                                                className="rounded-lg"
+                                                src={art.thumbnailUrl}
+                                                width={150}
+                                                height={150}
+                                            />
+                                        ) : (
+                                                <div className="rounded-lg bg-base05" style={{
+                                                    width: 150, height: 150
+                                                }}>
+
+                                                </div>
+                                            )}
+                                        
                                     </button>
                                 </div>
                             </SwiperSlide>
