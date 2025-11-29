@@ -46,6 +46,12 @@ const TrackControls: React.FC = () => {
 
     const prevTrack = () => {
         fmod.events.tapeStop.oneShot();
+
+        if (playQueue.currentTrack.isLoaded) {
+            // Restart current track
+            playQueue.currentTrack.event.start();
+        }
+
         dispatch({ type: 'PREVIOUS_TRACK' });
     }
 
@@ -63,14 +69,14 @@ const TrackControls: React.FC = () => {
                 <table className="w-90 table-fixed text-center">
                     <thead>
                         <tr>
-                            <th className="font-normal py-2 text-base03">
-                                prev
+                            <th className="font-normal p-2 text-base03">
+                                prev 
                             </th>
-                            <th className="font-normal py-2 text-base03">
+                            <th className="font-normal p-2 w-1/2 text-base03">
                                 now playing
                             </th>
-                            <th className="font-normal py-2 text-base03">
-                                next
+                            <th className="font-normal p-2 text-base03">
+                                up next
                             </th>
                         </tr>
                     </thead>
