@@ -61,7 +61,7 @@ const trackDistance = (playQueue: PlayQueue, track: Track): number => {
         playQueue.sliderState.chops - track.averageSliderState.chops,
     );
     result += Math.abs(
-        playQueue.sliderState.vocals - track.averageSliderState.vocals,playQueue
+        playQueue.sliderState.vocals - track.averageSliderState.vocals,
     );
     result /= 4;
 
@@ -85,14 +85,17 @@ const recentScore = (playQueue: PlayQueue, track: Track): number => {
 };
 
 export const getNextTracks = (playQueue: PlayQueue) => {
-    playQueue.tracklist.sort(
+    // Clone the tracklist to avoid mutating state
+    const tracklist = [...playQueue.tracklist];
+
+    tracklist.sort(
         (a, b) => trackDistance(playQueue, a) - trackDistance(playQueue, b),
     );
 
     const nextTracks: Track[] = [];
-    playQueue.tracklist.forEach((track) => {
-        // if (track == playQueue.currentTrack) return;
-        if (nextTracks.length >= playQueue.tracklist.length) return;
+    tracklist.forEach((track) => {
+        if (track === playQueue.currentTrack) return;
+        if (nextTracks.length >= tracklist.length) return;
         nextTracks.push(track);
     });
     return nextTracks;
@@ -139,7 +142,7 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
             };
         }
         case 'SET_NEXT_TRACKS': {
-            // updatePlayQueueLoading(playQueue);
+            action.nextTracks.forEach(track => dbg(track.name));
             return {
                 ...state,
                 nextTracks: action.nextTracks
@@ -167,10 +170,9 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
             };
         }
         case 'PREVIOUS_TRACK': {
-            // if (playQueue.history.length === 0) {
-            //     currentTrack.event.start();
-            //     return state;
-            // }
+            if (state.history.length === 0) {
+                return state;
+            }
 
             return {
                 ...state,
@@ -326,6 +328,10 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
             state.currentTrack.event.setParameter('Chops', state.sliderState.chops, true);
             state.currentTrack.event.setParameter('Vocals', state.sliderState.vocals, true);
         }
+        dispatch({
+            type: 'SET_NEXT_TRACKS',
+            nextTracks: getNextTracks(playQueue)
+        });
     }, [state.sliderState])
 
     return (
