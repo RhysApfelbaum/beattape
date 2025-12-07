@@ -34,7 +34,7 @@ const playQueue = {
     history: [] as Track[],
     currentTrack: firstTrack,
     nextTracks: [] as Track[],
-    changedTracks: [] as Track[],
+    changedTracks: {} as Record<string, boolean>,
     tracklist: tracklist,
     loading: true,
     paused: true,
@@ -92,13 +92,7 @@ export const getNextTracks = (playQueue: PlayQueue) => {
         (a, b) => trackDistance(playQueue, a) - trackDistance(playQueue, b),
     );
 
-    const nextTracks: Track[] = [];
-    tracklist.forEach((track) => {
-        if (track === playQueue.currentTrack) return;
-        if (nextTracks.length >= tracklist.length) return;
-        nextTracks.push(track);
-    });
-    return nextTracks;
+    return tracklist;
 };
 
 const PlayQueueContext = createContext<
@@ -122,12 +116,10 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
     dbg(action);
     switch (action.type) {
         case 'UPDATE': {
-            const changedTracks: Track[] = [];
+            const changedTracks = {} as typeof playQueue.changedTracks;
             const newNextTracks = getNextTracks(state);
             for (let i = 0; i < newNextTracks.length; i++) {
-                if (newNextTracks[i] !== state.nextTracks[i]) {
-                    changedTracks.push(newNextTracks[i]);
-                }
+                changedTracks[newNextTracks[i].name] = newNextTracks[i] !== state.nextTracks[i];
             }
             return {
                 ...state,
@@ -176,7 +168,7 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
 
             return {
                 ...state,
-                nextTracks: [state.currentTrack, ...state.nextTracks],
+                nextTracks: [state.currentTrack, ...state.nextTracks].slice(0, state.tracklist.length),
                 currentTrack: state.history[0],
                 history: state.history.slice(1),
             };
@@ -189,12 +181,6 @@ function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue
         }
     }
 }
-
-// const updatePlayQueueLoading = (playQueue: PlayQueue) => {
-//     if (!playQueue.currentTrack.isLoaded) {
-//         loadTrack(playQueue.currentTrack, playQueue)
-//     }
-// }
 
 
 // Create a provider component to wrap the top-level of your application
@@ -329,8 +315,7 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
             state.currentTrack.event.setParameter('Vocals', state.sliderState.vocals, true);
         }
         dispatch({
-            type: 'SET_NEXT_TRACKS',
-            nextTracks: getNextTracks(playQueue)
+            type: 'UPDATE',
         });
     }, [state.sliderState])
 
