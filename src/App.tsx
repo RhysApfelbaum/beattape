@@ -12,6 +12,7 @@ import './index.css';
 import LoadingPage from './LoadingPage';
 import { gesture } from './fmod/gesture';
 import Art from './Art';
+import PlayQueue from './PlayQueue';
 
 
 const App: React.FC = () => {
@@ -30,7 +31,6 @@ const App: React.FC = () => {
         fmod.events.radio.setParameter('RadioNearness', distance, false);
     };
 
-    const radioShowing = true;
 
     // App is unable to load if FMOD isn't loaded
     const mainPage = (
@@ -40,6 +40,7 @@ const App: React.FC = () => {
                 <SliderSwiper />
             </main>
             <footer className="fixed bottom-0 md:right-[50vw] md:translate-x-[50%] md:w-fit w-full flex flex-col justify-center items-center z-[60]">
+                <PlayQueue />
                 <TrackControls />
             </footer>
         </PlayQueueProvider>
