@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import artData from './art.json';
 import ArtPicker from './ArtPicker';
 import CreditLink from './CreditLink';
 import contributors from './contributors.json';
@@ -11,7 +10,7 @@ const Art: React.FC = () => {
     const { art } = useTheme();
 
     return (
-        <section className="py-5 mb-10">
+        <section className="py-5 mb-3">
             <img
                 src={art.url}
                 className="w-80 md:w-auto md:max-h-80 rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]"
