@@ -5,6 +5,7 @@ import TrackSliders from './TrackSliders';
 
 import AmbienceSliders from './AmbienceSliders';
 import Effects from './Effects';
+import LiveRadio from './LiveRadio';
 
 const SliderSwiper: React.FC = () => {
     const [headerSwiper, setHeaderSwiper] = useState<any>(null);
