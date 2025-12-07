@@ -19,6 +19,7 @@ import { useTheme } from './ThemeProvider';
 import PlayQueue from './PlayQueue';
 import { dbg } from './fmod/helpers';
 import OverflowMarquee from './components/OverflowMarquee';
+import { StreamedSound } from './fmod/sound';
 
 // This is probably the worst part of the entire project. This code is awful.
 
@@ -33,7 +34,6 @@ const TrackControls: React.FC = () => {
         if (!fmod.ready) return;
     }, [fmod]);
 
-
     const togglePause = () => {
         fmod.events.tapeStop.oneShot();
         dispatch({ type: 'TOGGLE_PAUSE', pauseEvent: fmod.events.paused });
@@ -47,7 +47,7 @@ const TrackControls: React.FC = () => {
     const prevTrack = () => {
         fmod.events.tapeStop.oneShot();
 
-        if (playQueue.currentTrack.isLoaded) {
+        if (playQueue.currentTrack.isLoaded && playQueue.history.length === 0) {
             // Restart current track
             playQueue.currentTrack.event.start();
         }
@@ -55,6 +55,9 @@ const TrackControls: React.FC = () => {
         dispatch({ type: 'PREVIOUS_TRACK' });
     }
 
+    const nextTrackChanged = playQueue.changedTracks[playQueue.nextTracks[0].name];
+
+    dbg(nextTrackChanged);
     useEffect(() => dispatch({ type: 'UPDATE' }), []);
 
     useEffect(() => dbg(playQueue), [playQueue]);
@@ -63,8 +66,7 @@ const TrackControls: React.FC = () => {
     if (playQueue.loading) playButtonIcon = faEllipsis;
 
     return (
-        <div className="flex flex-col place-content-center items-center bg-base01 py-5 px-5 md:mb-5 w-full md:w-auto md:rounded">
-            <PlayQueue />
+        <div className="flex flex-col place-content-center items-center bg-base01 pb-5 px-5 md:mb-5 w-full md:w-auto md:rounded">
             <div className="flex flex-row space-around">
                 <table className="w-90 table-fixed text-center">
                     <thead>
@@ -102,7 +104,7 @@ const TrackControls: React.FC = () => {
                             </td>
                             <td>
                                 <OverflowMarquee>
-                                    <p className="text-base04">
+                                    <p className={`text-base04 ${nextTrackChanged ? 'animate-track-changed' : ''}`}>
                                         {playQueue.nextTracks[0].displayName}
                                     </p>
                                 </OverflowMarquee>
