@@ -26,7 +26,7 @@ const Slider: React.FC<{
     return (
         <div
             className={
-                "flex flex-col relative overflow-clip items-center h-40 justify-start " +
+                "flex flex-col relative items-center h-40 justify-start " +
                 className
             }
             style={{ "--activation": activation } as React.CSSProperties}
@@ -41,7 +41,6 @@ const Slider: React.FC<{
                 />
             </div>
 
-            {/* Spacer */}
             <span className="h-[100px]" />
 
             <p className="slider-text">{label}</p>

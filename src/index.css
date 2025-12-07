@@ -25,7 +25,7 @@
         from {
             color: var(--color-base0A);
         } to {
-            color: var(--color-base05);
+            color: inherit;
         }
     }
 }
