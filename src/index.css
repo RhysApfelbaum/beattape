@@ -144,8 +144,8 @@ bun-hmr {
     align-content: center;
     filter: drop-shadow(0 0 10px color-mix(
         in srgb,
-        rgb(255, 238, 222, 0),
-        rgb(255, 238, 222, 1)
+        rgb(0,0,0,0),
+        var(--color-base09)
         var(--activation)
     ));
 

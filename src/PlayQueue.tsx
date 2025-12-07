@@ -5,14 +5,14 @@ import { SliderState } from './fmod/sliderState';
 import contributors from './contributors.json';
 import CreditLink from './CreditLink';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { motion, useAnimationControls } from 'framer-motion';
 import {
     faArrowDown,
     faArrowUp,
-    faArrowUp19,
-    faArrows,
     faPlay,
-    faUpDown,
 } from '@fortawesome/free-solid-svg-icons';
+import { useTheme } from './ThemeProvider';
+import { dbg } from './fmod/helpers';
 
 const playIcon = (
     <FontAwesomeIcon
@@ -22,6 +22,7 @@ const playIcon = (
         style={{ transform: 'scale(calc(var(--beat-pulse) * 0.3 + 100%))' }}
     />
 );
+
 
 const TrackRow: React.FC<{
     track: Track;
@@ -49,15 +50,55 @@ const TrackRow: React.FC<{
     );
 };
 
+
+
 const PlayQueue: React.FC = () => {
     const [playQueue, dispatch] = usePlayQueue();
     const [collapsed, setCollapsed] = useState(true);
 
     type TrackItem = { track: Track; changed: boolean };
     const [trackItems, setTrackItems] = useState<TrackItem[]>([]);
-    // const [sliderState, setSliderState] = useState<SliderState>(
-    //     playQueue.sliderState,
-    // );
+
+    const bounceControls = useAnimationControls();
+    const { theme } = useTheme();
+
+    const bounceArrow = async (repeat = Infinity) => {
+        bounceControls.start({
+            color: theme.palette.base0A,
+        });
+        await bounceControls.start({
+            y: [0, -10, 0],
+            transition: {
+                duration: 1,
+                ease: 'easeInOut',
+                repeat: repeat
+            }
+        });
+        if (repeat < Infinity) {
+            bounceControls.start({
+                color: theme.palette.base03,
+                transition: { duration: 1, ease: 'easeOut' },
+            });
+        }
+    };
+
+    const bounceArrowStop = async () => {
+        bounceControls.start({
+            y: 0,
+            transition: {
+                duration: 1,
+                ease: 'easeOut'
+            } 
+        })
+        bounceControls.start({
+            color: theme.palette.base03,
+            transition: { duration: 0.3, ease: 'easeOut' },
+        });
+    };
+
+    useEffect(() => {
+        bounceControls.set({ color: theme.palette.base03 });
+    }, [bounceControls, theme.palette.base03]);
 
     useEffect(() => {
         const nextTrackItems = playQueue.nextTracks.map(track => ({
@@ -75,7 +116,17 @@ const PlayQueue: React.FC = () => {
         }
 
         setTrackItems(nextTrackItems);
+
     }, [playQueue.nextTracks])
+
+    useEffect(() => {
+        dbg('changed tracks', playQueue.changedTracks);
+        for (const changed of Object.entries(playQueue.changedTracks)) {
+            if (changed) {
+                bounceArrow(1);
+            }
+        }
+    }, [playQueue.changedTracks]);
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -85,30 +136,17 @@ const PlayQueue: React.FC = () => {
             w-full
             bg-base01
             md:rounded-t-lg
-            group
             "
+            onMouseEnter={_ => bounceArrow()}
+            onMouseLeave={_ => bounceArrowStop()}
         >
-            <button
-                className="
-                    hover:cursor-pointer
-                    border-2
-                    border-transparent
-                    md:animate-bounce
-                    w-full
-                    ease-in-out
-                    rounded
-                    px-10
-                    pt-2
-                    opacity-100
-                    md:opacity-0
-                    group-hover:opacity-100
-                    transition-all
-                    duration-500
-                "
+            <motion.button
+                className="cursor-pointer"
+                animate={bounceControls}
                 onClick={() => setCollapsed(!collapsed)}
             >
                 <FontAwesomeIcon icon={collapsed ? faArrowUp : faArrowDown} />
-            </button>
+            </motion.button>
             <div
                 className={
                     'overflow-hidden transition-[height] ease-in-out duration-500'
@@ -130,7 +168,7 @@ const PlayQueue: React.FC = () => {
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="overflow-scroll">
                         <TrackRow
                             track={playQueue.currentTrack}
                             changed={false}
