@@ -1,22 +1,27 @@
 {
     "soundtomb": {
         "name": "Soundtomb",
-        "link": "https://linktr.ee/soundtomb"
+        "link": "https://linktr.ee/soundtomb",
+        "person": true
     },
     "pythagon": {
         "name": "PYTHAGON",
-        "link": "https://soundcloud.com/pythagon"
+        "link": "https://soundcloud.com/pythagon",
+        "person": true
     },
     "alex_krokus": {
         "name": "Alex Krokus",
-        "link": "https://www.instagram.com/alexkrokus/"
+        "link": "https://www.instagram.com/alexkrokus/",
+        "person": true
     },
     "midjourney": {
         "name": "Midjourney",
-        "link": "https://www.midjourney.com"
+        "link": "https://www.midjourney.com",
+        "person": false
     },
     "fmod": {
         "name": "FMOD",
-        "link": "https://www.fmod.com/"
+        "link": "https://www.fmod.com/",
+        "person": false
     }
 }

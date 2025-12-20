@@ -4,59 +4,70 @@ import contributors from './contributors.json';
 import Modal from './Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
-import CreditLink from './CreditLink';
+import CreditLink, { Link } from './CreditLink';
 
 type Contributor = typeof contributors.soundtomb;
 
 const infoPage = (
-    <section className="flex flex-col gap-5 text-left overflow-scroll h-[80vh] w-[80vw] md:w-auto">
-        <i>Welcome to beattape.net!</i>
+    <section className="flex flex-col gap-5 text-left overflow-scroll h-[80vh] w-[80vw] md:w-auto md:p-20">
+        <h3 className='text-base06 font-semibold'><i>Welcome to beattape.net!</i></h3>
 
         <p>
-            This website is
-            powered by <CreditLink contributor={contributors.fmod} />
+            I'm <CreditLink contributor={contributors.soundtomb}/>, and this is
+            my interactive music site, powered by <CreditLink
+                contributor={contributors.fmod} />.
+        </p>
+        <p>
+            The tracks you're hearing aren't fully generative, and they aren't
+            fully static. They're somewhere inbetween. You'll have to explore
+            to find out...
+        </p>
+        <p>
+            Here's a short explanation of what some of the controls do.
         </p>
 
-        <h3 className="text-base01">Track Sliders</h3>
+        <h3 className='text-base06 font-semibold'><i>Track Sliders</i></h3>
         <p>
-            These sliders represent the feel of the track. If you change them, the next tracks in the play queue will update. For example, if you turn up the "Grit" slider, the next tracks will be more gritty.
+            These sliders represent the feel of the track. If you change them,
+            the next tracks in the play queue will update. For example, if you
+            turn up the "Grit" slider, the next tracks will be more gritty.
         </p>
         <p>
-            If a slider starts glowing, that means that the track that's playing will react if you adjust it.
-        </p>
-
-        <h3>Track Sliders</h3>
-        <p>
-            These sliders represent the feel of the track. If you change them, the next tracks in the play queue will update. For example, if you turn up the "Grit" slider, the next tracks will be more gritty.
-        </p>
-        <p>
-            If a slider starts glowing, that means that the track that's playing will react if you adjust it.
+            If a slider starts glowing, that means that the track that's
+            playing will react if you adjust it.
         </p>
 
-        <h3>Track Sliders</h3>
+        <h3 className='text-base06 font-semibold'><i>Ambience Sliders</i></h3>
         <p>
-            These sliders represent the feel of the track. If you change them, the next tracks in the play queue will update. For example, if you turn up the "Grit" slider, the next tracks will be more gritty.
-        </p>
-        <p>
-            If a slider starts glowing, that means that the track that's playing will react if you adjust it.
+            These sliders let you play ambient sounds in the background.
         </p>
 
-        <h3>Track Sliders</h3>
+        <h3 className='text-base06 font-semibold'><i>Effects</i></h3>
         <p>
-            These sliders represent the feel of the track. If you change them, the next tracks in the play queue will update. For example, if you turn up the "Grit" slider, the next tracks will be more gritty.
+            These affect the track playing, but not the ambience.
         </p>
+        <hr />
         <p>
-            If a slider starts glowing, that means that the track that's playing will react if you adjust it.
+            I'm always looking for new art or music to host here. If that
+            sounds like something you'd be interested in, or if you have any
+            questions, feel free to send me an <Link
+                href="mailto:soundtomb1@gmail.com" text="email" />.
         </p>
 
-
-        <h3>Track Sliders</h3>
         <p>
-            These sliders represent the feel of the track. If you change them, the next tracks in the play queue will update. For example, if you turn up the "Grit" slider, the next tracks will be more gritty.
+            Besides me, here are the people who have contributed art or music so far:
         </p>
-        <p>
-            If a slider starts glowing, that means that the track that's playing will react if you adjust it.
-        </p>
+        <ul>
+            {Object.values(contributors).map(contributor => {
+                if (contributor.name !== 'Soundtomb' && contributor.person ) {
+                    return <li
+                        key={contributor.name}
+                    >
+                        - <CreditLink contributor={contributor} />
+                    </li>
+                }
+            })}
+        </ul>
     </section>
 );
 

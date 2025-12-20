@@ -1,15 +1,13 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 interface Contributor {
     name: string;
     link: string;
 }
 
-const CreditLink: React.FC<{ contributor: Contributor }> = ({
-    contributor,
-}) => (
+export const Link: React.FC<{ href: string, text: string }> = ({ href, text }) => (
     <a
-        href={contributor.link}
+        href={href}
         target="_blank"
         rel="noreferrer noopener"
         className="
@@ -20,8 +18,13 @@ const CreditLink: React.FC<{ contributor: Contributor }> = ({
         hover:text-base05 transition-all
         "
     >
-        {contributor.name}
+        {text}
     </a>
-);
+)
+
+
+const CreditLink: React.FC<{ contributor: Contributor }> = ({
+    contributor,
+}) => <Link href={contributor.link} text={contributor.name} />;
 
 export default CreditLink;

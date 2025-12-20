@@ -5,17 +5,6 @@ import Slider from './components/Slider';
 const TrackSliders: React.FC = () => {
     const [playQueue, dispatch] = usePlayQueue();
 
-    // useEffect(() => {
-    //     updateGrit(playQueue.sliderState.grit);
-    //     updateBrightness(playQueue.sliderState.brightness);
-    //     updateChops(playQueue.sliderState.chops);
-    //     updateVocals(playQueue.sliderState.vocals);
-    //
-    //     dispatch({
-    //         type: 'SET_SLIDER_STATE',
-    //         sliderState: playQueue.sliderState
-    //     })
-    // }, []);
 
     const updateGrit = (value: number) => {
         if (!playQueue.currentTrack.isLoaded) return;
