@@ -168,6 +168,6 @@ bun-hmr {
 }
 
 .swiper-button-prev, .swiper-button-next {
-    color: var(--color-base0A);
-    transform: scale(0.5);
+    color: var(--color-base0A) !important;
+    transform: scale(0.5) !important;
 }
