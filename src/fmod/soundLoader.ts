@@ -1,3 +1,4 @@
+import { dbg } from './helpers';
 import { StaticSound, StreamedSound } from './sound';
 
 export interface SoundInfo {
@@ -42,15 +43,8 @@ export class SoundLoader {
     }
 
     async load(time = 0, offset = 10) {
-        this.sounds.map((sound) => {
-            if (sound.isLoaded) {
-                // sound.updateTime(0)
-                // sound.updateDecoderPosition(time);
-            }
-        });
-
         if (time < this.threshold) return;
-        const promises = this.sounds.map((sound) => {
+        const promises = this.sounds.map(async (sound) => {
             if (sound.start > time + offset || sound.start < this.threshold) {
                 if (sound.end < this.threshold && sound.isLoaded) {
                     sound.unload();
@@ -62,9 +56,10 @@ export class SoundLoader {
                 return null;
             }
 
+            await sound.fetch();
             this.fetched.push(sound);
-            sound.fetch();
-            return sound.load();
+
+            await sound.load();
         });
         this.threshold = time + offset / 2;
 
@@ -72,11 +67,16 @@ export class SoundLoader {
     }
 
     async unload() {
+        dbg('unloading sounds');
+        this.fetched = [];
+        this.threshold = 0;
         await Promise.all(
-            this.sounds.map((sound) => {
-                if (sound.isLoaded) {
-                    return sound.unload();
-                }
+            this.sounds.map(sound => {
+                dbg(sound.url, sound.isLoaded)
+                // if (sound.isLoaded) {
+                //     return sound.unload();
+                // }
+                return sound.unload();
             }),
         );
     }

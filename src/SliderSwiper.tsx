@@ -5,12 +5,13 @@ import TrackSliders from './TrackSliders';
 
 import AmbienceSliders from './AmbienceSliders';
 import Effects from './Effects';
+import LiveRadio from './LiveRadio';
 
 const SliderSwiper: React.FC = () => {
     const [headerSwiper, setHeaderSwiper] = useState<any>(null);
     const [mainSwiper, setMainSwiper] = useState<any>(null);
     return (
-        <div className="w-100">
+        <div className="w-full md:w-100">
             <Swiper
                 slidesPerView="auto"
                 onSwiper={setHeaderSwiper}

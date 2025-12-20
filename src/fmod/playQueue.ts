@@ -89,7 +89,7 @@ export class PlayQueue {
             else this.nextTracks[i].changed = false;
         }
         this.updateDisplay();
-        this.pollLoading();
+        // this.pollLoading();
     }
 
     nextTrack() {
@@ -98,18 +98,18 @@ export class PlayQueue {
         // The track history begins with the most recently played track
         this.history.unshift(this.currentTrack);
         this.nextTracks.push(this.currentTrack);
-        this.currentTrack = this.nextTracks.shift();
-        this.updateDisplay();
-        this.pollLoading();
+        this.currentTrack = this.nextTracks.shift()!;
+        // this.updateDisplay();
+        // this.pollLoading();
     }
 
     lastTrack() {
         if (this.history.length == 0) return;
         this.nextTracks.pop();
         this.nextTracks.unshift(this.currentTrack);
-        this.currentTrack = this.history.shift();
+        this.currentTrack = this.history.shift()!;
         this.updateDisplay();
-        this.pollLoading();
+        // this.pollLoading();
     }
 
     updateDisplay() {
@@ -118,7 +118,7 @@ export class PlayQueue {
         //     </li>
         // );
 
-        let unorderedListElement = document.querySelector('#play-queue');
+        let unorderedListElement = document.querySelector('#play-queue')!;
         unorderedListElement.replaceChildren();
         this.nextTracks.forEach((track) => {
             let li = document.createElement('li');
@@ -132,19 +132,19 @@ export class PlayQueue {
             }
             unorderedListElement.appendChild(li);
         });
-        document.querySelector('#current-track-name').innerHTML =
+        document.querySelector('#current-track-name')!.innerHTML =
             this.currentTrack.displayName;
     }
 
-    async pollLoading() {
-        if (this.nextTracks[0].bank.loadingState == LoadingState.UNLOADED) {
-            await this.nextTracks[0].fetch();
-        }
-
-        for (let i = 1; i < this.nextTracks.length; i++) {
-            if (this.nextTracks[i].bank.loadingState == LoadingState.LOADED) {
-                this.nextTracks[i].unload();
-            }
-        }
-    }
+    // async pollLoading() {
+    //     if (this.nextTracks[0].bank.loadingState == LoadingState.UNLOADED) {
+    //         await this.nextTracks[0].fetch();
+    //     }
+    //
+    //     for (let i = 1; i < this.nextTracks.length; i++) {
+    //         if (this.nextTracks[i].bank.loadingState == LoadingState.LOADED) {
+    //             this.nextTracks[i].unload();
+    //         }
+    //     }
+    // }
 }

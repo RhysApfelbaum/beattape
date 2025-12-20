@@ -1,7 +1,12 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useReducer, useEffect } from 'react';
 import { Track } from './fmod/track';
 import tracklistData from './tracklist.json';
 import { SliderState } from './fmod/sliderState';
+import { useFMOD } from './FMODProvider';
+import { FMOD } from './fmod/system';
+import { beatPulse } from './beatPulse';
+import { EventInstance } from './fmod/event';
+import { dbg } from './fmod/helpers';
 
 const tracklist: Track[] = [];
 
@@ -16,15 +21,26 @@ for (const obj of tracklistData) {
     );
 }
 
-const currentTrack = tracklist[Math.floor(Math.random() * tracklist.length)];
 
-interface PlayQueue {
-    sliderState: SliderState;
-    nextTracks: Track[];
-    currentTrack: Track;
-    history: Track[];
-    tracklist: Track[];
-}
+const firstTrack = tracklist[Math.floor(Math.random() * tracklist.length)];
+
+const playQueue = {
+    sliderState: {
+        grit: 0.5,
+        brightness: 0.5,
+        chops: 0.5,
+        vocals: 0.5,
+    },
+    history: [] as Track[],
+    currentTrack: firstTrack,
+    nextTracks: [] as Track[],
+    changedTracks: {} as Record<string, boolean>,
+    tracklist: tracklist,
+    loading: true,
+    paused: true,
+};
+
+type PlayQueue = typeof playQueue;
 
 const trackDistance = (playQueue: PlayQueue, track: Track): number => {
     let result = 0;
@@ -69,49 +85,250 @@ const recentScore = (playQueue: PlayQueue, track: Track): number => {
 };
 
 export const getNextTracks = (playQueue: PlayQueue) => {
-    playQueue.tracklist.sort(
+    // Clone the tracklist to avoid mutating state
+    const tracklist = [...playQueue.tracklist];
+
+    tracklist.sort(
         (a, b) => trackDistance(playQueue, a) - trackDistance(playQueue, b),
     );
 
-    const nextTracks: Track[] = [];
-    playQueue.tracklist.forEach((track) => {
-        // if (track == playQueue.currentTrack) return;
-        if (nextTracks.length >= playQueue.tracklist.length) return;
-        nextTracks.push(track);
-    });
-    return nextTracks;
+    return tracklist;
 };
 
 const PlayQueueContext = createContext<
-    [PlayQueue, React.Dispatch<React.SetStateAction<PlayQueue>>] | null
+    [PlayQueue, React.Dispatch<PlayQueueAction>] | null
 >(null);
 
-const playQueue: PlayQueue = {
-    sliderState: {
-        grit: 0.5,
-        brightness: 0.5,
-        chops: 0.5,
-        vocals: 0.5,
-    },
-    history: [],
-    currentTrack: currentTrack,
-    nextTracks: [],
-    tracklist: tracklist,
-};
 
 playQueue.nextTracks = getNextTracks(playQueue);
+
+type PlayQueueAction =
+| { type: 'TOGGLE_PAUSE', pauseEvent: EventInstance }
+| { type: 'NEXT_TRACK' }
+| { type: 'PREVIOUS_TRACK' }
+| { type: 'SET_NEXT_TRACKS', nextTracks: Track[] }
+| { type: 'SET_SLIDER_STATE', sliderState: SliderState }
+| { type: 'UPDATE' }
+| { type: 'SET_LOADING'; value: boolean};
+
+
+function playQueueDispatch(state: PlayQueue, action: PlayQueueAction): PlayQueue {
+    dbg(action);
+    switch (action.type) {
+        case 'UPDATE': {
+            const changedTracks = {} as typeof playQueue.changedTracks;
+            const newNextTracks = getNextTracks(state);
+            for (let i = 0; i < newNextTracks.length; i++) {
+                changedTracks[newNextTracks[i].name] = newNextTracks[i] !== state.nextTracks[i];
+            }
+            return {
+                ...state,
+                nextTracks: newNextTracks,
+                changedTracks: changedTracks
+            };
+        }
+        case 'SET_SLIDER_STATE': {
+            return {
+                ...state,
+                sliderState: action.sliderState
+            };
+        }
+        case 'SET_NEXT_TRACKS': {
+            action.nextTracks.forEach(track => dbg(track.name));
+            return {
+                ...state,
+                nextTracks: action.nextTracks
+            };
+        }
+        case 'TOGGLE_PAUSE': {
+            if (!state.currentTrack.isLoaded) {
+                return state;
+            }
+
+            return {
+                ...state,
+                paused: !state.paused
+            };
+        }
+        case 'NEXT_TRACK': {
+            return {
+                ...state,
+                history: [state.currentTrack, ...state.history],
+                currentTrack: state.nextTracks[0],
+                nextTracks: [
+                    ...state.nextTracks.slice(1),
+                    state.nextTracks[0],
+                ],
+            };
+        }
+        case 'PREVIOUS_TRACK': {
+            if (state.history.length === 0) {
+                return state;
+            }
+
+            return {
+                ...state,
+                nextTracks: [state.currentTrack, ...state.nextTracks].slice(0, state.tracklist.length),
+                currentTrack: state.history[0],
+                history: state.history.slice(1),
+            };
+        }
+        case 'SET_LOADING': {
+            return {
+                ...state,
+                loading: action.value
+            }
+        }
+    }
+}
+
 
 // Create a provider component to wrap the top-level of your application
 export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
-    const playQueueState = useState<PlayQueue>(playQueue);
+    const [state, dispatch] = useReducer(playQueueDispatch, playQueue);
+    const fmod = useFMOD();
+
+    const setLoading = (loading: boolean) => {
+        dispatch({ type: 'SET_LOADING', value: loading });
+    };
+
+    const startTrack = async (track: Track) => {
+        await track.load();
+        setLoading(false);
+        dbg(track);
+
+        const { grit, brightness, chops, vocals } = playQueue.sliderState;
+        track.event.setParameter('Grit', grit, false);
+        track.event.setParameter('Brightness', brightness, false);
+        track.event.setParameter('Chops', chops, false);
+        track.event.setParameter('Vocals', vocals, false);
+
+        track.event.setPaused(state.paused);
+        track.event.setCallback(
+            FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT |
+                FMOD.STUDIO_EVENT_CALLBACK_STOPPED |
+                FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND,
+            (type, _event, parameters) => {
+                if (type & FMOD.STUDIO_EVENT_CALLBACK_STOPPED) {
+                    if (track.isLoaded) {
+                        dispatch({ type: 'NEXT_TRACK' });
+                    }
+                }
+
+                if (type & FMOD.STUDIO_EVENT_CALLBACK_TIMELINE_BEAT) {
+                    beatPulse();
+                    track.sounds.load(
+                        parameters.position / 1000,
+                    );
+                }
+
+                if (type & FMOD.STUDIO_EVENT_CALLBACK_CREATE_PROGRAMMER_SOUND) {
+                    const sound = track.sounds.getSound(
+                        parameters.name,
+                    );
+                    dbg('found sound', sound.url);
+
+                    if (!sound.isLoaded) {
+                        dbg(sound.handle);
+                        throw new Error(`Sound not loaded: ${sound.url}`)
+                    }
+
+                    sound.stop = () => {
+                        if (!track.event.getPaused()) {
+                            track.event.setPaused(true);
+                            setLoading(true);
+                        }
+                    };
+                    sound.restart = () => {
+                        if (track.event.getPaused()) {
+                            dbg('restarting after underflow');
+                            track.event.setPaused(false);
+                            setLoading(false);
+                        }
+                    };
+                    parameters.sound = sound.handle;
+                    parameters.subsoundIndex = -1;
+                }
+
+                return FMOD.OK;
+            },
+        );
+
+        track.event.start();
+    };
+
+    dbg(state);
+
+    useEffect(() => {
+
+        const unloadingTracks: Promise<void>[] = [];
+        for (const track of state.tracklist) {
+            if (track.name === state.currentTrack.name) {
+                continue;
+            }
+            if (track.isLoaded) {
+                dbg('stopping and unloading', track.displayName);
+                track.event.stop(0);
+                unloadingTracks.push(track.unload());
+            }
+        }
+
+        Promise.all(unloadingTracks).then(_ => {
+            dbg('done unloading')
+            if (!state.currentTrack.isLoaded) {
+                startTrack(state.currentTrack);
+            }
+        })
+
+    }, [state.currentTrack]);
+
+    useEffect(() => {
+        if (!state.currentTrack.isLoaded)
+            return;
+        if (!state.currentTrack.event.getPaused()) {
+            fmod.events.paused.start();
+
+            // HACK
+            // This is awful. It polls intensity parameter in the FMOD snapshot every 50ms until it's 0.
+            const intervalID = setInterval(_ => {
+                const intensity = fmod.events.paused.getParameter('Intensity');
+                if (intensity >= 100) {
+                    if (state.currentTrack.isLoaded) {
+                        state.currentTrack.event.setPaused(true);
+                    }
+                    clearInterval(intervalID);
+                }
+            }, 50);
+        } else {
+            state.currentTrack.event.setPaused(false);
+            fmod.events.paused.stop(0);
+        }
+    }, [state.paused])
+
+    useEffect(() => {
+        if (state.currentTrack.isLoaded) {
+            state.currentTrack.event.setParameter('Grit', state.sliderState.grit, true);
+            state.currentTrack.event.setParameter('Brightness', state.sliderState.brightness, true);
+            state.currentTrack.event.setParameter('Chops', state.sliderState.chops, true);
+            state.currentTrack.event.setParameter('Vocals', state.sliderState.vocals, true);
+        }
+        dispatch({
+            type: 'UPDATE',
+        });
+    }, [state.sliderState])
+
     return (
-        <PlayQueueContext.Provider value={playQueueState}>
+        <PlayQueueContext.Provider value={[state, dispatch]}>
             {children}
         </PlayQueueContext.Provider>
     );
 };
 
-export const usePlayQueue = () => useContext(PlayQueueContext)!;
+export const usePlayQueue = () => {
+    const ctx = useContext(PlayQueueContext)!;
+    if (!ctx) throw new Error('usePlayQueue must be used inside PlayQueueProvider');
+    return ctx;
+};
 export default PlayQueueProvider;

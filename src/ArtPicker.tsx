@@ -1,24 +1,27 @@
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import contributors from './contributors.json';
 import artData from './art.json';
 
-import { Navigation, Scrollbar } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import "swiper/css";
+import "swiper/css/navigation";
 import Modal from './Modal';
-import Button from './Button';
 import { useIsMobile } from './fmod/helpers';
+import themes from './styles/themes.json';
+import { useTheme } from './ThemeProvider';
 
 type Contributor = typeof contributors.soundtomb;
 
-const ArtPicker: React.FC<{
-    artist: string;
-    index: number;
-    setIndex: React.Dispatch<SetStateAction<number>>;
-}> = ({ artist, index, setIndex }) => {
+const ArtPicker: React.FC = () => {
+
+    const { theme, art, themeKey, artKey, setThemeKey, setArtKey } = useTheme();
     const [open, setOpen] = useState(false);
-    const artistInfo = contributors[artist as keyof typeof contributors];
+    const artistInfo = contributors[art.artist as keyof typeof contributors];
     const [imagesLoaded, setImagesLoaded] = useState(false);
-    const mobile = useIsMobile();
+
+
+    const mobile = useIsMobile(1000);
 
     const preloadImages = async () => {
         const promises = artData.map((art) => {
@@ -37,8 +40,7 @@ const ArtPicker: React.FC<{
     }, []);
 
     const handleSelect = (idx: number) => {
-        setIndex(idx);
-        setOpen(false);
+        setArtKey(idx)
     };
 
     return (
@@ -54,7 +56,7 @@ const ArtPicker: React.FC<{
                     pl-5
                     group
                     "
-                    title="Change artwork"
+                    title="Appearance"
                     onClick={() => setOpen(true)}
                 >
                     <div className="bg-base0A w-3 h-3 rounded group-hover:bg-base09 transition-all" />
@@ -62,29 +64,37 @@ const ArtPicker: React.FC<{
                     <div className="bg-base0F w-3 h-3 rounded group-hover:bg-base0E transition-all" />
                 </button>
             )}
-            <Modal open={open} onClose={() => setOpen(false)}>
-                <h2>Select Artwork</h2>
-                <Swiper
-                    modules={[Navigation]}
-                    slidesPerView={mobile ? 1 : 5}
-                    navigation
-                    className="px-10"
-                    onSlideChange={(swiper) => {
-                        if (mobile) {
-                            setIndex(swiper.activeIndex);
-                        }
-                    }}
-                    onSwiper={(swiper) => {
-                        if (mobile) {
-                            swiper.slideTo(index);
-                        }
-                    }}
-                >
-                    {artData.map((art, index) => (
-                        <SwiperSlide key={index}>
-                            <div className="flex justify-center">
-                                <button
-                                    className="
+            <Modal
+                open={open}
+                onClose={() => setOpen(false)}
+            >
+                <section className="flex flex-col items-center gap-3">
+                    <h2>Select Artwork</h2>
+                    <Swiper
+                        modules={[Navigation]}
+                        slidesPerView={mobile ? 'auto' : 5 }
+                        observer={true}
+                        observeParents={true}
+                        navigation
+                        className="px-10"
+                        onSlideChange={(swiper) => {
+                            if (mobile) {
+                                handleSelect(swiper.realIndex);
+                            }
+                        }}
+                        onSwiper={(swiper) => {
+                            swiper.update();
+                            if (mobile) {
+                                swiper.slideTo(artKey);
+                            }
+                        }}
+                        key={mobile ? 'mobile' : 'desktop'}
+                    >
+                        {artData.map((art, index) => (
+                            <SwiperSlide key={index}>
+                                <div className="flex justify-center">
+                                    <button
+                                        className="
                                         bg-transparent
                                         border-0
                                         text-inherit
@@ -99,21 +109,74 @@ const ArtPicker: React.FC<{
                                         hover:text-darkTint
                                         hover:font-bold
                                         "
-                                    onClick={() => handleSelect(index)}
+                                        onClick={() => handleSelect(index)}
+                                    >
+                                        {imagesLoaded ? (
+                                            <img
+                                                className="rounded-lg"
+                                                src={art.thumbnailUrl}
+                                                width={150}
+                                                height={150}
+                                            />
+                                        ) : (
+                                                <div className="rounded-lg bg-base05" style={{
+                                                    width: 150, height: 150
+                                                }}>
+
+                                                </div>
+                                            )}
+                                        
+                                    </button>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                    <div className="m-4" />
+                    <label htmlFor="theme-select"><h2>Select Colorscheme</h2></label>
+                    <select
+                        id="theme-select"
+                        value={themeKey}
+                        onChange={e => {
+                            if (e.target.value === 'auto') {
+                                setThemeKey('auto');
+                                return;
+                            }
+
+                            const index = Number.parseInt(e.target.value);
+                            if (Number.isNaN(index)) {
+                                throw new Error(`Invalid theme key: ${index}`);
+                            }
+                            setThemeKey(index);
+                        }}
+                        className="bg-base00 text-base04 border-b-1 border-base04 hover:text-base06 hover:border-base06 transition-[border] transition-[text] ease"
+                    >
+                        {
+                            [
+                                <option value="auto" key="auto">Match with art</option>
+                            ].concat(
+                                themes.map((theme, index) => (
+                                    <option value={index} key={index}>
+                                        {theme.name}
+                                    </option>
+                                ))
+                            )
+                        }
+                    </select>
+                    <div className="grid grid-cols-8 w-fit">
+                        {
+                            Object.entries(theme.palette).map(([key, value]) =>
+                                <button
+                                    key={key}
+                                    className="w-8 h-8 rounded border m-1 transition-colors ease"
+                                    style={{
+                                        backgroundColor: value
+                                    }}
                                 >
-                                    <img
-                                        className="
-                                            rounded-lg
-                                            border
-                                            border-brightLight
-                                            "
-                                        src={art.thumbnailUrl}
-                                    />
                                 </button>
-                            </div>
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
+                            )
+                        }
+                    </div>
+                </section>
             </Modal>
         </>
     );

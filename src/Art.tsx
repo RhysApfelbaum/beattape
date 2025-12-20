@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 
-import artData from './art.json';
 import ArtPicker from './ArtPicker';
 import CreditLink from './CreditLink';
 import contributors from './contributors.json';
+import Info from './Info';
+import { useTheme } from './ThemeProvider';
 
 const Art: React.FC = () => {
-    const [artIndex, setArtIndex] = useState(
-        Math.floor(Math.random() * (Object.keys(artData).length - 2)),
-    );
-
-    const art = artData[artIndex];
+    const { art } = useTheme();
 
     return (
-        <section className="py-5 mb-10">
+        <section className="py-5 mb-3">
             <img
                 src={art.url}
                 className="w-80 md:w-auto md:max-h-80 rounded border-3 border-[color-mix(in_srgb,var(--color-base03),var(--color-base09)_var(--beat-pulse))]"
@@ -23,17 +20,14 @@ const Art: React.FC = () => {
                     <p className="text-base04">Artwork by</p>
                     <CreditLink
                         contributor={
-                            contributors[
-                                art.artist as keyof typeof contributors
-                            ]
+                            contributors[art.artist as keyof typeof contributors]
                         }
                     />
                 </div>
-                <ArtPicker
-                    artist={art.artist}
-                    index={artIndex}
-                    setIndex={setArtIndex}
-                />
+                <div className="flex">
+                    <Info />
+                    <ArtPicker />
+                </div>
             </div>
         </section>
     );

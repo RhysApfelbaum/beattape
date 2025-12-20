@@ -19,7 +19,7 @@ const Modal: React.FC<{
                 top-1/2 left-1/2
                 -translate-x-1/2 -translate-y-1/2
                 z-100
-                max-w-[80%]
+                max-w-[85%]
                 "
             >
                 {children}

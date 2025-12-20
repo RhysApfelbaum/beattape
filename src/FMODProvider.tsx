@@ -9,6 +9,7 @@ import React, {
 import { FMOD } from './fmod/system';
 import { Bank } from './fmod/bank';
 import { EventInstance } from './fmod/event';
+import { logging } from './fmod/helpers';
 
 declare const FMODModule: any;
 const preloadBanks: Bank[] = [];
@@ -72,7 +73,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({
 
     useEffect(() => {
         const script = document.createElement('script');
-        script.src = '/fmodstudio.js';
+        script.src = logging.fmodstudio ? '/fmodstudioL.js' : '/fmodstudio.js';
         script.onload = () => {
             FMODModule(FMOD);
         };
@@ -81,7 +82,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({
 
     if (ref.current) {
         ref.current.style.setProperty('--thumb-color', '#ff0000');
-        ref.current.style.setProperty('--beat-pulse', '0%');
+        // ref.current.style.setProperty('--beat-pulse', '0%');
     }
 
     return (

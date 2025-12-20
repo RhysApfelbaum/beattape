@@ -25,7 +25,7 @@
         from {
             color: var(--color-base0A);
         } to {
-            color: var(--color-base05);
+            color: inherit;
         }
     }
 }
@@ -38,6 +38,7 @@
     --brightness: 0%;
     --chops: 0%;
     --vocals: 0%;
+    --beat-pulse: 0%;
 }
 
 body {
@@ -143,8 +144,8 @@ bun-hmr {
     align-content: center;
     filter: drop-shadow(0 0 10px color-mix(
         in srgb,
-        rgb(255, 238, 222, 0),
-        rgb(255, 238, 222, 1)
+        rgb(0,0,0,0),
+        var(--color-base09)
         var(--activation)
     ));
 

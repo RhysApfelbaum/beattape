@@ -77,7 +77,6 @@ Object.keys(referenceColors).forEach((key) => {
     const color = hexToRgb(
         referenceColors[key as keyof typeof referenceColors],
     );
-    // console.log(color, colorDistance(referenceMean, color))
 });
 
 const nearestDistance = (imageBuffer: Buffer, distance: number): RGB => {
@@ -154,4 +153,3 @@ const generateTheme = (imageBuffer: Buffer) => {
     return result;
 };
 
-console.log(generateTheme(imageBuffer));
