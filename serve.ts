@@ -1,5 +1,3 @@
-import { type HTMLBundle } from 'bun';
-
 import index from './src/index.html';
 
 const server = Bun.serve({
