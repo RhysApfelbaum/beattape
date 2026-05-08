@@ -25,6 +25,7 @@
     "bun-plugin-html": "^2.0.0",
     "bun-plugin-tailwind": "latest",
     "chokidar": "^3.6.0",
+    "codec-parser": "^2.5.0",
     "color-thief-node": "^1.0.4",
     "framer-motion": "^12.20.1",
     "http-server": "^14.1.1",

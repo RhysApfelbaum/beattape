@@ -1,3 +1,4 @@
+import CodecParser from 'codec-parser';
 import index from './src/index.html';
 
 const server = Bun.serve({
