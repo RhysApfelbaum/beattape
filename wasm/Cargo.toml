@@ -1,5 +1,5 @@
 [package]
-name = "beatbuff"
+name = "decode-streams"
 version = "0.1.0"
 edition = "2024"
 
@@ -23,5 +23,5 @@ version = "1"
 default-features = false
 features = [ "io-util" ]
 
-# [lib]
-# crate-type = ["cdylib", "rlib"]
+[lib]
+crate-type = ["cdylib"]

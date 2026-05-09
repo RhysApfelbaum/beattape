@@ -12,7 +12,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in {
       devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [ bun cargo rustc wasm-bindgen ];
+        packages = with pkgs; [ bun cargo rustc wasm-pack llvmPackages.lld ];
       };
     };
 }

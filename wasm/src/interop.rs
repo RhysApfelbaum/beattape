@@ -45,6 +45,7 @@ pub enum ProducerMessage {
 #[tsify(from_wasm_abi, into_wasm_abi)]
 pub enum ConsumerMessage {
     CreateSound {
+        url: String,
         sample_rate: u32,
         channel_count: usize,
         pcm_pointer: u32,
