@@ -47,7 +47,7 @@ export class SoundLoader {
         const promises = this.sounds.map(async (sound) => {
             if (sound.start > time + offset || sound.start < this.threshold) {
                 if (sound.end < this.threshold && sound.isLoaded) {
-                    sound.unload();
+                    await sound.unload();
                 }
                 return null;
             }
@@ -71,12 +71,12 @@ export class SoundLoader {
         this.fetched = [];
         this.threshold = 0;
         await Promise.all(
-            this.sounds.map(sound => {
+            this.sounds.map(async sound => {
                 dbg(sound.url, sound.isLoaded)
-                // if (sound.isLoaded) {
-                //     return sound.unload();
-                // }
-                return sound.unload();
+                if (sound.isLoaded) {
+                    return sound.unload();
+                }
+                // return sound.unload();
             }),
         );
     }
