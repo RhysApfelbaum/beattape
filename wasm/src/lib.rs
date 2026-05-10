@@ -63,12 +63,14 @@ impl DecodeStreams {
     pub fn handle_message(&mut self, message: ConsumerMessage) {
         match message {
             ConsumerMessage::CreateSound {
+                url,
                 sample_rate,
                 channel_count,
                 pcm_pointer,
                 pcm_length,
             } => {
-                let sound = Sound::new(sample_rate, channel_count, pcm_pointer, pcm_length);
+                let sound = Sound::new(
+                    url, sample_rate, channel_count, pcm_pointer, pcm_length);
                 let id = self.add_sound(sound).unwrap();
                 send_message(ProducerMessage::AcknowledgeSound(id));
             }

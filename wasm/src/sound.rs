@@ -3,7 +3,7 @@ use opus_decoder::OpusDecoder;
 use wasm_bindgen_futures::spawn_local;
 use futures::{StreamExt, stream::{AbortHandle, Abortable}};
 
-use crate::{buffer::{RingBuffer, SharedRingBuffer}, interop::{FetchResult, ReadableRegions, fetch_bytes}};
+use crate::{buffer::{RingBuffer, SharedRingBuffer}, interop::{ReadableRegions, fetch_bytes, register_connection, unregister_connection}};
 
 pub type SoundID = u8;
 
@@ -11,6 +11,7 @@ pub type SoundID = u8;
 
 
 pub struct SoundHandle {
+    id: SoundID,
     pcm: SharedRingBuffer<i16>,
     fetch_handle: AbortHandle,
     decode_handle: AbortHandle
@@ -20,6 +21,7 @@ impl Drop for SoundHandle {
     fn drop(&mut self) {
         self.fetch_handle.abort();
         self.decode_handle.abort();
+        unregister_connection(self.id);
     }
 
 }
@@ -37,6 +39,7 @@ impl SoundHandle {
 }
 
 pub struct Sound {
+    url: String,
     pcm_buffer: SharedRingBuffer<i16>,
     fetch_buffer: SharedRingBuffer<u8>,
     decoder: Decoder 
@@ -44,6 +47,7 @@ pub struct Sound {
 
 impl Sound {
     pub fn new(
+        url: String,
         sample_rate: u32,
         channel_count: usize,
         pcm_pointer: u32,
@@ -64,7 +68,9 @@ impl Sound {
         );
 
 
+
         Self {
+            url,
             pcm_buffer,
             fetch_buffer,
             decoder: decoder,
@@ -72,6 +78,7 @@ impl Sound {
     }
 
     pub fn start(self, id: SoundID) -> SoundHandle {
+        register_connection(id, self.url);
         let mut decoder = self.decoder;
         let (fetch_handle, fetch_reg) = AbortHandle::new_pair();
         let (decode_handle, decode_reg) = AbortHandle::new_pair();
@@ -89,11 +96,7 @@ impl Sound {
             }
         });
 
-        SoundHandle {
-            pcm,
-            fetch_handle,
-            decode_handle
-        }
+        SoundHandle { id, pcm, fetch_handle, decode_handle }
     }
 
     async fn fetch(id: SoundID, buffer: SharedRingBuffer<u8>) {
@@ -103,12 +106,8 @@ impl Sound {
             }
 
             let region = buffer.borrow_mut().next_writeable_region();
-            let FetchResult { done, bytes } = fetch_bytes(id, region).await.unwrap();
+            let bytes = fetch_bytes(id, region).await.unwrap();
             buffer.borrow_mut().advance_write(bytes);
-
-            if done {
-                break;
-            };
         }
     }
 }

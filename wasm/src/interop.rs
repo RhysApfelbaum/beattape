@@ -12,20 +12,22 @@ extern "C" {
     #[wasm_bindgen]
     fn post_message(message: JsValue);
 
+    #[wasm_bindgen]
     fn pump(id: SoundID, offset: u32, length: u32) -> Promise;
+    
+    #[wasm_bindgen]
+    pub fn register_connection(id: SoundID, url: String);
+
+    #[wasm_bindgen]
+    pub fn unregister_connection(id: SoundID);
 }
 
-pub struct FetchResult {
-    pub done: bool,
-    pub bytes: usize
-}
 
-pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<FetchResult, JsValue> {
+pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<usize, JsValue> {
     let result = JsFuture::from(pump(id, region.offset, region.length)).await?;
     let array = Array::from(&result);
-    let done = array.get(0).as_bool().ok_or("not a bool")?;
     let bytes = array.get(0).as_f64().ok_or("not a number")? as usize;
-    Ok(FetchResult { done, bytes })
+    Ok(bytes)
 }
 
 pub fn send_message(message: ProducerMessage) {
