@@ -1,8 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    interop::{ConsumerMessage, ProducerMessage, send_message},
-    sound::{Sound, SoundHandle, SoundID},
+    interop::{ConsumerMessage, ProducerMessage, StreamInfo, send_message}, sound::{SoundID, StreamHandle}
 };
 pub mod buffer;
 mod interop;
@@ -12,9 +11,10 @@ const MAX_SOUNDS: usize = SoundID::MAX as usize;
 
 #[wasm_bindgen]
 pub struct DecodeStreams {
-    sound_handles: [Option<SoundHandle>; MAX_SOUNDS],
+    sound_handles: [Option<StreamHandle>; MAX_SOUNDS],
     free: Vec<SoundID>,
 }
+
 
 #[wasm_bindgen]
 impl DecodeStreams {
@@ -30,54 +30,46 @@ impl DecodeStreams {
         }
     }
 
-    fn get_regions(&self) {
-        todo!()
-    }
-
-    fn get_handle(&self, id: SoundID) -> Option<&SoundHandle> {
+    fn get_handle(&self, id: SoundID) -> Option<&StreamHandle> {
         (&self.sound_handles[id as usize]).as_ref()
     }
 
-    fn get_mut_handle(&mut self, id: SoundID) -> Option<&mut SoundHandle> {
+    fn get_mut_handle(&mut self, id: SoundID) -> Option<&mut StreamHandle> {
         self.slot(id).as_mut()
     }
 
-    fn remove_sound(&mut self, id: SoundID) -> Option<SoundHandle> {
-        self.free.push(id);
-        self.slot(id).take()
-    }
 
-    fn slot(&mut self, id: SoundID) -> &mut Option<SoundHandle> {
+    fn slot(&mut self, id: SoundID) -> &mut Option<StreamHandle> {
         &mut self.sound_handles[id as usize]
     }
 
-    fn add_sound(&mut self, sound: Sound) -> Option<SoundID> {
+    fn add_stream(&mut self, info: StreamInfo) -> Option<SoundID> {
         if let Some(id) = self.free.pop() {
-            self.slot(id).replace(sound.start(id));
+            self.slot(id).replace(StreamHandle::new(id, info));
+
             Some(id)
         } else {
             None
         }
     }
 
+    fn remove_stream(&mut self, id: SoundID) -> Option<StreamHandle> {
+        self.free.push(id);
+        self.slot(id).take()
+    }
+
     pub fn handle_message(&mut self, message: ConsumerMessage) {
         match message {
-            ConsumerMessage::CreateSound {
-                sample_rate,
-                channel_count,
-                pcm_pointer,
-                pcm_length,
-            } => {
-                let sound = Sound::new(sample_rate, channel_count, pcm_pointer, pcm_length);
-                let id = self.add_sound(sound).unwrap();
+            ConsumerMessage::CreateStream(info) => {
+                let id = self.add_stream(info).unwrap();
                 send_message(ProducerMessage::AcknowledgeSound(id));
             }
-            ConsumerMessage::ReleaseSound(id) => {
-                _ = self.remove_sound(id);
+            ConsumerMessage::ReleaseStream(id) => {
+                _ = self.remove_stream(id);
             }
             ConsumerMessage::Read(id, length) => {
-                let handle = self.get_mut_handle(id).unwrap();
-                let regions = handle.read(length);
+                let stream = self.get_mut_handle(id).unwrap();
+                let regions = stream.read(length);
                 send_message(ProducerMessage::AcknowledgeRead(id, regions));
             }
         }

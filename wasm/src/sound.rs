@@ -3,20 +3,20 @@ use opus_decoder::OpusDecoder;
 use wasm_bindgen_futures::spawn_local;
 use futures::{StreamExt, stream::{AbortHandle, Abortable}};
 
-use crate::{buffer::{RingBuffer, SharedRingBuffer}, interop::{FetchResult, ReadableRegions, fetch_bytes}};
+use crate::{buffer::{RingBuffer, SharedRingBuffer}, interop::{FetchResult, ReadableRegions, StreamInfo, fetch_bytes}};
 
 pub type SoundID = u8;
 
 
 
 
-pub struct SoundHandle {
+pub struct StreamHandle {
     pcm: SharedRingBuffer<i16>,
     fetch_handle: AbortHandle,
     decode_handle: AbortHandle
 }
 
-impl Drop for SoundHandle {
+impl Drop for StreamHandle {
     fn drop(&mut self) {
         self.fetch_handle.abort();
         self.decode_handle.abort();
@@ -24,7 +24,42 @@ impl Drop for SoundHandle {
 
 }
 
-impl SoundHandle {
+impl StreamHandle {
+    pub fn new(id: SoundID, info: StreamInfo) -> Self {
+        let fetch_buffer: SharedRingBuffer<u8> = RingBuffer::new(1024).into();
+
+        let pcm: SharedRingBuffer<i16> = unsafe {
+            RingBuffer::from_raw_parts(
+                info.pcm_pointer as *mut i16,
+                info.pcm_length as usize
+            )
+        }.into();
+
+        let mut decoder = Decoder::new(
+            fetch_buffer.clone(),
+            pcm.clone(),
+            info.sample_rate,
+            info.channel_count
+        );
+
+        let (fetch_handle, fetch_reg) = AbortHandle::new_pair();
+        let (decode_handle, decode_reg) = AbortHandle::new_pair();
+
+        spawn_local(async move {
+            match Abortable::new(fetch(id, fetch_buffer), fetch_reg).await {
+                _ => {}
+            }
+        });
+
+        spawn_local(async move {
+            match Abortable::new(decoder.decode(), decode_reg).await {
+                _ => {}
+            }
+        });
+
+        Self { pcm, fetch_handle, decode_handle }
+    }
+
     pub fn read(&self, length: usize) -> ReadableRegions {
         let mut pcm = self.pcm.borrow_mut();
         pcm.advance_read(length);
@@ -35,6 +70,22 @@ impl SoundHandle {
         self.pcm.borrow_mut().readable_regions()
     }
 }
+
+
+
+
+async fn fetch(id: SoundID, buffer: SharedRingBuffer<u8>) {
+    loop {
+        if buffer.borrow().full() {
+            buffer.can_write().await;
+        }
+
+        let region = buffer.borrow_mut().next_writeable_region();
+        let bytes = fetch_bytes(id, region).await.unwrap();
+        buffer.borrow_mut().advance_write(bytes);
+    }
+}
+
 
 pub struct Sound {
     pcm_buffer: SharedRingBuffer<i16>,
@@ -71,30 +122,30 @@ impl Sound {
         }
     }
 
-    pub fn start(self, id: SoundID) -> SoundHandle {
-        let mut decoder = self.decoder;
-        let (fetch_handle, fetch_reg) = AbortHandle::new_pair();
-        let (decode_handle, decode_reg) = AbortHandle::new_pair();
-        let pcm = self.pcm_buffer.clone();
-
-        spawn_local(async move {
-            match Abortable::new(Self::fetch(id, self.fetch_buffer), fetch_reg).await {
-                _ => {}
-            }
-        });
-
-        spawn_local(async move {
-            match Abortable::new(decoder.decode(), decode_reg).await {
-                _ => {}
-            }
-        });
-
-        SoundHandle {
-            pcm,
-            fetch_handle,
-            decode_handle
-        }
-    }
+    // pub fn start(self, id: SoundID) -> SoundHandle {
+    //     let mut decoder = self.decoder;
+    //     let (fetch_handle, fetch_reg) = AbortHandle::new_pair();
+    //     let (decode_handle, decode_reg) = AbortHandle::new_pair();
+    //     let pcm = self.pcm_buffer.clone();
+    //
+    //     spawn_local(async move {
+    //         match Abortable::new(Self::fetch(id, self.fetch_buffer), fetch_reg).await {
+    //             _ => {}
+    //         }
+    //     });
+    //
+    //     spawn_local(async move {
+    //         match Abortable::new(decoder.decode(), decode_reg).await {
+    //             _ => {}
+    //         }
+    //     });
+    //
+    //     SoundHandle {
+    //         pcm,
+    //         fetch_handle,
+    //         decode_handle
+    //     }
+    // }
 
     async fn fetch(id: SoundID, buffer: SharedRingBuffer<u8>) {
         loop {
@@ -103,26 +154,22 @@ impl Sound {
             }
 
             let region = buffer.borrow_mut().next_writeable_region();
-            let FetchResult { done, bytes } = fetch_bytes(id, region).await.unwrap();
+            let bytes = fetch_bytes(id, region).await.unwrap();
             buffer.borrow_mut().advance_write(bytes);
-
-            if done {
-                break;
-            };
         }
     }
 }
 
 
 
-struct Decoder {
+pub struct Decoder {
     decoder: OpusDecoder,
     input: PacketReader<SharedRingBuffer<u8>>,
     output: SharedRingBuffer<i16>
 }
 
 impl Decoder {
-    fn new(
+    pub fn new(
         input: SharedRingBuffer<u8>,
         output: SharedRingBuffer<i16>,
         sample_rate: u32,
@@ -135,7 +182,7 @@ impl Decoder {
         }
     }
 
-    async fn decode(&mut self) {
+    pub async fn decode(&mut self) {
         let mut decoded = [0i16; 960 * 2];
 
         while let Some(packet) = self.input.next().await {

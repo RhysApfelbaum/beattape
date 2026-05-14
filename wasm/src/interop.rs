@@ -20,12 +20,22 @@ pub struct FetchResult {
     pub bytes: usize
 }
 
-pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<FetchResult, JsValue> {
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(from_wasm_abi, into_wasm_abi)]
+pub struct StreamInfo {
+    pub url: String,
+    pub sample_rate: u32,
+    pub channel_count: usize,
+    pub pcm_pointer: u32,
+    pub pcm_length: u32,
+}
+
+pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<usize, JsValue> {
     let result = JsFuture::from(pump(id, region.offset, region.length)).await?;
     let array = Array::from(&result);
-    let done = array.get(0).as_bool().ok_or("not a bool")?;
+    // let done = array.get(0).as_bool().ok_or("not a bool")?;
     let bytes = array.get(0).as_f64().ok_or("not a number")? as usize;
-    Ok(FetchResult { done, bytes })
+    Ok(bytes)
 }
 
 pub fn send_message(message: ProducerMessage) {
@@ -44,14 +54,8 @@ pub enum ProducerMessage {
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(from_wasm_abi, into_wasm_abi)]
 pub enum ConsumerMessage {
-    CreateSound {
-        url: String,
-        sample_rate: u32,
-        channel_count: usize,
-        pcm_pointer: u32,
-        pcm_length: u32
-    },
-    ReleaseSound(SoundID),
+    CreateStream(StreamInfo),
+    ReleaseStream(SoundID),
     Read(SoundID, usize),
 }
 
