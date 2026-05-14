@@ -256,6 +256,7 @@ export class LoopBuffer {
     }
 
     allocate(capacity: number) {
+        this.view.allocate(capacity);
         this.hotThreshold = Math.min(this.hotThreshold, capacity);
         this.unlock();
     }
