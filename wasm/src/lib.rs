@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::*;
 use crate::{
     interop::{ConsumerMessage, ProducerMessage, StreamInfo, send_message}, sound::{SoundID, StreamHandle}
 };
-pub mod buffer;
+pub mod buffering;
 mod interop;
 pub mod sound;
 
@@ -14,7 +14,6 @@ pub struct DecodeStreams {
     sound_handles: [Option<StreamHandle>; MAX_SOUNDS],
     free: Vec<SoundID>,
 }
-
 
 #[wasm_bindgen]
 impl DecodeStreams {
@@ -35,7 +34,6 @@ impl DecodeStreams {
         self.slot(id).as_mut()
     }
 
-
     fn slot(&mut self, id: SoundID) -> &mut Option<StreamHandle> {
         &mut self.sound_handles[id as usize]
     }
@@ -43,7 +41,6 @@ impl DecodeStreams {
     fn add_stream(&mut self, info: StreamInfo) -> Option<SoundID> {
         if let Some(id) = self.free.pop() {
             self.slot(id).replace(StreamHandle::new(id, info));
-
             Some(id)
         } else {
             None
@@ -59,7 +56,7 @@ impl DecodeStreams {
         match message {
             ConsumerMessage::CreateStream(info) => {
                 let id = self.add_stream(info).unwrap();
-                send_message(ProducerMessage::AcknowledgeSound(id));
+                send_message(ProducerMessage::AcknowledgeStream(id));
             }
             ConsumerMessage::ReleaseStream(id) => {
                 _ = self.remove_stream(id);

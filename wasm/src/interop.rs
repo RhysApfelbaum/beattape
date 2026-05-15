@@ -11,13 +11,7 @@ use crate::sound::SoundID;
 extern "C" {
     #[wasm_bindgen]
     fn post_message(message: JsValue);
-
     fn pump(id: SoundID, offset: u32, length: u32) -> Promise;
-}
-
-pub struct FetchResult {
-    pub done: bool,
-    pub bytes: usize
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
@@ -32,10 +26,8 @@ pub struct StreamInfo {
 
 pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<usize, JsValue> {
     let result = JsFuture::from(pump(id, region.offset, region.length)).await?;
-    let array = Array::from(&result);
-    // let done = array.get(0).as_bool().ok_or("not a bool")?;
-    let bytes = array.get(0).as_f64().ok_or("not a number")? as usize;
-    Ok(bytes)
+    let bytes = result.as_f64().expect("fetch_bytes should return a number");
+    Ok(bytes as usize)
 }
 
 pub fn send_message(message: ProducerMessage) {
