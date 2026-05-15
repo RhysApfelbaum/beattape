@@ -45,7 +45,7 @@ pub fn send_message(message: ProducerMessage) {
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(from_wasm_abi, into_wasm_abi)]
 pub enum ProducerMessage {
-    AcknowledgeSound(SoundID),
+    AcknowledgeStream(SoundID),
     AcknowledgeRead(SoundID, ReadableRegions),
     Write(SoundID, ReadableRegions),
     Error,

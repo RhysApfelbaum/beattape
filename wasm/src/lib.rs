@@ -30,10 +30,7 @@ impl DecodeStreams {
         }
     }
 
-    fn get_handle(&self, id: SoundID) -> Option<&StreamHandle> {
-        (&self.sound_handles[id as usize]).as_ref()
-    }
-
+    #[inline]
     fn get_mut_handle(&mut self, id: SoundID) -> Option<&mut StreamHandle> {
         self.slot(id).as_mut()
     }
