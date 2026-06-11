@@ -1,19 +1,23 @@
-import CodecParser from 'codec-parser';
-import index from './src/index.html';
+import path from 'path';
 
 const server = Bun.serve({
     port: 3000,
-    routes: {
-        '/': index,
-        '/*': async (req) => {
-            const url = new URL(req.url);
-            return new Response(Bun.file(`./static${url.pathname}`), {
-                headers: { 'Access-Control-Allow-Origin': '*' },
-            });
-        },
+    fetch(req) {
+        const url = new URL(req.url);
+
+        const index = url.pathname === '/' ? 'index.html' : '';
+        const filePath = path.join('./dist', url.pathname, index);
+
+        return new Response(Bun.file(filePath), {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+            },
+        })
     },
 
-    error: (error) => {
+    error(error) {
         let status = 500;
 
         if (error?.code === 'ENOENT') {
