@@ -4,15 +4,27 @@
   inputs = {
     nixpkgs.url =
       "github:nixos/nixpkgs?ref=8c29968b3a942f2903f90797f9623737c215737c";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, rust-overlay }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      overlays = [ (import rust-overlay) ];
+      pkgs = import nixpkgs { inherit system overlays; };
     in {
       devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [ bun cargo rustc wasm-pack llvmPackages.lld ];
+        packages = with pkgs; [
+          bun
+          (rust-bin.fromRustupToolchainFile ./wasm/rust-toolchain.toml)
+          wasm-pack
+          wasm-tools
+          llvmPackages.lld
+        ];
       };
     };
 }

@@ -1,22 +1,24 @@
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    interop::{ConsumerMessage, ProducerMessage, StreamInfo, send_message}, sound::{SoundID, StreamHandle}
+    interop::{ConsumerMessage, ProducerMessage, StreamInfo, send_message}, stream::{SoundID, StreamHandle}
 };
 pub mod buffering;
 mod interop;
-pub mod sound;
+pub mod stream;
 
 const MAX_SOUNDS: usize = SoundID::MAX as usize;
 
 #[wasm_bindgen]
 pub struct DecodeStreams {
-    sound_handles: [Option<StreamHandle>; MAX_SOUNDS],
+    handles: [Option<StreamHandle>; MAX_SOUNDS],
     free: Vec<SoundID>,
 }
 
 #[wasm_bindgen]
 impl DecodeStreams {
+
+    #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         let mut free = Vec::new();
         for i in 0..MAX_SOUNDS {
@@ -24,7 +26,7 @@ impl DecodeStreams {
         }
 
         Self {
-            sound_handles: std::array::from_fn(|_| None),
+            handles: std::array::from_fn(|_| None),
             free,
         }
     }
@@ -35,7 +37,7 @@ impl DecodeStreams {
     }
 
     fn slot(&mut self, id: SoundID) -> &mut Option<StreamHandle> {
-        &mut self.sound_handles[id as usize]
+        &mut self.handles[id as usize]
     }
 
     fn add_stream(&mut self, info: StreamInfo) -> Option<SoundID> {
@@ -69,3 +71,4 @@ impl DecodeStreams {
         }
     }
 }
+

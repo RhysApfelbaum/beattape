@@ -5,26 +5,26 @@ use futures::{future::poll_fn, task::AtomicWaker};
 
 use crate::buffering::ringbuffer::RingBuffer;
 
-struct Inner<T> {
+pub struct SharedRingBufferInner<T> {
     buffer: RingBuffer<T>,
     read_waker: AtomicWaker,
     write_waker: AtomicWaker
 }
 
-impl<T> Deref for Inner<T> {
+impl<T> Deref for SharedRingBufferInner<T> {
     type Target = RingBuffer<T>;
     fn deref(&self) -> &Self::Target {
         &self.buffer
     }
 }
 
-impl<T> DerefMut for Inner<T> {
+impl<T> DerefMut for SharedRingBufferInner<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.buffer
     }
 }
 
-impl<T: Pod + Default + Copy> Inner<T> {
+impl<T: Pod + Default + Copy> SharedRingBufferInner<T> {
     pub fn advance_read(&mut self, length: usize) {
         self.buffer.advance_read(length);
         self.read_waker.wake();
@@ -53,10 +53,10 @@ impl<T: Pod + Default + Copy> Inner<T> {
 
 
 #[derive(Clone)]
-pub struct SharedRingBuffer<T>(Rc<RefCell<Inner<T>>>);
+pub struct SharedRingBuffer<T>(Rc<RefCell<SharedRingBufferInner<T>>>);
 
 impl<T> Deref for SharedRingBuffer<T> {
-    type Target = RefCell<Inner<T>>;
+    type Target = RefCell<SharedRingBufferInner<T>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -113,7 +113,7 @@ impl<T: Pod + Default + Copy> SharedRingBuffer<T> {
 
 impl<T> From<RingBuffer<T>> for SharedRingBuffer<T> {
     fn from(value: RingBuffer<T>) -> Self {
-        Self(Rc::new(RefCell::new(Inner {
+        Self(Rc::new(RefCell::new(SharedRingBufferInner {
             buffer: value,
             read_waker: AtomicWaker::new(),
             write_waker: AtomicWaker::new()

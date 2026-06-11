@@ -1,8 +1,5 @@
 use bytemuck::Pod;
-use futures::{task::AtomicWaker};
-use std::{
-    cell::{RefCell}, ops::{Deref, DerefMut}, rc::Rc, slice, task::{Poll}
-};
+use std::{ ops::{Deref, DerefMut}, slice };
 
 use crate::interop::{ReadableRegions, Region };
 

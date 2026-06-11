@@ -3,13 +3,11 @@ use serde::{Deserialize, Serialize};
 use tsify::Tsify;
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 use wasm_bindgen_futures::{JsFuture, js_sys::Promise};
-use web_sys::js_sys::{Array};
 
-use crate::sound::SoundID;
+use crate::stream::SoundID;
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen]
     fn post_message(message: JsValue);
     fn pump(id: SoundID, offset: u32, length: u32) -> Promise;
 }
@@ -31,7 +29,7 @@ pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<usize, JsValue> 
 }
 
 pub fn send_message(message: ProducerMessage) {
-    post_message(serde_wasm_bindgen::to_value(&message).unwrap());
+    post_message(serde_wasm_bindgen::to_value(&message).expect("should be a valid ProducerMessage"));
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
