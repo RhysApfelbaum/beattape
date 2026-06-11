@@ -7,16 +7,16 @@ const ringBufferDefaultOptions = {
 };
 
 export class RingBuffer {
-    private buffer: ArrayBufferLike;
+    private buffer: Uint8Array;
     private readIndex: number;
     private writeIndex: number;
     private full: boolean;
     private hotThreshold: number;
 
     public canRead: PromiseStatus;
-    public canWrite: PromiseStatus;
+    private canWrite: PromiseStatus;
 
-    constructor(buffer: ArrayBufferLike, options?: typeof ringBufferDefaultOptions) {
+    constructor(buffer: Uint8Array, options?: typeof ringBufferDefaultOptions) {
         const opts = { ...ringBufferDefaultOptions, ...options };
         this.buffer = buffer;
         this.readIndex = 0;
@@ -56,7 +56,7 @@ export class RingBuffer {
     }
 
     writeChunk(chunk: Uint8Array) {
-        const view = new Uint8Array(this.buffer, this.writeIndex);
+        const view = this.buffer.subarray(this.writeIndex);
 
         const remaining = Math.min(this.capacity - this.writeIndex, this.bytesFree);
         const writeSize = Math.min(chunk.length, remaining);
@@ -78,6 +78,27 @@ export class RingBuffer {
         return null;
     }
 
+    async reserveWrite(maxChunkSize?: number) {
+        await this.canWrite;
+        const view = this.buffer.subarray(this.writeIndex);
+        const free = this.bytesFree;
+        const length = Math.min(maxChunkSize ?? free, free);
+
+        const viewSize = Math.min(this.capacity - this.writeIndex, length);
+        const wrapSize = length - viewSize;
+
+        this.writeIndex = (this.writeIndex + length) % this.capacity;
+
+        if (wrapSize > 0) {
+            return {
+                wrap: true,
+                view,
+                wrappedView: this.buffer.subarray(0, wrapSize)
+            };
+        }
+        return { wrap: false, view }
+    }
+
     flush() {
         this.readIndex = 0;
         this.writeIndex = 0;
@@ -86,53 +107,21 @@ export class RingBuffer {
         this.full = false;
     }
 
-    read(requestedLength: number): ReadResult {
+    advanceRead(requestedLength: number) {
         const length = Math.min(requestedLength, this.capacity);
 
-        const viewSize = Math.min(length, this.capacity - this.readIndex);
-        const wrapSize = length - viewSize;
-
-
         if (this.size < length) {
-            return {
-                view: null,
-                wrappedView: null,
-                wrap: false,
-                underflow: true,
-            };
+            return 'underflow'
         }
-
-        const result: ReadResult =
-            wrapSize > 0
-                ? {
-                      view: new Uint8Array(
-                          this.buffer,
-                          this.readIndex,
-                          viewSize,
-                      ),
-                      wrappedView: new Uint8Array(this.buffer, 0, wrapSize),
-                      underflow: false,
-                      wrap: true,
-                  }
-                : {
-                      view: new Uint8Array(
-                          this.buffer,
-                          this.readIndex,
-                          viewSize,
-                      ),
-                      wrappedView: null,
-                      underflow: false,
-                      wrap: false,
-                  };
 
         this.full = false;
         this.canWrite.resolve();
 
         this.readIndex = (this.readIndex + length) % this.capacity;
-        return result;
+        return 'ok';
     }
 
-    async write(chunk: Uint8Array) {
+    async write(requestedLength: Uint8Array) {
         let leftover = this.writeChunk(chunk);
 
         while (leftover !== null) {
