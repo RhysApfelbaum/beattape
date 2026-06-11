@@ -3,16 +3,12 @@ use serde::{Deserialize, Serialize};
 use tsify::Tsify;
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 use wasm_bindgen_futures::{JsFuture, js_sys::Promise};
-use web_sys::js_sys::{Array};
 
-use crate::sound::SoundID;
+use crate::stream::SoundID;
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen]
     fn post_message(message: JsValue);
-
-    #[wasm_bindgen]
     fn pump(id: SoundID, offset: u32, length: u32) -> Promise;
     
     #[wasm_bindgen]
@@ -22,22 +18,30 @@ extern "C" {
     pub fn unregister_connection(id: SoundID);
 }
 
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(from_wasm_abi, into_wasm_abi)]
+pub struct StreamInfo {
+    pub url: String,
+    pub sample_rate: u32,
+    pub channel_count: usize,
+    pub pcm_pointer: u32,
+    pub pcm_length: u32,
+}
 
 pub async fn fetch_bytes(id: SoundID, region: Region) -> Result<usize, JsValue> {
     let result = JsFuture::from(pump(id, region.offset, region.length)).await?;
-    let array = Array::from(&result);
-    let bytes = array.get(0).as_f64().ok_or("not a number")? as usize;
-    Ok(bytes)
+    let bytes = result.as_f64().expect("fetch_bytes should return a number");
+    Ok(bytes as usize)
 }
 
 pub fn send_message(message: ProducerMessage) {
-    post_message(serde_wasm_bindgen::to_value(&message).unwrap());
+    post_message(serde_wasm_bindgen::to_value(&message).expect("should be a valid ProducerMessage"));
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(from_wasm_abi, into_wasm_abi)]
 pub enum ProducerMessage {
-    AcknowledgeSound(SoundID),
+    AcknowledgeStream(SoundID),
     AcknowledgeRead(SoundID, ReadableRegions),
     Write(SoundID, ReadableRegions),
     Error,
@@ -46,14 +50,8 @@ pub enum ProducerMessage {
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(from_wasm_abi, into_wasm_abi)]
 pub enum ConsumerMessage {
-    CreateSound {
-        url: String,
-        sample_rate: u32,
-        channel_count: usize,
-        pcm_pointer: u32,
-        pcm_length: u32
-    },
-    ReleaseSound(SoundID),
+    CreateStream(StreamInfo),
+    ReleaseStream(SoundID),
     Read(SoundID, usize),
 }
 

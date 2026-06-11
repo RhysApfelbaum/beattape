@@ -28,7 +28,6 @@
     "codec-parser": "^2.5.0",
     "color-thief-node": "^1.0.4",
     "framer-motion": "^12.20.1",
-    "http-server": "^14.1.1",
     "mpg123-decoder": "^1.0.1",
     "prettier": "^3.6.2",
     "react": "^18.2.0",

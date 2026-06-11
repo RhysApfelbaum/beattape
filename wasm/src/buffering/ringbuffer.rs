@@ -1,40 +1,7 @@
 use bytemuck::Pod;
-use futures::{future::{Shared, poll_fn}, task::AtomicWaker};
-use std::{
-    cell::{RefCell}, ops::{Deref, DerefMut}, rc::Rc, slice, task::{Poll}
-};
+use std::{ ops::{Deref, DerefMut}, slice };
 
-use crate::interop::{FetchResult, ReadableRegions, Region, fetch_bytes};
-
-struct WriteWaiter {
-    waker: AtomicWaker,
-}
-
-impl WriteWaiter {
-    fn new() -> Self {
-        Self {
-            waker: AtomicWaker::new(),
-        }
-    }
-
-    pub async fn can_write<F>(&self, can_write: F)
-    where
-        F: Fn() -> bool
-    {
-        poll_fn(|context| {
-            self.waker.register(context.waker());
-            if can_write() {
-                Poll::Ready(())
-            } else {
-                Poll::Pending
-            }
-        }).await
-    }
-
-    fn wake(&self) {
-        self.waker.wake();
-    }
-}
+use crate::interop::{ReadableRegions, Region };
 
 enum Buffer<T> {
     Owned(Box<[T]>),
@@ -72,7 +39,6 @@ pub struct RingBuffer<T> {
     read_index: usize,
     write_index: usize,
     full: bool,
-    waiter: WriteWaiter
 }
 
 impl<T: Default + Copy + Pod> RingBuffer<T> {
@@ -83,7 +49,6 @@ impl<T: Default + Copy + Pod> RingBuffer<T> {
             read_index: 0,
             write_index: 0,
             full: false,
-            waiter: WriteWaiter::new()
         }
     }
 
@@ -93,7 +58,6 @@ impl<T: Default + Copy + Pod> RingBuffer<T> {
             read_index: 0,
             write_index: 0,
             full: false,
-            waiter: WriteWaiter::new()
         }
     }
 
@@ -143,7 +107,6 @@ impl<T: Default + Copy + Pod> RingBuffer<T> {
         if length > 0 {
             self.full = false;
         }
-        self.waiter.wake();
     }
 
     #[inline]
@@ -158,7 +121,7 @@ impl<T: Default + Copy + Pod> RingBuffer<T> {
         }
     }
 
-    fn slices(&self) -> (&[T], &[T]) {
+    pub fn slices(&self) -> (&[T], &[T]) {
         let readable = self.filled_length();
         let length = readable.min(self.capacity() - self.read_index);
         let wrapped_length = readable.saturating_sub(length);
@@ -207,68 +170,7 @@ impl<T: Default + Copy + Pod> RingBuffer<T> {
         let length = length.min(self.filled_length());
         self.advance_read(length);
     }
-
-    pub async fn can_write(&self) {
-        self.waiter.can_write(|| !self.full).await
-    }
 }
 
 
-#[derive(Clone)]
-pub struct SharedRingBuffer<T>(Rc<RefCell<RingBuffer<T>>>);
 
-impl<T> Deref for SharedRingBuffer<T> {
-    type Target = RefCell<RingBuffer<T>>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl tokio::io::AsyncRead for SharedRingBuffer<u8> {
-    fn poll_read(
-        self: std::pin::Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-        buf: &mut tokio::io::ReadBuf<'_>,
-    ) -> std::task::Poll<std::io::Result<()>> {
-
-        self.borrow().waiter.waker.register(cx.waker());
-        
-
-        let mut remaining: usize = buf.remaining();
-        let mut copied: usize = 0;
-        {
-            let rb = self.borrow();
-            if rb.empty() {
-                return Poll::Pending;
-            }
-            let (left, right) = rb.slices();
-            for chunk in [left, right] {
-                if remaining == 0 {
-                    break;
-                }
-                let length = chunk.len().min(remaining);
-                buf.put_slice(&chunk[..length]);
-                copied += length;
-                remaining -= length;
-            }
-        }
-
-        self.borrow_mut().advance_read(copied);
-        Poll::Ready(Ok(()))
-    }
-}
-
-impl<T> SharedRingBuffer<T> {
-    pub async fn can_write(&self) {
-        self.borrow().waiter.can_write(
-            || !self.borrow().full
-        ).await
-    }
-}
-
-
-impl<T> From<RingBuffer<T>> for SharedRingBuffer<T> {
-    fn from(value: RingBuffer<T>) -> Self {
-        Self(Rc::new(RefCell::new(value)))
-    }
-}

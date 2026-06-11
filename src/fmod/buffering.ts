@@ -34,7 +34,7 @@ export class Sink implements WritableBuffer {
 }
 
 class WrappedBufferView {
-    buffer: ArrayBuffer | null;
+    buffer: ArrayBufferLike | null;
     capacity: number;
     readIndex: number;
     writeIndex: number;
@@ -256,6 +256,7 @@ export class LoopBuffer {
     }
 
     allocate(capacity: number) {
+        this.view.allocate(capacity);
         this.hotThreshold = Math.min(this.hotThreshold, capacity);
         this.unlock();
     }
