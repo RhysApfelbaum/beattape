@@ -586,21 +586,17 @@ export class StaticSound implements RemoteSound {
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
 
-        info.length = this.source.length;
-        info.numchannels = 2;
-        info.defaultfrequency = 48000;
-        info.decodebuffersize = 48000;
-        info.format = FMOD.SOUND_FORMAT_PCM16;
-        // info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
-        const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
+        info.suggestedsoundtype = FMOD.SOUND_TYPE_VORBIS;
+        const mode = FMOD.LOOP_NORMAL;
 
-        FMOD.Result = FMOD.Core.createSound(
+        FMOD.Result = FMOD.Core.createStream(
             '/' + this.source.filename,
             mode,
             info,
             sound,
         );
         this.handle = sound.deref();
+        console.log(this.handle);
         return true;
     }
 

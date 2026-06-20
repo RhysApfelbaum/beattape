@@ -14,17 +14,13 @@ const ENOENT = 44
 
 const MAX_STREAMS = 256;
 
-export class AudioConnection {
+class AudioConnection {
     reader: Promise<ReadableStreamBYOBReader>;
-    private url: string;
+    private response: Response;
 
-    constructor(url: string) {
-        this.url = url;
-        this.reader = this.newReader();
-    }
+    constructor(response: Response) {
+        this.response = response;
 
-    private async newReader() {
-        const response = await fetch(this.url);
         if (!response.ok) {
             throw new Error(
                 `Failed to fetch ${this.url}: ${response.status} ${response.statusText}`,
@@ -34,11 +30,25 @@ export class AudioConnection {
         if (!response.body) {
             throw new Error(`Failed to fetch ${this.url}: No response body`);
         }
-        return response.body.getReader({ mode: 'byob' });
+
+        this.reader = this.newReader();
     }
 
-    restart() {
-        this.reader = this.newReader();
+    private async newReader() {
+        if (!this.response.ok) {
+            throw new Error(
+                `Failed to fetch ${this.url}: ${response.status} ${response.statusText}`,
+            );
+        }
+
+        if (!this.response.body) {
+            throw new Error(`Failed to fetch ${this.response.url}: No response body`);
+        }
+        return this.response.body.getReader({ mode: 'byob' });
+    }
+
+    async restart() {
+        this.response = await fetch(this.response.url);
     }
 }
 
@@ -63,8 +73,9 @@ export class AudioStreams {
         const streamFS = {
         };
 
-        this.fs.mkdir('/audio');
-        this.fs.mount(streamFS, {}, '/audio');
+        this.fs.mkdir('/audio_streams');
+        this.fs.mkdir('/audio_static');
+        this.fs.mount(streamFS, {}, '/audio/streams');
     }
 
     add(url: string) {
@@ -83,6 +94,7 @@ export class AudioStreams {
 
     remove(id: number) {
         this.connections.delete(id);
+        this.fs.rm('/audio/streams')
     }
 
 }

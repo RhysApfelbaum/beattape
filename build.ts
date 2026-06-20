@@ -15,7 +15,7 @@ const build = async () => {
         outdir: outputDirectory,
         plugins: [tailwind],
         target: 'browser',
-        minify: true,
+        minify: false,
     });
 
     if (result.success) {

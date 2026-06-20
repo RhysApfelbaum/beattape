@@ -35,6 +35,7 @@ FMOD.preRun = () => {
         new Bank('Master.strings', `./fmod_banks/Master.strings.bank`),
     );
     preloadBanks.map((bank) => bank.fetch());
+
 };
 
 const mainLoop = () => {
@@ -74,7 +75,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({
     useEffect(() => {
         const script = document.createElement('script');
         // script.src = logging.fmodstudio ? '/fmodstudioL.js' : '/fmodstudio.js';
-        script.src = '/fmodstudioPL.js';
+        script.src = '/fmodstudioL.js';
         script.onload = () => {
             FMODModule(FMOD);
         };

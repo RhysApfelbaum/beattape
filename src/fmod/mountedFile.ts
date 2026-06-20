@@ -47,7 +47,6 @@ export class FMODMountedFile implements RemoteSoundData {
             const responseData = new Uint8Array(buffer);
             this.length = buffer.byteLength;
 
-            // Write buffer to local file using this completely undocumented emscripten function :)
             FMOD.FS_createDataFile(
                 '/',
                 this.filename,
@@ -64,7 +63,11 @@ export class FMODMountedFile implements RemoteSoundData {
     }
 
     release() {
-        FMOD.unlink(`/${this.filename}`);
+        try {
+            FMOD.FS_unlink('/' + this.filename);
+        } catch (error) {
+            dbg('duplicate filename', this.filename);
+        }
         this.fetchStatus = new PromiseStatus();
     }
 }
