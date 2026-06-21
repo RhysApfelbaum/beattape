@@ -228,26 +228,26 @@ export const PlayQueueProvider: React.FC<{ children: ReactNode }> = ({
                     const sound = track.sounds.getSound(
                         parameters.name,
                     );
-                    dbg('found sound', sound.url);
+                    dbg('found sound', sound.source.url);
 
                     if (!sound.isLoaded) {
                         dbg(sound.handle);
-                        throw new Error(`Sound not loaded: ${sound.url}`)
+                        throw new Error(`Sound not loaded: ${sound.source.url}`)
                     }
 
-                    sound.stop = () => {
-                        if (!track.event.getPaused()) {
-                            track.event.setPaused(true);
-                            setLoading(true);
-                        }
-                    };
-                    sound.restart = () => {
-                        if (track.event.getPaused()) {
-                            dbg('restarting after underflow');
-                            track.event.setPaused(false);
-                            setLoading(false);
-                        }
-                    };
+                    // sound.stop = () => {
+                    //     if (!track.event.getPaused()) {
+                    //         track.event.setPaused(true);
+                    //         setLoading(true);
+                    //     }
+                    // };
+                    // sound.restart = () => {
+                    //     if (track.event.getPaused()) {
+                    //         dbg('restarting after underflow');
+                    //         track.event.setPaused(false);
+                    //         setLoading(false);
+                    //     }
+                    // };
                     parameters.sound = sound.handle;
                     parameters.subsoundIndex = -1;
                 }

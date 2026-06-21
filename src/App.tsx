@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFMOD } from './FMODProvider';
 import PlayQueueProvider, { usePlayQueue } from './PlayQueueProvider';
 import TrackControls from './TrackControls';
@@ -13,6 +13,7 @@ import LoadingPage from './LoadingPage';
 import { gesture } from './fmod/gesture';
 import Art from './Art';
 import PlayQueue from './PlayQueue';
+import { soundtest } from './soundtest';
 
 
 const App: React.FC = () => {
@@ -31,6 +32,11 @@ const App: React.FC = () => {
         fmod.events.radio.setParameter('RadioNearness', distance, false);
     };
 
+    // useEffect(() => {
+    //     if (pageReady) {
+    //         soundtest();
+    //     }
+    // }, [pageReady]);
 
     // App is unable to load if FMOD isn't loaded
     const mainPage = (

@@ -26,10 +26,39 @@ export interface RemoteSound {
     release: () => void;
 }
 
+// const decoder = new DecodeStreamsWorker();
+//
+// export class RustSound implements RemoteSound {
+//     buffer: SharedArrayBuffer;
+//     constructor(
+//         url: string,
+//         start: number,
+//         end: number,
+//         length: number,
+//         sampleRate: number,
+//         onStop = () => {},
+//         onRestart = () => {},
+//     ) {
+//         this.buffer = new SharedArrayBuffer(sampleRate * 2);
+//         decoder.postMessage({
+//             CreateSound: {
+//                 channel_count: 2,
+//                 pcm_length: 0,
+//                 pcm_pointer: 0,
+//                 sample_rate: sampleRate
+//             }
+//         })
+//     }
+//
+//
+// }
+
 export class StreamedSound implements RemoteSound {
     private fileBuffer: LoopBuffer;
     private startBuffer: LoopBuffer;
     private decodeBuffer: RingBuffer;
+
+    private int16Buffer: Int16Array;
     private decoder!: OggVorbisDecoderWebWorker | null;
     private soundInfo: typeof DEFAULT_SOUND_INFO;
     private seekPosition!: number;
@@ -93,6 +122,7 @@ export class StreamedSound implements RemoteSound {
             )
         });
         this.decodeBuffer = new RingBuffer({ hotThreshold: decodedHot });
+        this.int16Buffer = new Int16Array(0);
 
 
 
@@ -123,17 +153,22 @@ export class StreamedSound implements RemoteSound {
             this.decodePosition = (this.decodePosition + length) % sampleCount;
 
             // Create Int16Array for interleaved stereo output
-            const int16Buffer = new Int16Array(length * 2);
+
+            // This is fucking stupid
+            const neededBufLength = length * 2;
+            // if (this.int16Buffer.length < neededBufLength) {
+            this.int16Buffer = new Int16Array(neededBufLength);
+            // }
 
             // TODO Maybe there's a clever way to sort out the floats
             for (let i = 0; i < length; i++) {
                 // Clamp float sample to [-1, 1] and convert to 16-bit PCM
-                int16Buffer[i * 2] =
+                this.int16Buffer[i * 2] =
                     Math.max(-1, Math.min(1, left[i])) * 0x7fff;
-                int16Buffer[i * 2 + 1] =
+                this.int16Buffer[i * 2 + 1] =
                     Math.max(-1, Math.min(1, right[i])) * 0x7fff;
             }
-            return new Uint8Array(int16Buffer.buffer);
+            return new Uint8Array(this.int16Buffer.buffer);
         };
     }
 
@@ -425,7 +460,8 @@ export class StreamedSound implements RemoteSound {
 
         FMOD.Result = FMOD.Core.createStream(
             '',
-            FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME,
+            // FMOD.OPENUSER | FMOD.LOOP_NORMAL | FMOD.ACCURATETIME,
+            FMOD.OPENUSER | FMOD.LOOP_NORMAL,
             info,
             sound,
         );
@@ -550,15 +586,10 @@ export class StaticSound implements RemoteSound {
         const sound = new Pointer<any>();
         const info = FMOD.CREATESOUNDEXINFO();
 
-        info.length = this.source.length;
-        info.numchannels = 2;
-        info.defaultfrequency = 48000;
-        info.decodebuffersize = 48000;
-        info.format = FMOD.SOUND_FORMAT_PCM16;
-        // info.suggestedsoundtype = FMOD.SOUND_TYPE_WAV;
-        const mode = FMOD.LOOP_NORMAL | FMOD.CREATESAMPLE;
+        info.suggestedsoundtype = FMOD.SOUND_TYPE_VORBIS;
+        const mode = FMOD.LOOP_NORMAL;
 
-        FMOD.Result = FMOD.Core.createSound(
+        FMOD.Result = FMOD.Core.createStream(
             '/' + this.source.filename,
             mode,
             info,

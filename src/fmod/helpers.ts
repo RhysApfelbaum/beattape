@@ -61,3 +61,14 @@ export const dbg = (message: any, ...optionalParams: any[]) => {
         console.debug(message, ...optionalParams);
     }
 }
+
+export function poll<T>(value: T, expected: T, ms = 100) {
+    return new Promise<void>(resolve => {
+        const interval = setInterval(() => {
+            if (value === expected) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, ms);
+    })
+}

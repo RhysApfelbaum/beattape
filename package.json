@@ -6,8 +6,8 @@
     "@types/bun": "^1.2.15",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.2.19",
-    "sharp": "^0.33.4",
-    "concurrently": "^9.1.2"
+    "concurrently": "^10.0.3",
+    "sharp": "^0.33.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -25,9 +25,9 @@
     "bun-plugin-html": "^2.0.0",
     "bun-plugin-tailwind": "latest",
     "chokidar": "^3.6.0",
+    "codec-parser": "^2.5.0",
     "color-thief-node": "^1.0.4",
     "framer-motion": "^12.20.1",
-    "http-server": "^14.1.1",
     "mpg123-decoder": "^1.0.1",
     "prettier": "^3.6.2",
     "react": "^18.2.0",
