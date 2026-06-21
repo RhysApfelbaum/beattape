@@ -10,6 +10,7 @@ export const FMOD: any = {
         const outval = new Pointer<any>();
         const sampleRate = new Pointer<number>();
 
+        FMOD.Result = FMOD.Debug_Initialize(FMOD.DEBUG_LEVEL_NONE);
         FMOD.Studio_System_Create(outval);
         FMOD.Studio = outval.deref();
         FMOD.Result = FMOD.Studio.getCoreSystem(outval);

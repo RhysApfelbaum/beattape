@@ -68,6 +68,7 @@ export const FMODProvider: React.FC<{ children: ReactNode }> = ({
         // Start FMOD main loop
         window.setInterval(mainLoop, 20);
 
+
         // Mark FMOD state as ready
         setFmod((prevFmod) => ({ ...prevFmod, ref: ref, ready: true }));
     };

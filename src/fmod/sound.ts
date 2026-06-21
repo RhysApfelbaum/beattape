@@ -596,7 +596,6 @@ export class StaticSound implements RemoteSound {
             sound,
         );
         this.handle = sound.deref();
-        console.log(this.handle);
         return true;
     }
 

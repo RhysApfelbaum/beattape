@@ -6,8 +6,8 @@
     "@types/bun": "^1.2.15",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.2.19",
-    "sharp": "^0.33.4",
-    "concurrently": "^9.1.2"
+    "concurrently": "^10.0.3",
+    "sharp": "^0.33.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

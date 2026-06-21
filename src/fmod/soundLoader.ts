@@ -26,7 +26,6 @@ export class SoundLoader {
         soundInfo.forEach((item: any) => {
             const path = pathToTrackURL(item.path);
             const filename = path.split('/').pop()!;
-            console.log(path, filename);
             const stream = new StaticSound(
                 path,
                 filename,
@@ -71,7 +70,6 @@ export class SoundLoader {
 
     async unload() {
         dbg('unloading sounds');
-        console.log(FMOD);
         this.fetched = [];
         this.threshold = 0;
         await Promise.all(
@@ -86,7 +84,6 @@ export class SoundLoader {
     }
 
     getSound(path: string) {
-        console.log('get', path);
         let newPath = path.replace('mp3', 'ogg');
         for (const sound of this.sounds) {
             if (sound.source.url === pathToTrackURL(newPath)) {
