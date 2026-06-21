@@ -37,7 +37,7 @@ if (existsSync(outputDirectory)) {
 await build();
 
 if (argv.includes('--watch')) {
-    watch('./src', { recursive: true }, async (event, filename) => {
+    watch('./src', { recursive: true }, async (_event, filename) => {
         if (!filename?.endsWith('~')) return;
         await build();
     });
