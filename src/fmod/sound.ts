@@ -26,33 +26,6 @@ export interface RemoteSound {
     release: () => void;
 }
 
-// const decoder = new DecodeStreamsWorker();
-//
-// export class RustSound implements RemoteSound {
-//     buffer: SharedArrayBuffer;
-//     constructor(
-//         url: string,
-//         start: number,
-//         end: number,
-//         length: number,
-//         sampleRate: number,
-//         onStop = () => {},
-//         onRestart = () => {},
-//     ) {
-//         this.buffer = new SharedArrayBuffer(sampleRate * 2);
-//         decoder.postMessage({
-//             CreateSound: {
-//                 channel_count: 2,
-//                 pcm_length: 0,
-//                 pcm_pointer: 0,
-//                 sample_rate: sampleRate
-//             }
-//         })
-//     }
-//
-//
-// }
-
 export class StreamedSound implements RemoteSound {
     private fileBuffer: LoopBuffer;
     private startBuffer: LoopBuffer;
